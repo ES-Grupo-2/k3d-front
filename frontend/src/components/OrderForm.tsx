@@ -1,3 +1,10 @@
+/**
+ * @file Formulário reutilizável de criação e edição de pedido (Order).
+ * Carrega listas de clientes e categorias via React Query, mantém o estado
+ * local do formulário e delega a persistência para o componente pai através
+ * do callback `onSave`.
+ * @author lukasnascimento1
+ */
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -11,6 +18,25 @@ type Props = {
   onCancel: () => void;
 };
 
+/**
+ * Componente de formulário de pedido. Funciona tanto para "novo pedido"
+ * (quando `order` não é informado) quanto para "editar pedido" (quando
+ * `order` recebe um pedido existente — os campos são pré-preenchidos).
+ *
+ * Responsabilidades:
+ * - Buscar clientes (`GET /clients`) e categorias (`GET /tags`) para popular
+ *   os selects.
+ * - Validar cliente e categoria antes de submeter (toast de erro).
+ * - Converter os campos numéricos (Number()) antes de chamar `onSave`.
+ * - Bloquear o botão "Salvar" enquanto a mutação está em andamento.
+ *
+ * **Onde é usado:** dentro do `<Modal />` em `KanbanPage.tsx`, em duas
+ * situações: criar novo pedido e editar pedido existente.
+ *
+ * @param order - pedido a ser editado; se `null/undefined`, cria um novo
+ * @param onSave - callback async que recebe o payload sanitizado
+ * @param onCancel - callback chamado ao clicar em "Cancelar"
+ */
 export function OrderForm({ order, onSave, onCancel }: Props) {
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["clients"],
@@ -35,6 +61,11 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
   });
   const [saving, setSaving] = useState(false);
 
+  /**
+   * Handler do submit. Valida os campos obrigatórios (cliente e categoria),
+   * normaliza os tipos numéricos e delega ao callback `onSave`. Ativa o
+   * estado `saving` para desabilitar o botão durante a chamada.
+   */
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.clientId || !form.tagId) {
@@ -55,6 +86,13 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
     }
   }
 
+  /**
+   * Atualiza um único campo do formulário mantendo type-safety. É um helper
+   * tipado para evitar `setState` espalhado pelos handlers de cada input.
+   *
+   * @param field - chave do campo
+   * @param value - novo valor
+   */
   function update<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
     setForm((s) => ({ ...s, [field]: value }));
   }

@@ -1,3 +1,9 @@
+/**
+ * @file Tela de gestão de Categorias/Tags (rota `/tags`). Restrita ao perfil
+ * MANAGER. Permite criar, editar e remover as categorias que serão associadas
+ * aos pedidos no Kanban e aparecem nas legendas dos dashboards.
+ * @author lukasnascimento1
+ */
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -5,6 +11,14 @@ import { api } from "../api/client";
 import type { Tag } from "../api/types";
 import { Modal } from "../components/Modal";
 
+/**
+ * Página de Categorias. CRUD completo de tags, cada uma com nome e cor (hex).
+ * A cor é usada como faixa lateral nos cards do Kanban e como identificador
+ * no Dashboard Operacional.
+ *
+ * **Onde é usada:** rota `/tags` em `App.tsx`, protegida por
+ * `ProtectedRoute roles={["MANAGER"]}`.
+ */
 export function TagsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -15,6 +29,11 @@ export function TagsPage() {
     queryFn: () => api.get("/tags").then((r) => r.data),
   });
 
+  /**
+   * Mutação combinada de criação e edição — usa POST ou PUT conforme a
+   * presença de `payload.id`. Em sucesso invalida a query de tags e fecha
+   * o modal.
+   */
   const save = useMutation({
     mutationFn: (payload: Partial<Tag> & { id?: string }) =>
       payload.id
@@ -29,6 +48,7 @@ export function TagsPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao salvar"),
   });
 
+  /** Mutação de remoção (`DELETE /tags/:id`). */
   const remove = useMutation({
     mutationFn: (id: string) => api.delete(`/tags/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
@@ -109,6 +129,17 @@ export function TagsPage() {
   );
 }
 
+/**
+ * Formulário interno de categoria. Usa `<input type="color">` nativo do
+ * navegador para a escolha de cor (devolve hex `#rrggbb`, que é exatamente
+ * o formato esperado pelo backend).
+ *
+ * **Onde é usado:** apenas dentro de `TagsPage` (componente interno).
+ *
+ * @param tag - categoria a editar; se `null/undefined`, cria uma nova
+ * @param onSave - callback de persistência
+ * @param onCancel - callback de cancelamento (fecha o modal)
+ */
 function TagForm({
   tag,
   onSave,

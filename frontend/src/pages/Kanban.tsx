@@ -1,3 +1,10 @@
+/**
+ * @file Tela do quadro Kanban (rota `/kanban`). Atende aos RFs principais do
+ * documento de requisitos: criar/editar/excluir pedidos, mover entre as três
+ * colunas (A Fazer · Fazendo · Concluído) via drag-and-drop, listar todos os
+ * pedidos. É a única rota acessível tanto para Gerente quanto Operacional.
+ * @author lukasnascimento1
+ */
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,12 +23,28 @@ import { Modal } from "../components/Modal";
 import { OrderForm } from "../components/OrderForm";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Definição estática das três colunas do quadro. A ordem aqui dita a ordem
+ * visual da grade. Os IDs devem corresponder exatamente ao enum
+ * `KanbanColumn` do backend.
+ */
 const COLUMNS: { id: KanbanColumn; title: string }[] = [
   { id: "TODO", title: "A Fazer" },
   { id: "DOING", title: "Fazendo" },
   { id: "DONE", title: "Concluído" },
 ];
 
+/**
+ * Página principal do Kanban. Orquestra:
+ * - Carregamento dos pedidos via React Query (`GET /orders`).
+ * - Agrupamento dos pedidos por coluna (`useMemo`).
+ * - Mutações de criação, edição, movimentação e exclusão.
+ * - Captura do drag-and-drop através de `DndContext`.
+ * - Modais para criar e editar pedidos.
+ *
+ * **Onde é usada:** rota `/kanban` em `App.tsx`. Também é a rota de fallback
+ * para usuários sem permissão em outras telas (via `ProtectedRoute`).
+ */
 export function KanbanPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -33,12 +56,19 @@ export function KanbanPage() {
     queryFn: () => api.get("/orders").then((r) => r.data),
   });
 
+  /**
+   * Agrupa a lista linear de pedidos em um mapa `{ TODO, DOING, DONE }` para
+   * facilitar a renderização das colunas. Recalculado apenas quando `orders`
+   * muda.
+   */
   const byColumn = useMemo(() => {
     const map: Record<KanbanColumn, Order[]> = { TODO: [], DOING: [], DONE: [] };
     orders?.forEach((o) => map[o.column].push(o));
     return map;
   }, [orders]);
 
+  // Mutação de criação: POST /orders. Em sucesso invalida o cache de pedidos
+  // (força refetch) e fecha o modal.
   const createMut = useMutation({
     mutationFn: (payload: any) => api.post("/orders", payload).then((r) => r.data),
     onSuccess: () => {
@@ -49,6 +79,7 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao criar"),
   });
 
+  // Mutação de edição: PUT /orders/:id.
   const updateMut = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) =>
       api.put(`/orders/${id}`, payload).then((r) => r.data),
@@ -60,6 +91,8 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao salvar"),
   });
 
+  // Mutação de movimentação entre colunas: PATCH /orders/:id/move.
+  // Disparada pelo evento de drop do dnd-kit.
   const moveMut = useMutation({
     mutationFn: ({ id, column }: { id: string; column: KanbanColumn }) =>
       api.patch(`/orders/${id}/move`, { column }).then((r) => r.data),
@@ -67,6 +100,8 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao mover"),
   });
 
+  // Mutação de exclusão: DELETE /orders/:id. Restrita ao perfil MANAGER no
+  // backend — operadores recebem 403 e a mensagem aparece como toast.
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/orders/${id}`),
     onSuccess: () => {
@@ -76,8 +111,17 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Sem permissão para remover"),
   });
 
+  // PointerSensor exige um drag mínimo de 6px antes de iniciar o arrasto —
+  // evita disparar drag por engano quando o usuário só queria clicar.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
+  /**
+   * Handler chamado pelo `DndContext` quando o usuário solta um card.
+   * Identifica o card arrastado (active) e a coluna destino (over) e,
+   * se a coluna mudou, dispara `moveMut` para persistir.
+   *
+   * @param e - evento de fim de drag do dnd-kit
+   */
   function onDrop(e: DragEndEvent) {
     const orderId = String(e.active.id);
     const target = e.over?.id as KanbanColumn | undefined;
@@ -139,6 +183,20 @@ export function KanbanPage() {
   );
 }
 
+/**
+ * Coluna do Kanban — representa um estágio (A Fazer / Fazendo / Concluído).
+ * Registra-se como zona de drop via `useDroppable` (recebe os cards
+ * arrastados) e renderiza um cabeçalho com contador.
+ *
+ * **Onde é usado:** somente dentro de `KanbanPage` (componente interno).
+ *
+ * @param id - chave da coluna (também é o droppable id)
+ * @param title - texto exibido no cabeçalho
+ * @param orders - lista de pedidos pertencentes a esta coluna
+ * @param onEdit - handler de edição (abre modal no pai)
+ * @param onDelete - handler de exclusão (já passa pelo confirm)
+ * @param canDelete - controla a exibição do botão de excluir (RBAC)
+ */
 function Column({
   id,
   title,
@@ -182,6 +240,23 @@ function Column({
   );
 }
 
+/**
+ * Card individual do Kanban. Implementa o layout das três regiões definido
+ * no Figma (top 20% / content 60% / bottom 20%) e o handle de arrasto via
+ * `useDraggable`.
+ *
+ * - Top Region: tag colorida + ações (editar, excluir).
+ * - Content Region: título, cliente, quantidade e preço. Funciona como
+ *   handle de drag — listeners do dnd-kit ficam nesta área.
+ * - Bottom Region: status e forma de pagamento.
+ *
+ * **Onde é usado:** dentro de `Column` (componente interno do `Kanban.tsx`).
+ *
+ * @param order - dados do pedido
+ * @param onEdit - handler para abrir o modal de edição
+ * @param onDelete - handler para excluir
+ * @param canDelete - se `false`, oculta o botão de excluir (RBAC)
+ */
 function Card({
   order,
   onEdit,

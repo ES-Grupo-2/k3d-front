@@ -1,7 +1,25 @@
+/**
+ * @file Esqueleto visual das páginas autenticadas. Renderiza a sidebar fixa
+ * (logo, navegação filtrada por perfil, identificação do usuário, alternador
+ * de tema, botão Sair) e o `<Outlet />` do React Router para o conteúdo da
+ * rota corrente.
+ * @author lukasnascimento1
+ */
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
+/**
+ * Componente de layout das rotas protegidas. É renderizado dentro do
+ * `ProtectedRoute` em `App.tsx` e injeta o conteúdo de cada página pelo
+ * `<Outlet />`.
+ *
+ * Filtra os itens da sidebar com base no `role` do usuário corrente (RBAC),
+ * de modo que perfis Operacional não veem rotas restritas ao Gerente.
+ *
+ * **Onde é usado:** envolve todas as rotas privadas em `App.tsx` (Kanban,
+ * Calculator, Dashboards, Clients, Tags).
+ */
 export function Layout() {
   const { user, logout } = useAuth();
   const navItems = [

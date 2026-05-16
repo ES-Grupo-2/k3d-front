@@ -1,3 +1,10 @@
+/**
+ * @file Tela da Calculadora Inteligente (rota `/calculator`). Restrita ao
+ * perfil MANAGER. Permite calcular custo e preço sugerido de pedidos
+ * extraordinários a partir dos insumos (filamento, energia, depreciação) e
+ * salvar parâmetros padrão para reuso.
+ * @author lukasnascimento1
+ */
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -5,6 +12,15 @@ import { api } from "../api/client";
 import type { CalculationResult } from "../api/types";
 import { currency } from "../lib/format";
 
+/**
+ * Página da Calculadora. Carrega os parâmetros padrão do backend para
+ * pré-preencher o formulário, dispara o cálculo via `POST /calculator/calculate`
+ * e mostra o resultado em uma lista de definição (custo de filamento, energia,
+ * depreciação, total, lucro e preço sugerido).
+ *
+ * **Onde é usada:** rota `/calculator` em `App.tsx`, protegida por
+ * `ProtectedRoute roles={["MANAGER"]}`.
+ */
 export function CalculatorPage() {
   const { data: config } = useQuery({
     queryKey: ["calc-config"],
@@ -22,6 +38,9 @@ export function CalculatorPage() {
     hourlyDepreciation: 1.5,
   });
 
+  // Quando os parâmetros padrão chegam do backend, sobrescreve apenas os
+  // campos persistidos (preço filamento, KWh, margem, depreciação).
+  // Mantém os campos voláteis (gramas, horas, tipo) como digitados.
   useEffect(() => {
     if (config) {
       setForm((s) => ({
@@ -36,6 +55,10 @@ export function CalculatorPage() {
 
   const [result, setResult] = useState<CalculationResult | null>(null);
 
+  /**
+   * Mutação que dispara o cálculo no backend. Em sucesso, popula o estado
+   * `result` para renderizar o painel de resultado.
+   */
   const calculate = useMutation({
     mutationFn: (payload: typeof form) =>
       api.post<CalculationResult>("/calculator/calculate", payload).then((r) => r.data),
@@ -43,6 +66,11 @@ export function CalculatorPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro no cálculo"),
   });
 
+  /**
+   * Mutação que persiste os parâmetros atuais como padrão do sistema
+   * (`PUT /calculator/config`). Útil para que o próximo cálculo já venha
+   * pré-preenchido com os valores recém-configurados.
+   */
   const saveConfig = useMutation({
     mutationFn: () =>
       api
@@ -56,6 +84,10 @@ export function CalculatorPage() {
     onSuccess: () => toast.success("Parâmetros padrão salvos"),
   });
 
+  /**
+   * Helper tipado para atualizar um campo do formulário sem perder
+   * type-safety. Espelha o padrão usado em `OrderForm.update`.
+   */
   function update<K extends keyof typeof form>(c: K, v: (typeof form)[K]) {
     setForm((s) => ({ ...s, [c]: v }));
   }
@@ -128,6 +160,18 @@ export function CalculatorPage() {
   );
 }
 
+/**
+ * Campo de input genérico do formulário da calculadora. Converte string→number
+ * automaticamente quando `type="number"`, evitando que React reclame de NaN.
+ *
+ * **Onde é usado:** somente dentro de `CalculatorPage` (componente interno).
+ *
+ * @param label - rótulo exibido acima do input
+ * @param value - valor atual (qualquer tipo, será convertido se number)
+ * @param onChange - callback de atualização
+ * @param type - tipo HTML (text/number/etc.)
+ * @param step - granularidade para inputs numéricos
+ */
 function Field({
   label,
   value,
@@ -155,6 +199,17 @@ function Field({
   );
 }
 
+/**
+ * Linha (`<dt>`/`<dd>`) do painel de resultado. Suporta destaque visual
+ * (`emphasis`) e tamanho aumentado (`large`) para evidenciar o preço sugerido.
+ *
+ * **Onde é usada:** dentro de `CalculatorPage` (lista de resultado).
+ *
+ * @param label - rótulo (esquerda)
+ * @param value - valor formatado (direita)
+ * @param emphasis - aplica peso negrito
+ * @param large - aplica tamanho de fonte maior
+ */
 function Row({
   label,
   value,

@@ -1,3 +1,9 @@
+/**
+ * @file Tela de gestão de Clientes (rota `/clients`). Visualização disponível
+ * para ambos os perfis, mas apenas Gerente pode editar ou remover (controle
+ * exibido condicionalmente conforme o `role` do usuário).
+ * @author lukasnascimento1
+ */
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -6,6 +12,13 @@ import type { Client } from "../api/types";
 import { Modal } from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Página de Clientes. Lista a tabela de clientes cadastrados e expõe um modal
+ * para criar/editar. Operadores podem visualizar e criar; só Gerentes podem
+ * editar ou remover (regra reforçada também no backend).
+ *
+ * **Onde é usada:** rota `/clients` em `App.tsx`.
+ */
 export function ClientsPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -17,6 +30,10 @@ export function ClientsPage() {
     queryFn: () => api.get("/clients").then((r) => r.data),
   });
 
+  /**
+   * Mutação combinada de criar e editar — escolhe a rota a partir da
+   * presença de `payload.id`. Centraliza a lógica em uma única definição.
+   */
   const save = useMutation({
     mutationFn: (payload: Partial<Client> & { id?: string }) =>
       payload.id
@@ -31,6 +48,7 @@ export function ClientsPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao salvar"),
   });
 
+  /** Mutação de remoção (`DELETE /clients/:id`). Restrita a Gerente no backend. */
   const remove = useMutation({
     mutationFn: (id: string) => api.delete(`/clients/${id}`),
     onSuccess: () => {
@@ -122,6 +140,16 @@ export function ClientsPage() {
   );
 }
 
+/**
+ * Formulário interno de cliente. Mantém estado local dos três campos e
+ * delega a persistência para o `onSave` do pai (que decide criar vs editar).
+ *
+ * **Onde é usado:** apenas dentro de `ClientsPage` (componente interno).
+ *
+ * @param client - cliente a editar; se `null/undefined`, cria um novo
+ * @param onSave - callback de persistência
+ * @param onCancel - callback de cancelamento (fecha o modal)
+ */
 function ClientForm({
   client,
   onSave,

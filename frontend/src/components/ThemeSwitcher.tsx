@@ -1,11 +1,28 @@
+/**
+ * @file Alternador visual de tema (☀ claro / ☾ escuro / ⎚ sistema).
+ * Pequeno grupo de três botões que reflete e atualiza o `ThemeContext`.
+ * @author lukasnascimento1
+ */
 import { useTheme, type Theme } from "../context/ThemeContext";
 
+/**
+ * Definição das opções exibidas no alternador. Mantida fora do componente
+ * para evitar realocação a cada render.
+ */
 const OPTIONS: { value: Theme; title: string; icon: string }[] = [
   { value: "light", title: "Tema claro", icon: "☀" },
   { value: "dark", title: "Tema escuro", icon: "☾" },
   { value: "system", title: "Seguir sistema", icon: "⎚" },
 ];
 
+/**
+ * Componente que renderiza os três botões de tema. O botão correspondente ao
+ * tema corrente recebe destaque visual (`bg-primary`). Cada clique chama
+ * `setTheme` do contexto, que persiste no `localStorage` e aplica a classe
+ * `dark` no `<html>`.
+ *
+ * **Onde é usado:** rodapé da sidebar em `Layout.tsx`.
+ */
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
   return (

@@ -1,3 +1,11 @@
+/**
+ * @file Tela do Dashboard Operacional (rota `/dashboard/operational`).
+ * Mostra a quantidade de pedidos por categoria/tag, com filtros de período
+ * (semanal · mensal · semestral). Também exporta dois componentes
+ * compartilhados (`PeriodFilter`, `MetricCard`) reutilizados pelo Dashboard
+ * Financeiro.
+ * @author lukasnascimento1
+ */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -7,12 +15,28 @@ import { useThemeColors } from "../hooks/useThemeColors";
 
 type Period = "WEEKLY" | "MONTHLY" | "SEMIANNUAL";
 
+/**
+ * Mapeamento de enum de período (backend) para label em PT-BR (UI).
+ * Necessário porque a API trabalha em inglês mas a interface é em PT-BR.
+ */
 const PERIOD_LABELS: Record<Period, string> = {
   WEEKLY: "Semanal",
   MONTHLY: "Mensal",
   SEMIANNUAL: "Semestral",
 };
 
+/**
+ * Página do Dashboard Operacional. Consome `GET /dashboard/operational` com
+ * o filtro de período corrente e renderiza:
+ * - dois `MetricCard` com totais (pedidos no período, categorias ativas);
+ * - um gráfico de barras com a quantidade de pedidos por categoria.
+ *
+ * As cores do Recharts vêm do `useThemeColors`, então o gráfico segue o tema
+ * claro/escuro automaticamente.
+ *
+ * **Onde é usada:** rota `/dashboard/operational` em `App.tsx` (acessível a
+ * ambos os perfis).
+ */
 export function OperationalDashboardPage() {
   const [period, setPeriod] = useState<Period>("MONTHLY");
   const colors = useThemeColors();
@@ -59,6 +83,16 @@ export function OperationalDashboardPage() {
   );
 }
 
+/**
+ * Botões de filtro de período (Semanal · Mensal · Semestral). Componente
+ * controlado: estado fica no pai (`period` + `setPeriod`).
+ *
+ * **Onde é usado:** `OperationalDashboardPage` e `FinancialDashboardPage`
+ * (importado a partir deste arquivo).
+ *
+ * @param period - período selecionado atualmente
+ * @param setPeriod - setter do estado controlado
+ */
 export function PeriodFilter({
   period,
   setPeriod,
@@ -81,6 +115,15 @@ export function PeriodFilter({
   );
 }
 
+/**
+ * Card de métrica usado nos dashboards (operacional e financeiro). Exibe um
+ * título pequeno em caixa alta e um valor grande em destaque.
+ *
+ * **Onde é usado:** `OperationalDashboardPage` e `FinancialDashboardPage`.
+ *
+ * @param title - rótulo da métrica (ex.: "Receita")
+ * @param value - valor já formatado (string ou number)
+ */
 export function MetricCard({ title, value }: { title: string; value: number | string }) {
   return (
     <div className="panel p-4">

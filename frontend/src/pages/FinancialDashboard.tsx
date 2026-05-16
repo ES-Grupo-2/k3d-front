@@ -1,3 +1,12 @@
+/**
+ * @file Tela do Dashboard Financeiro (rota `/dashboard/financial`). Restrita
+ * ao perfil MANAGER. Apresenta indicadores financeiros (receita, custo, lucro,
+ * ticket médio) e um gráfico comparativo, todos filtráveis por período.
+ *
+ * Reutiliza `MetricCard` e `PeriodFilter` exportados pelo
+ * `OperationalDashboard` para manter consistência visual entre dashboards.
+ * @author lukasnascimento1
+ */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,6 +26,17 @@ import { useThemeColors } from "../hooks/useThemeColors";
 
 type Period = "WEEKLY" | "MONTHLY" | "SEMIANNUAL";
 
+/**
+ * Página do Dashboard Financeiro. Consome `GET /dashboard/financial` e
+ * renderiza:
+ * - quatro `MetricCard`s (Receita, Custo, Lucro, Ticket médio) formatados em R$;
+ * - gráfico de barras comparativo (Receita × Custo × Lucro).
+ *
+ * O Tooltip do Recharts formata os valores como moeda BRL via `currency()`.
+ *
+ * **Onde é usada:** rota `/dashboard/financial` em `App.tsx`, protegida por
+ * `ProtectedRoute roles={["MANAGER"]}`.
+ */
 export function FinancialDashboardPage() {
   const [period, setPeriod] = useState<Period>("MONTHLY");
   const colors = useThemeColors();
@@ -26,6 +46,8 @@ export function FinancialDashboardPage() {
     queryFn: () => api.get(`/dashboard/financial?period=${period}`).then((r) => r.data),
   });
 
+  // Monta os dados do gráfico no formato esperado pelo Recharts.
+  // Vazio enquanto a query não retornou para evitar render parcial estranho.
   const chartData = data
     ? [
         { name: "Receita", value: data.revenue },
