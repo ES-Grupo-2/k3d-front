@@ -1,8 +1,12 @@
 /**
  * @file Utilitários de formatação e listas de opções dos enums do domínio.
  * Centraliza funções puras de apresentação reutilizadas em várias páginas.
+ *
+ * Os mapas `ORDER_STATUS_LABELS` e `PAYMENT_METHOD_LABELS` traduzem os enums
+ * (que ficam em inglês no banco/API) para o português exibido na interface.
  * @author lukasnascimento1
  */
+import type { OrderStatus, PaymentMethod } from "../api/types";
 
 /**
  * Converte um valor numérico (ou string numérica) para o formato monetário
@@ -21,18 +25,55 @@ export function currency(value: number | string): string {
 }
 
 /**
- * Transforma um enum em SCREAMING_SNAKE_CASE em texto legível.
- * Substitui underscores por espaços e aplica title-case.
- * Ex.: `"PENDING_PRINT"` → `"Pending Print"`.
+ * Mapa de tradução dos status de pedido. Backend usa enums em inglês;
+ * a interface exibe em português.
  *
- * **Onde é usada:** exibição de `OrderStatus` e `PaymentMethod` nos cards do
- * Kanban e nos selects do `OrderForm`.
- *
- * @param s - chave do enum
- * @returns texto humanizado
+ * **Onde é usado:** cards do Kanban (status do pedido) e selects do
+ * `OrderForm`.
  */
-export function humanizeEnum(s: string): string {
-  return s.replaceAll("_", " ").toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING_PRINT: "Aguardando impressão",
+  PRINTING: "Imprimindo",
+  COMPLETED: "Concluído",
+  PARTIAL_PAYMENT: "Pagamento parcial",
+  PAID: "Pago",
+};
+
+/**
+ * Mapa de tradução das formas de pagamento. Backend usa enums em inglês;
+ * a interface exibe em português.
+ *
+ * **Onde é usado:** cards do Kanban (forma de pagamento) e selects do
+ * `OrderForm`.
+ */
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CASH: "Dinheiro",
+  PIX: "PIX",
+  CREDIT_CARD: "Cartão de crédito",
+  DEBIT_CARD: "Cartão de débito",
+  BOLETO: "Boleto",
+  OTHER: "Outro",
+};
+
+/**
+ * Retorna o rótulo em português para um status de pedido. Se o valor não
+ * estiver no mapa (caso improvável), faz fallback para o próprio valor.
+ *
+ * @param s - chave do enum `OrderStatus`
+ * @returns texto em português
+ */
+export function orderStatusLabel(s: OrderStatus): string {
+  return ORDER_STATUS_LABELS[s] ?? s;
+}
+
+/**
+ * Retorna o rótulo em português para uma forma de pagamento.
+ *
+ * @param m - chave do enum `PaymentMethod`
+ * @returns texto em português
+ */
+export function paymentMethodLabel(m: PaymentMethod): string {
+  return PAYMENT_METHOD_LABELS[m] ?? m;
 }
 
 /**

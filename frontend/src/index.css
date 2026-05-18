@@ -2,55 +2,353 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Design system espelhado do EyePleasure (frontend_web/app-worker/theme.ts).
+ *
+ * Tokens em CSS custom properties --ep-*. Dark é o padrão; light vira override
+ * via :root[data-theme="light"] (definido pelo boot script no <head>).
+ *
+ * Paleta:
+ *   primary  #6366f1 (índigo) → light: #4f46e5
+ *   accent   #8b5cf6 (violeta) → light: #7c3aed
+ *   bg dark  #08080f · bg light #f6f6fb
+ */
+
 @layer base {
   :root {
-    /* Tema claro (padrão) */
-    --background: 248 250 252;
-    --surface: 255 255 255;
-    --border: 226 232 240;
-    --foreground: 24 24 27;
-    --muted: 82 82 91;
-    --subtle: 161 161 170;
+    /* Dark (padrão) */
+    --ep-bg: #08080f;
+    --ep-bg-elevated: rgba(20, 20, 32, 0.85);
+    --ep-surface: rgba(255, 255, 255, 0.04);
+    --ep-surface-strong: rgba(255, 255, 255, 0.06);
+    --ep-surface-hover: rgba(255, 255, 255, 0.08);
+    --ep-border: rgba(255, 255, 255, 0.08);
+    --ep-border-strong: rgba(255, 255, 255, 0.12);
+    --ep-border-soft: rgba(255, 255, 255, 0.05);
+    --ep-text: #fff;
+    --ep-text-soft: rgba(255, 255, 255, 0.85);
+    --ep-text-muted: rgba(255, 255, 255, 0.55);
+    --ep-text-faint: rgba(255, 255, 255, 0.4);
+    --ep-text-dim: rgba(255, 255, 255, 0.25);
+    --ep-placeholder: rgba(255, 255, 255, 0.2);
+    --ep-label: rgba(255, 255, 255, 0.5);
+    --ep-scan-grad-1: rgba(99, 102, 241, 0.08);
+    --ep-scan-grad-2: rgba(139, 92, 246, 0.05);
+    --ep-shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.2);
+    --ep-shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.5);
+    --ep-shadow-card: 0 4px 14px rgba(99, 102, 241, 0.35);
+    --ep-shadow-card-hover: 0 6px 18px rgba(99, 102, 241, 0.45);
+    --ep-toast-bg: rgba(0, 0, 0, 0.85);
+    --ep-glass-inset-top: rgba(255, 255, 255, 0.5);
+    --ep-glass-inset-bot: rgba(255, 255, 255, 0.5);
+    --ep-primary: #6366f1;
+    --ep-primary-soft: #a5b4fc;
+    --ep-accent: #8b5cf6;
+    --ep-accent-soft: #c4b5fd;
+    --ep-error: #f87171;
+    --ep-error-soft: #fca5a5;
+    --ep-success: #10b981;
+    --ep-success-soft: #6ee7b7;
+    --ep-warning: #f59e0b;
+    --ep-warning-soft: #fbbf24;
+    color-scheme: dark;
   }
-  .dark {
-    --background: 11 13 18;
-    --surface: 22 25 34;
-    --border: 38 42 54;
-    --foreground: 244 244 245;
-    --muted: 161 161 170;
-    --subtle: 113 113 122;
+
+  :root[data-theme="light"] {
+    --ep-bg: #f6f6fb;
+    --ep-bg-elevated: rgba(255, 255, 255, 0.92);
+    --ep-surface: rgba(255, 255, 255, 0.7);
+    --ep-surface-strong: #ffffff;
+    --ep-surface-hover: rgba(99, 102, 241, 0.08);
+    --ep-border: rgba(15, 23, 42, 0.08);
+    --ep-border-strong: rgba(15, 23, 42, 0.14);
+    --ep-border-soft: rgba(15, 23, 42, 0.05);
+    --ep-text: #0f172a;
+    --ep-text-soft: rgba(15, 23, 42, 0.8);
+    --ep-text-muted: rgba(15, 23, 42, 0.6);
+    --ep-text-faint: rgba(15, 23, 42, 0.45);
+    --ep-text-dim: rgba(15, 23, 42, 0.3);
+    --ep-placeholder: rgba(15, 23, 42, 0.35);
+    --ep-label: rgba(15, 23, 42, 0.55);
+    --ep-scan-grad-1: rgba(99, 102, 241, 0.12);
+    --ep-scan-grad-2: rgba(139, 92, 246, 0.08);
+    --ep-shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.06);
+    --ep-shadow-elevated: 0 16px 48px rgba(15, 23, 42, 0.14);
+    --ep-shadow-card: 0 4px 14px rgba(99, 102, 241, 0.25);
+    --ep-shadow-card-hover: 0 8px 22px rgba(99, 102, 241, 0.35);
+    --ep-toast-bg: #0f172a;
+    --ep-glass-inset-top: rgba(255, 255, 255, 0.85);
+    --ep-glass-inset-bot: rgba(15, 23, 42, 0.05);
+    --ep-primary: #4f46e5;
+    --ep-primary-soft: #4338ca;
+    --ep-accent: #7c3aed;
+    --ep-accent-soft: #6d28d9;
+    --ep-error: #dc2626;
+    --ep-error-soft: #b91c1c;
+    --ep-success: #059669;
+    --ep-success-soft: #047857;
+    --ep-warning: #d97706;
+    --ep-warning-soft: #b45309;
+    color-scheme: light;
   }
+
+  /* Transição suave entre temas (aplicada via classe pelo boot script) */
+  .ep-theme-transition,
+  .ep-theme-transition *,
+  .ep-theme-transition *::before,
+  .ep-theme-transition *::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease,
+      box-shadow 0.3s ease !important;
+  }
+
   html,
   body,
   #root {
     height: 100%;
   }
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    @apply bg-background text-foreground;
+    background: var(--ep-bg);
+    color: var(--ep-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus,
+  button:focus-visible {
+    outline: 2px solid var(--ep-primary);
+    outline-offset: 2px;
+  }
+
+  /* Background com radial gradients sutis (scan do iOS) */
+  .bg-scan {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 0%, var(--ep-scan-grad-1), transparent 50%),
+      radial-gradient(circle at 80% 100%, var(--ep-scan-grad-2), transparent 50%),
+      var(--ep-bg);
   }
 }
 
 @layer components {
-  .btn {
-    @apply inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  /* Glass card padrão — backdrop-filter + insets */
+  .ep-glass {
+    background: var(--ep-surface);
+    border: 1px solid var(--ep-border);
+    border-radius: 16px;
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    box-shadow: var(--ep-shadow-soft),
+      inset 1px 1px 1px -0.5px var(--ep-glass-inset-top),
+      inset -1px -1px 1px -0.5px var(--ep-glass-inset-bot);
   }
+
+  /* Botão primário (gradiente índigo→violeta) */
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary/90;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    height: 44px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, var(--ep-primary) 0%, var(--ep-accent) 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: var(--ep-shadow-card);
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
   }
-  .btn-secondary {
-    @apply btn bg-border text-foreground hover:bg-border/70;
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--ep-shadow-card-hover);
   }
+  .btn-primary:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    filter: saturate(0.6);
+  }
+
+  /* Botão glass (secundário) */
+  .btn-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--ep-surface-strong);
+    border: 1px solid var(--ep-border-strong);
+    color: var(--ep-text);
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn-glass:hover {
+    background: var(--ep-surface-hover);
+    transform: translateY(-1px);
+  }
+  .btn-glass:active {
+    transform: scale(0.97);
+  }
+
+  /* Botão "danger" — usa ep-error como base */
   .btn-danger {
-    @apply btn bg-danger text-white hover:bg-danger/90;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--ep-error);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 14px rgba(248, 113, 113, 0.3);
+    transition: transform 0.15s ease, filter 0.15s ease;
   }
-  .input {
-    @apply w-full rounded-md bg-surface border border-border px-3 py-2 text-sm text-foreground placeholder:text-subtle focus:outline-none focus:border-primary;
+  .btn-danger:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
   }
-  .label {
-    @apply text-xs font-medium text-muted mb-1 block;
+
+  /* Field (label + input) verticais */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
   }
-  .panel {
-    @apply bg-surface border border-border rounded-lg;
+  .field > label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ep-label);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    background: var(--ep-surface);
+    border: 1px solid var(--ep-border-strong);
+    border-radius: 12px;
+    color: var(--ep-text);
+    font-size: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--ep-placeholder);
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--ep-primary);
+    background: var(--ep-surface-strong);
+  }
+
+  /* Tabela padrão */
+  table.ep-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  table.ep-table thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ep-text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ep-border);
+    background: var(--ep-surface);
+  }
+  table.ep-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ep-border-soft);
+    vertical-align: middle;
+  }
+  table.ep-table tbody tr {
+    transition: background 0.15s ease;
+  }
+  table.ep-table tbody tr:hover {
+    background: var(--ep-surface);
+  }
+  table.ep-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* Badge / status pill */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--ep-border-strong);
+    border-top-color: var(--ep-primary);
+    animation: ep-spin 0.8s linear infinite;
+  }
+  @keyframes ep-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Toggle de tema (botão ☀/☾/⎚ versão visual) */
+  .ep-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ep-surface);
+    border: 1px solid var(--ep-border);
+    color: var(--ep-text-muted);
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .ep-theme-toggle:hover {
+    background: var(--ep-surface-hover);
+    color: var(--ep-text);
+    border-color: var(--ep-border-strong);
+  }
+  .ep-theme-toggle:active {
+    transform: scale(0.94);
+  }
+  .ep-theme-toggle.active {
+    color: var(--ep-text);
+    border-color: var(--ep-primary);
   }
 }

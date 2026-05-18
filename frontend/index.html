@@ -3,22 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08080f" />
     <title>K3D — Tasker Kria3D Control</title>
     <script>
-      // Aplica o tema antes do React carregar (evita flash)
+      /**
+       * Boot do tema (espelho do themeBootScript do EyePleasure).
+       * Roda antes do React/CSS pintar pra evitar flash.
+       * Lê localStorage ("k3d:theme"); se ausente, segue prefers-color-scheme.
+       */
       (function () {
         try {
-          var t = localStorage.getItem("k3d:theme") || "system";
-          var dark =
-            t === "system"
-              ? window.matchMedia("(prefers-color-scheme: dark)").matches
-              : t === "dark";
-          if (dark) document.documentElement.classList.add("dark");
-        } catch (e) {}
+          var KEY = "k3d:theme";
+          var saved = null;
+          try {
+            saved = localStorage.getItem(KEY);
+          } catch (e) {}
+          var mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)");
+          var sysLight = !!(mql && mql.matches);
+          var theme = saved === "light" || saved === "dark" ? saved : sysLight ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", theme === "light" ? "#f6f6fb" : "#08080f");
+          // Mantém o tema seguindo o SO enquanto o usuário não fixar manualmente
+          if (mql && !saved && typeof mql.addEventListener === "function") {
+            mql.addEventListener("change", function (e) {
+              var current = null;
+              try {
+                current = localStorage.getItem(KEY);
+              } catch (e2) {}
+              if (current === "light" || current === "dark") return;
+              var next = e.matches ? "light" : "dark";
+              document.documentElement.setAttribute("data-theme", next);
+              var m = document.querySelector('meta[name="theme-color"]');
+              if (m) m.setAttribute("content", next === "light" ? "#f6f6fb" : "#08080f");
+            });
+          }
+        } catch (e) {
+          /* boot do tema não pode quebrar a página */
+        }
       })();
     </script>
   </head>
   <body>
+    <div class="bg-scan"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

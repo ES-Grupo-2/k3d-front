@@ -1,7 +1,6 @@
 /**
- * @file Tela de gestão de Clientes (rota `/clients`). Visualização disponível
- * para ambos os perfis, mas apenas Gerente pode editar ou remover (controle
- * exibido condicionalmente conforme o `role` do usuário).
+ * @file Tela de gestão de Clientes (rota `/clients`). Tabela `ep-table` no
+ * estilo EyePleasure.
  * @author lukasnascimento1
  */
 import { useState } from "react";
@@ -12,13 +11,6 @@ import type { Client } from "../api/types";
 import { Modal } from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
 
-/**
- * Página de Clientes. Lista a tabela de clientes cadastrados e expõe um modal
- * para criar/editar. Operadores podem visualizar e criar; só Gerentes podem
- * editar ou remover (regra reforçada também no backend).
- *
- * **Onde é usada:** rota `/clients` em `App.tsx`.
- */
 export function ClientsPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -30,10 +22,6 @@ export function ClientsPage() {
     queryFn: () => api.get("/clients").then((r) => r.data),
   });
 
-  /**
-   * Mutação combinada de criar e editar — escolhe a rota a partir da
-   * presença de `payload.id`. Centraliza a lógica em uma única definição.
-   */
   const save = useMutation({
     mutationFn: (payload: Partial<Client> & { id?: string }) =>
       payload.id
@@ -48,7 +36,6 @@ export function ClientsPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao salvar"),
   });
 
-  /** Mutação de remoção (`DELETE /clients/:id`). Restrita a Gerente no backend. */
   const remove = useMutation({
     mutationFn: (id: string) => api.delete(`/clients/${id}`),
     onSuccess: () => {
@@ -59,35 +46,39 @@ export function ClientsPage() {
   });
 
   return (
-    <div className="p-6">
+    <div className="p-8">
       <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
+        <div>
+          <h1 className="text-[26px] font-extrabold tracking-tight text-foreground">Clientes</h1>
+          <p className="text-[13px] text-muted">Gestão da base de clientes da loja.</p>
+        </div>
         <button className="btn-primary" onClick={() => setOpen(true)}>
           + Novo cliente
         </button>
       </header>
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-background text-xs uppercase text-muted">
+      <div className="ep-glass overflow-hidden">
+        <table className="ep-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2 text-left">Nome</th>
-              <th className="px-4 py-2 text-left">Telefone</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-right">Ações</th>
+              <th>Nome</th>
+              <th>Telefone</th>
+              <th>Email</th>
+              <th style={{ textAlign: "right" }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {data?.map((c) => (
-              <tr key={c.id} className="border-t border-border">
-                <td className="px-4 py-2 text-foreground">{c.name}</td>
-                <td className="px-4 py-2 text-muted">{c.phone ?? "—"}</td>
-                <td className="px-4 py-2 text-muted">{c.email ?? "—"}</td>
-                <td className="px-4 py-2 text-right space-x-2">
+              <tr key={c.id}>
+                <td style={{ color: "var(--ep-text)", fontWeight: 600 }}>{c.name}</td>
+                <td style={{ color: "var(--ep-text-muted)" }}>{c.phone ?? "—"}</td>
+                <td style={{ color: "var(--ep-text-muted)" }}>{c.email ?? "—"}</td>
+                <td style={{ textAlign: "right" }}>
                   {user?.role === "MANAGER" && (
-                    <>
+                    <span className="inline-flex gap-3">
                       <button
-                        className="text-xs text-primary hover:underline"
+                        className="text-[12px] font-semibold hover:underline"
+                        style={{ color: "var(--ep-primary-soft)" }}
                         onClick={() => {
                           setEditing(c);
                           setOpen(true);
@@ -96,21 +87,22 @@ export function ClientsPage() {
                         editar
                       </button>
                       <button
-                        className="text-xs text-danger hover:underline"
+                        className="text-[12px] font-semibold hover:underline"
+                        style={{ color: "var(--ep-error-soft)" }}
                         onClick={() => {
                           if (confirm("Remover este cliente?")) remove.mutate(c.id);
                         }}
                       >
                         remover
                       </button>
-                    </>
+                    </span>
                   )}
                 </td>
               </tr>
             ))}
             {data?.length === 0 && (
               <tr>
-                <td colSpan={4} className="text-center py-8 text-subtle">
+                <td colSpan={4} style={{ textAlign: "center", padding: 40, color: "var(--ep-text-faint)" }}>
                   Nenhum cliente cadastrado
                 </td>
               </tr>
@@ -140,16 +132,6 @@ export function ClientsPage() {
   );
 }
 
-/**
- * Formulário interno de cliente. Mantém estado local dos três campos e
- * delega a persistência para o `onSave` do pai (que decide criar vs editar).
- *
- * **Onde é usado:** apenas dentro de `ClientsPage` (componente interno).
- *
- * @param client - cliente a editar; se `null/undefined`, cria um novo
- * @param onSave - callback de persistência
- * @param onCancel - callback de cancelamento (fecha o modal)
- */
 function ClientForm({
   client,
   onSave,
@@ -168,27 +150,21 @@ function ClientForm({
         e.preventDefault();
         onSave({ name, phone: phone || null, email: email || null });
       }}
-      className="space-y-3"
     >
-      <div>
-        <label className="label">Nome</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} required />
+      <div className="field">
+        <label>Nome</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
-      <div>
-        <label className="label">Telefone</label>
-        <input className="input" value={phone ?? ""} onChange={(e) => setPhone(e.target.value)} />
+      <div className="field">
+        <label>Telefone</label>
+        <input value={phone ?? ""} onChange={(e) => setPhone(e.target.value)} />
       </div>
-      <div>
-        <label className="label">Email</label>
-        <input
-          className="input"
-          type="email"
-          value={email ?? ""}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div className="field">
+        <label>Email</label>
+        <input type="email" value={email ?? ""} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div className="flex justify-end gap-2">
-        <button type="button" className="btn-secondary" onClick={onCancel}>
+        <button type="button" className="btn-glass" onClick={onCancel}>
           Cancelar
         </button>
         <button type="submit" className="btn-primary">

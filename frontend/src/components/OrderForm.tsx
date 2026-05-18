@@ -1,8 +1,6 @@
 /**
- * @file Formulário reutilizável de criação e edição de pedido (Order).
- * Carrega listas de clientes e categorias via React Query, mantém o estado
- * local do formulário e delega a persistência para o componente pai através
- * do callback `onSave`.
+ * @file Formulário reutilizável de criação/edição de pedido. Estilo
+ * EyePleasure com `.field`, `.btn-primary` e `.btn-glass`.
  * @author lukasnascimento1
  */
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +8,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../api/client";
 import type { Client, Order, Tag } from "../api/types";
-import { PAYMENT_METHOD_OPTIONS, STATUS_OPTIONS, humanizeEnum } from "../lib/format";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  STATUS_OPTIONS,
+  orderStatusLabel,
+  paymentMethodLabel,
+} from "../lib/format";
 
 type Props = {
   order?: Order | null;
@@ -18,25 +21,6 @@ type Props = {
   onCancel: () => void;
 };
 
-/**
- * Componente de formulário de pedido. Funciona tanto para "novo pedido"
- * (quando `order` não é informado) quanto para "editar pedido" (quando
- * `order` recebe um pedido existente — os campos são pré-preenchidos).
- *
- * Responsabilidades:
- * - Buscar clientes (`GET /clients`) e categorias (`GET /tags`) para popular
- *   os selects.
- * - Validar cliente e categoria antes de submeter (toast de erro).
- * - Converter os campos numéricos (Number()) antes de chamar `onSave`.
- * - Bloquear o botão "Salvar" enquanto a mutação está em andamento.
- *
- * **Onde é usado:** dentro do `<Modal />` em `KanbanPage.tsx`, em duas
- * situações: criar novo pedido e editar pedido existente.
- *
- * @param order - pedido a ser editado; se `null/undefined`, cria um novo
- * @param onSave - callback async que recebe o payload sanitizado
- * @param onCancel - callback chamado ao clicar em "Cancelar"
- */
 export function OrderForm({ order, onSave, onCancel }: Props) {
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["clients"],
@@ -61,11 +45,6 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
   });
   const [saving, setSaving] = useState(false);
 
-  /**
-   * Handler do submit. Valida os campos obrigatórios (cliente e categoria),
-   * normaliza os tipos numéricos e delega ao callback `onSave`. Ativa o
-   * estado `saving` para desabilitar o botão durante a chamada.
-   */
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.clientId || !form.tagId) {
@@ -86,34 +65,28 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
     }
   }
 
-  /**
-   * Atualiza um único campo do formulário mantendo type-safety. É um helper
-   * tipado para evitar `setState` espalhado pelos handlers de cada input.
-   *
-   * @param field - chave do campo
-   * @param value - novo valor
-   */
   function update<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
     setForm((s) => ({ ...s, [field]: value }));
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <div>
-        <label className="label">Título</label>
+    <form onSubmit={submit}>
+      <div className="field">
+        <label htmlFor="f-title">Título</label>
         <input
-          className="input"
+          id="f-title"
           value={form.title}
           onChange={(e) => update("title", e.target.value)}
+          placeholder="Ex.: Lote de chaveiros LOGO"
           required
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="label">Cliente</label>
+        <div className="field">
+          <label htmlFor="f-client">Cliente</label>
           <select
-            className="input"
+            id="f-client"
             value={form.clientId}
             onChange={(e) => update("clientId", e.target.value)}
             required
@@ -126,10 +99,10 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
             ))}
           </select>
         </div>
-        <div>
-          <label className="label">Categoria</label>
+        <div className="field">
+          <label htmlFor="f-tag">Categoria</label>
           <select
-            className="input"
+            id="f-tag"
             value={form.tagId}
             onChange={(e) => update("tagId", e.target.value)}
             required
@@ -145,45 +118,41 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
       </div>
 
       <div className="grid grid-cols-4 gap-3">
-        <div>
-          <label className="label">Preço (R$)</label>
+        <div className="field">
+          <label>Preço (R$)</label>
           <input
             type="number"
             step="0.01"
             min="0"
-            className="input"
             value={String(form.price)}
             onChange={(e) => update("price", e.target.value as any)}
           />
         </div>
-        <div>
-          <label className="label">Valor pago</label>
+        <div className="field">
+          <label>Valor pago</label>
           <input
             type="number"
             step="0.01"
             min="0"
-            className="input"
             value={String(form.amountPaid)}
             onChange={(e) => update("amountPaid", e.target.value as any)}
           />
         </div>
-        <div>
-          <label className="label">Custo</label>
+        <div className="field">
+          <label>Custo</label>
           <input
             type="number"
             step="0.01"
             min="0"
-            className="input"
             value={String(form.cost)}
             onChange={(e) => update("cost", e.target.value as any)}
           />
         </div>
-        <div>
-          <label className="label">Quantidade</label>
+        <div className="field">
+          <label>Quantidade</label>
           <input
             type="number"
             min="1"
-            className="input"
             value={form.quantity}
             onChange={(e) => update("quantity", Number(e.target.value) as any)}
           />
@@ -191,51 +160,46 @@ export function OrderForm({ order, onSave, onCancel }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="label">Forma de pagamento</label>
+        <div className="field">
+          <label>Forma de pagamento</label>
           <select
-            className="input"
             value={form.paymentMethod}
             onChange={(e) => update("paymentMethod", e.target.value as any)}
           >
             {PAYMENT_METHOD_OPTIONS.map((f) => (
               <option key={f} value={f}>
-                {humanizeEnum(f)}
+                {paymentMethodLabel(f)}
               </option>
             ))}
           </select>
         </div>
-        <div>
-          <label className="label">Status</label>
-          <select
-            className="input"
-            value={form.status}
-            onChange={(e) => update("status", e.target.value as any)}
-          >
+        <div className="field">
+          <label>Status</label>
+          <select value={form.status} onChange={(e) => update("status", e.target.value as any)}>
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {humanizeEnum(s)}
+                {orderStatusLabel(s)}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      <div>
-        <label className="label">Observações</label>
+      <div className="field">
+        <label>Observações</label>
         <textarea
-          className="input min-h-[60px]"
+          rows={3}
           value={form.notes ?? ""}
           onChange={(e) => update("notes", e.target.value as any)}
         />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" className="btn-secondary" onClick={onCancel}>
+        <button type="button" className="btn-glass" onClick={onCancel}>
           Cancelar
         </button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? "Salvando..." : "Salvar"}
+          {saving ? <span className="spinner" style={{ width: 18, height: 18 }} /> : "Salvar"}
         </button>
       </div>
     </form>

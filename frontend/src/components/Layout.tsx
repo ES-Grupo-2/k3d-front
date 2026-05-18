@@ -1,25 +1,13 @@
 /**
- * @file Esqueleto visual das páginas autenticadas. Renderiza a sidebar fixa
- * (logo, navegação filtrada por perfil, identificação do usuário, alternador
- * de tema, botão Sair) e o `<Outlet />` do React Router para o conteúdo da
- * rota corrente.
+ * @file Esqueleto visual das rotas autenticadas — sidebar com logo K3D,
+ * navegação filtrada por perfil, perfil do usuário, alternador de tema
+ * e botão Sair. Estilo EyePleasure (sidebar translúcida sobre o bg-scan).
  * @author lukasnascimento1
  */
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
-/**
- * Componente de layout das rotas protegidas. É renderizado dentro do
- * `ProtectedRoute` em `App.tsx` e injeta o conteúdo de cada página pelo
- * `<Outlet />`.
- *
- * Filtra os itens da sidebar com base no `role` do usuário corrente (RBAC),
- * de modo que perfis Operacional não veem rotas restritas ao Gerente.
- *
- * **Onde é usado:** envolve todas as rotas privadas em `App.tsx` (Kanban,
- * Calculator, Dashboards, Clients, Tags).
- */
 export function Layout() {
   const { user, logout } = useAuth();
   const navItems = [
@@ -33,11 +21,29 @@ export function Layout() {
 
   return (
     <div className="h-full flex">
-      <aside className="w-60 shrink-0 border-r border-border bg-surface flex flex-col">
-        <Link to="/kanban" className="px-4 py-4 text-lg font-bold tracking-wide text-foreground">
-          K3D
+      <aside
+        className="w-64 shrink-0 flex flex-col"
+        style={{
+          background: "var(--ep-surface)",
+          borderRight: "1px solid var(--ep-border)",
+          backdropFilter: "blur(20px) saturate(1.3)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.3)",
+        }}
+      >
+        <Link to="/kanban" className="px-5 py-5 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm tracking-tight"
+            style={{ background: "linear-gradient(135deg, var(--ep-primary), var(--ep-accent))" }}>
+            K3D
+          </div>
+          <div>
+            <div className="text-foreground font-extrabold tracking-tight">K3D</div>
+            <div className="text-[9px] text-faint uppercase tracking-[2px]">
+              Tasker Kria3D
+            </div>
+          </div>
         </Link>
-        <nav className="flex-1 px-2 space-y-1">
+
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
           {navItems
             .filter((i) => user && i.roles.includes(user.role))
             .map((i) => (
@@ -45,24 +51,36 @@ export function Layout() {
                 key={i.to}
                 to={i.to}
                 className={({ isActive }) =>
-                  `block rounded-md px-3 py-2 text-sm transition ${
+                  `block rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition-all ${
                     isActive
-                      ? "bg-primary text-white"
-                      : "text-muted hover:bg-border hover:text-foreground"
+                      ? "text-white shadow-card"
+                      : "text-muted hover:text-foreground hover:bg-surface-hover"
                   }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? { background: "linear-gradient(135deg, var(--ep-primary), var(--ep-accent))" }
+                    : {}
                 }
               >
                 {i.title}
               </NavLink>
             ))}
         </nav>
-        <div className="p-3 border-t border-border text-xs space-y-2">
-          <div>
-            <div className="text-foreground font-medium">{user?.name}</div>
-            <div className="text-subtle">{user?.role}</div>
+
+        <div className="p-4 border-t border-border space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+              style={{ background: "linear-gradient(135deg, var(--ep-primary), var(--ep-accent))" }}>
+              {user?.name.charAt(0)}
+            </div>
+            <div className="min-w-0">
+              <div className="text-foreground font-semibold text-xs truncate">{user?.name}</div>
+              <div className="text-faint text-[10px] uppercase tracking-wider">{user?.role}</div>
+            </div>
           </div>
           <ThemeSwitcher />
-          <button onClick={logout} className="btn-secondary w-full text-xs py-1">
+          <button onClick={logout} className="btn-glass w-full text-xs" style={{ height: 36 }}>
             Sair
           </button>
         </div>

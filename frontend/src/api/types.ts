@@ -97,6 +97,25 @@ export type FinancialDashboardData = {
   totalOrders: number;
 };
 
+/** Métricas agregadas de um único produto (agrupado por título do pedido). */
+export type ProductBreakdownItem = {
+  name: string;
+  tagName: string;
+  tagColor: string;
+  revenue: number;
+  cost: number;
+  profit: number;
+  quantity: number;
+  orders: number;
+  profitMarginPercent: number;
+};
+
+/** Resposta de `GET /dashboard/financial/products` — financeiro detalhado por produto. */
+export type ProductsBreakdownData = {
+  period: string;
+  products: ProductBreakdownItem[];
+};
+
 /** Resultado de `POST /calculator/calculate` — breakdown de custo e preço sugerido. */
 export type CalculationResult = {
   filamentCost: number;

@@ -1,8 +1,6 @@
 /**
- * @file Tela do quadro Kanban (rota `/kanban`). Atende aos RFs principais do
- * documento de requisitos: criar/editar/excluir pedidos, mover entre as três
- * colunas (A Fazer · Fazendo · Concluído) via drag-and-drop, listar todos os
- * pedidos. É a única rota acessível tanto para Gerente quanto Operacional.
+ * @file Tela do quadro Kanban (rota `/kanban`). Cards no estilo glass do
+ * EyePleasure, com pill colorida pra status e tag.
  * @author lukasnascimento1
  */
 import { useMemo, useState } from "react";
@@ -12,39 +10,33 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDraggable,
+  useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { useDraggable, useDroppable } from "@dnd-kit/core";
 import toast from "react-hot-toast";
 import { api } from "../api/client";
-import type { KanbanColumn, Order } from "../api/types";
-import { currency, humanizeEnum } from "../lib/format";
+import type { KanbanColumn, Order, OrderStatus } from "../api/types";
+import { currency, orderStatusLabel, paymentMethodLabel } from "../lib/format";
 import { Modal } from "../components/Modal";
 import { OrderForm } from "../components/OrderForm";
 import { useAuth } from "../context/AuthContext";
 
-/**
- * Definição estática das três colunas do quadro. A ordem aqui dita a ordem
- * visual da grade. Os IDs devem corresponder exatamente ao enum
- * `KanbanColumn` do backend.
- */
 const COLUMNS: { id: KanbanColumn; title: string }[] = [
   { id: "TODO", title: "A Fazer" },
   { id: "DOING", title: "Fazendo" },
   { id: "DONE", title: "Concluído" },
 ];
 
-/**
- * Página principal do Kanban. Orquestra:
- * - Carregamento dos pedidos via React Query (`GET /orders`).
- * - Agrupamento dos pedidos por coluna (`useMemo`).
- * - Mutações de criação, edição, movimentação e exclusão.
- * - Captura do drag-and-drop através de `DndContext`.
- * - Modais para criar e editar pedidos.
- *
- * **Onde é usada:** rota `/kanban` em `App.tsx`. Também é a rota de fallback
- * para usuários sem permissão em outras telas (via `ProtectedRoute`).
- */
+// Cor de fundo da pill de status — combina semanticamente com o estado
+const STATUS_COLOR: Record<OrderStatus, { bg: string; fg: string }> = {
+  PENDING_PRINT: { bg: "rgba(245,158,11,.16)", fg: "var(--ep-warning-soft)" },
+  PRINTING: { bg: "rgba(99,102,241,.16)", fg: "var(--ep-primary-soft)" },
+  COMPLETED: { bg: "rgba(16,185,129,.16)", fg: "var(--ep-success-soft)" },
+  PARTIAL_PAYMENT: { bg: "rgba(245,158,11,.16)", fg: "var(--ep-warning-soft)" },
+  PAID: { bg: "rgba(16,185,129,.16)", fg: "var(--ep-success-soft)" },
+};
+
 export function KanbanPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -56,19 +48,12 @@ export function KanbanPage() {
     queryFn: () => api.get("/orders").then((r) => r.data),
   });
 
-  /**
-   * Agrupa a lista linear de pedidos em um mapa `{ TODO, DOING, DONE }` para
-   * facilitar a renderização das colunas. Recalculado apenas quando `orders`
-   * muda.
-   */
   const byColumn = useMemo(() => {
     const map: Record<KanbanColumn, Order[]> = { TODO: [], DOING: [], DONE: [] };
     orders?.forEach((o) => map[o.column].push(o));
     return map;
   }, [orders]);
 
-  // Mutação de criação: POST /orders. Em sucesso invalida o cache de pedidos
-  // (força refetch) e fecha o modal.
   const createMut = useMutation({
     mutationFn: (payload: any) => api.post("/orders", payload).then((r) => r.data),
     onSuccess: () => {
@@ -79,7 +64,6 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao criar"),
   });
 
-  // Mutação de edição: PUT /orders/:id.
   const updateMut = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) =>
       api.put(`/orders/${id}`, payload).then((r) => r.data),
@@ -91,8 +75,6 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao salvar"),
   });
 
-  // Mutação de movimentação entre colunas: PATCH /orders/:id/move.
-  // Disparada pelo evento de drop do dnd-kit.
   const moveMut = useMutation({
     mutationFn: ({ id, column }: { id: string; column: KanbanColumn }) =>
       api.patch(`/orders/${id}/move`, { column }).then((r) => r.data),
@@ -100,8 +82,6 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro ao mover"),
   });
 
-  // Mutação de exclusão: DELETE /orders/:id. Restrita ao perfil MANAGER no
-  // backend — operadores recebem 403 e a mensagem aparece como toast.
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/orders/${id}`),
     onSuccess: () => {
@@ -111,17 +91,8 @@ export function KanbanPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Sem permissão para remover"),
   });
 
-  // PointerSensor exige um drag mínimo de 6px antes de iniciar o arrasto —
-  // evita disparar drag por engano quando o usuário só queria clicar.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-  /**
-   * Handler chamado pelo `DndContext` quando o usuário solta um card.
-   * Identifica o card arrastado (active) e a coluna destino (over) e,
-   * se a coluna mudou, dispara `moveMut` para persistir.
-   *
-   * @param e - evento de fim de drag do dnd-kit
-   */
   function onDrop(e: DragEndEvent) {
     const orderId = String(e.active.id);
     const target = e.over?.id as KanbanColumn | undefined;
@@ -132,12 +103,12 @@ export function KanbanPage() {
   }
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <header className="flex items-center justify-between mb-4">
+    <div className="p-8 h-full flex flex-col">
+      <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Kanban</h1>
-          <p className="text-sm text-muted">
-            Arraste os cards entre colunas — ou clique para editar.
+          <h1 className="text-[26px] font-extrabold tracking-tight text-foreground">Kanban</h1>
+          <p className="text-[13px] text-muted">
+            Arraste os cards entre colunas ou clique para editar.
           </p>
         </div>
         <button className="btn-primary" onClick={() => setCreating(true)}>
@@ -146,7 +117,7 @@ export function KanbanPage() {
       </header>
 
       <DndContext sensors={sensors} onDragEnd={onDrop}>
-        <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
+        <div className="grid grid-cols-3 gap-5 flex-1 min-h-0">
           {COLUMNS.map((column) => (
             <Column
               key={column.id}
@@ -163,14 +134,14 @@ export function KanbanPage() {
         </div>
       </DndContext>
 
-      <Modal open={creating} title="Novo pedido" onClose={() => setCreating(false)}>
+      <Modal open={creating} title="Novo pedido" onClose={() => setCreating(false)} width="max-w-2xl">
         <OrderForm
           onSave={async (payload) => createMut.mutateAsync(payload)}
           onCancel={() => setCreating(false)}
         />
       </Modal>
 
-      <Modal open={!!editing} title="Editar pedido" onClose={() => setEditing(null)}>
+      <Modal open={!!editing} title="Editar pedido" onClose={() => setEditing(null)} width="max-w-2xl">
         {editing && (
           <OrderForm
             order={editing}
@@ -183,20 +154,6 @@ export function KanbanPage() {
   );
 }
 
-/**
- * Coluna do Kanban — representa um estágio (A Fazer / Fazendo / Concluído).
- * Registra-se como zona de drop via `useDroppable` (recebe os cards
- * arrastados) e renderiza um cabeçalho com contador.
- *
- * **Onde é usado:** somente dentro de `KanbanPage` (componente interno).
- *
- * @param id - chave da coluna (também é o droppable id)
- * @param title - texto exibido no cabeçalho
- * @param orders - lista de pedidos pertencentes a esta coluna
- * @param onEdit - handler de edição (abre modal no pai)
- * @param onDelete - handler de exclusão (já passa pelo confirm)
- * @param canDelete - controla a exibição do botão de excluir (RBAC)
- */
 function Column({
   id,
   title,
@@ -216,11 +173,20 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`panel flex flex-col min-h-0 ${isOver ? "ring-2 ring-primary" : ""}`}
+      className="ep-glass flex flex-col min-h-0"
+      style={{
+        outline: isOver ? `2px solid var(--ep-primary)` : "none",
+        outlineOffset: "-1px",
+      }}
     >
-      <header className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <h2 className="font-semibold text-sm uppercase tracking-wider text-muted">{title}</h2>
-        <span className="text-xs text-subtle">{orders.length}</span>
+      <header className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h2 className="font-bold text-[11px] uppercase tracking-[0.6px] text-faint">{title}</h2>
+        <span
+          className="inline-flex items-center justify-center min-w-[24px] h-[22px] px-2 rounded-full text-[11px] font-bold"
+          style={{ background: "var(--ep-surface-strong)", color: "var(--ep-text-muted)" }}
+        >
+          {orders.length}
+        </span>
       </header>
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {orders.map((o) => (
@@ -233,30 +199,13 @@ function Column({
           />
         ))}
         {orders.length === 0 && (
-          <p className="text-xs text-subtle text-center py-6">Sem pedidos aqui</p>
+          <p className="text-[12px] text-faint text-center py-8">Sem pedidos aqui</p>
         )}
       </div>
     </div>
   );
 }
 
-/**
- * Card individual do Kanban. Implementa o layout das três regiões definido
- * no Figma (top 20% / content 60% / bottom 20%) e o handle de arrasto via
- * `useDraggable`.
- *
- * - Top Region: tag colorida + ações (editar, excluir).
- * - Content Region: título, cliente, quantidade e preço. Funciona como
- *   handle de drag — listeners do dnd-kit ficam nesta área.
- * - Bottom Region: status e forma de pagamento.
- *
- * **Onde é usado:** dentro de `Column` (componente interno do `Kanban.tsx`).
- *
- * @param order - dados do pedido
- * @param onEdit - handler para abrir o modal de edição
- * @param onDelete - handler para excluir
- * @param canDelete - se `false`, oculta o botão de excluir (RBAC)
- */
 function Card({
   order,
   onEdit,
@@ -275,39 +224,54 @@ function Card({
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
+  const statusColors = STATUS_COLOR[order.status];
+
   return (
     <div
       ref={setNodeRef}
-      style={style}
-      className={`bg-background border border-border rounded-md text-sm overflow-hidden shadow-sm ${
-        isDragging ? "opacity-50" : ""
-      }`}
+      style={{
+        ...style,
+        background: "var(--ep-surface-strong)",
+        border: "1px solid var(--ep-border-strong)",
+        borderRadius: 12,
+        boxShadow: "var(--ep-shadow-soft)",
+        opacity: isDragging ? 0.5 : 1,
+        overflow: "hidden",
+      }}
     >
-      {/* Top Region — 20% (do design Figma: regiões do card) */}
+      {/* Top region — tag + ações */}
       <div
-        className="px-3 py-2 flex items-center justify-between border-b border-border"
+        className="px-3.5 py-2.5 flex items-center justify-between border-b border-border-soft"
         style={{ borderLeft: `3px solid ${order.tag.color}` }}
       >
-        <span className="text-[10px] uppercase tracking-wider text-muted font-medium">
+        <span
+          className="status-pill"
+          style={{
+            background: `${order.tag.color}26`,
+            color: order.tag.color,
+          }}
+        >
           {order.tag.name}
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
-            className="text-xs text-subtle hover:text-foreground px-1"
+            className="w-7 h-7 inline-flex items-center justify-center rounded-md text-faint hover:text-foreground hover:bg-surface-hover transition-colors text-xs"
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
+            title="Editar"
           >
             ✎
           </button>
           {canDelete && (
             <button
-              className="text-xs text-subtle hover:text-danger px-1"
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-faint hover:text-error transition-colors text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
+              title="Remover"
             >
               ✕
             </button>
@@ -315,19 +279,32 @@ function Card({
         </div>
       </div>
 
-      {/* Content Region — 60% (handle de arrastar) */}
-      <div className="px-3 py-2 cursor-grab" {...listeners} {...attributes}>
-        <div className="font-medium leading-tight text-foreground">{order.title}</div>
-        <div className="text-xs text-muted mt-1">{order.client.name}</div>
-        <div className="text-[11px] text-subtle mt-1">
-          Qtde: {order.quantity} · {currency(order.price)}
+      {/* Content region — drag handle */}
+      <div className="px-3.5 py-3 cursor-grab" {...listeners} {...attributes}>
+        <div className="font-bold text-[13.5px] leading-tight text-foreground tracking-tight">
+          {order.title}
+        </div>
+        <div className="text-[12px] text-muted mt-1.5">{order.client.name}</div>
+        <div className="text-[11px] text-faint mt-2 flex items-center gap-3">
+          <span>Qtde: {order.quantity}</span>
+          <span className="font-semibold" style={{ color: "var(--ep-text-soft)" }}>
+            {currency(order.price)}
+          </span>
         </div>
       </div>
 
-      {/* Bottom Region — 20% */}
-      <div className="px-3 py-1.5 border-t border-border text-[10px] text-subtle flex justify-between">
-        <span>{humanizeEnum(order.status)}</span>
-        <span>{humanizeEnum(order.paymentMethod)}</span>
+      {/* Bottom region — status + forma pagamento */}
+      <div
+        className="px-3.5 py-2 border-t border-border-soft flex items-center justify-between gap-2"
+        style={{ background: "var(--ep-surface)" }}
+      >
+        <span
+          className="status-pill"
+          style={{ background: statusColors.bg, color: statusColors.fg }}
+        >
+          {orderStatusLabel(order.status)}
+        </span>
+        <span className="text-[10.5px] text-faint">{paymentMethodLabel(order.paymentMethod)}</span>
       </div>
     </div>
   );

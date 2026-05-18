@@ -1,8 +1,6 @@
 /**
- * @file Tela da Calculadora Inteligente (rota `/calculator`). Restrita ao
- * perfil MANAGER. Permite calcular custo e preço sugerido de pedidos
- * extraordinários a partir dos insumos (filamento, energia, depreciação) e
- * salvar parâmetros padrão para reuso.
+ * @file Tela da Calculadora Inteligente (rota `/calculator`). Layout em duas
+ * colunas: form de insumos + painel de resultado. Estilo EyePleasure.
  * @author lukasnascimento1
  */
 import { useEffect, useState } from "react";
@@ -12,15 +10,6 @@ import { api } from "../api/client";
 import type { CalculationResult } from "../api/types";
 import { currency } from "../lib/format";
 
-/**
- * Página da Calculadora. Carrega os parâmetros padrão do backend para
- * pré-preencher o formulário, dispara o cálculo via `POST /calculator/calculate`
- * e mostra o resultado em uma lista de definição (custo de filamento, energia,
- * depreciação, total, lucro e preço sugerido).
- *
- * **Onde é usada:** rota `/calculator` em `App.tsx`, protegida por
- * `ProtectedRoute roles={["MANAGER"]}`.
- */
 export function CalculatorPage() {
   const { data: config } = useQuery({
     queryKey: ["calc-config"],
@@ -38,9 +27,6 @@ export function CalculatorPage() {
     hourlyDepreciation: 1.5,
   });
 
-  // Quando os parâmetros padrão chegam do backend, sobrescreve apenas os
-  // campos persistidos (preço filamento, KWh, margem, depreciação).
-  // Mantém os campos voláteis (gramas, horas, tipo) como digitados.
   useEffect(() => {
     if (config) {
       setForm((s) => ({
@@ -55,10 +41,6 @@ export function CalculatorPage() {
 
   const [result, setResult] = useState<CalculationResult | null>(null);
 
-  /**
-   * Mutação que dispara o cálculo no backend. Em sucesso, popula o estado
-   * `result` para renderizar o painel de resultado.
-   */
   const calculate = useMutation({
     mutationFn: (payload: typeof form) =>
       api.post<CalculationResult>("/calculator/calculate", payload).then((r) => r.data),
@@ -66,11 +48,6 @@ export function CalculatorPage() {
     onError: (e: any) => toast.error(e.response?.data?.mensagem ?? "Erro no cálculo"),
   });
 
-  /**
-   * Mutação que persiste os parâmetros atuais como padrão do sistema
-   * (`PUT /calculator/config`). Útil para que o próximo cálculo já venha
-   * pré-preenchido com os valores recém-configurados.
-   */
   const saveConfig = useMutation({
     mutationFn: () =>
       api
@@ -84,30 +61,30 @@ export function CalculatorPage() {
     onSuccess: () => toast.success("Parâmetros padrão salvos"),
   });
 
-  /**
-   * Helper tipado para atualizar um campo do formulário sem perder
-   * type-safety. Espelha o padrão usado em `OrderForm.update`.
-   */
   function update<K extends keyof typeof form>(c: K, v: (typeof form)[K]) {
     setForm((s) => ({ ...s, [c]: v }));
   }
 
   return (
-    <div className="p-6 max-w-5xl">
-      <h1 className="text-2xl font-bold mb-1 text-foreground">Calculadora Inteligente</h1>
-      <p className="text-sm text-muted mb-6">
-        Calcula custo e preço sugerido para pedidos extraordinários.
-      </p>
+    <div className="p-8 max-w-6xl">
+      <header className="mb-6">
+        <h1 className="text-[26px] font-extrabold tracking-tight text-foreground">
+          Calculadora Inteligente
+        </h1>
+        <p className="text-[13px] text-muted">
+          Calcula custo e preço sugerido para pedidos extraordinários.
+        </p>
+      </header>
 
       <div className="grid grid-cols-2 gap-6">
         <form
-          className="panel p-5 space-y-3"
+          className="ep-glass p-6"
           onSubmit={(e) => {
             e.preventDefault();
             calculate.mutate(form);
           }}
         >
-          <h2 className="font-semibold mb-2 text-foreground">Insumos</h2>
+          <h2 className="font-bold text-[14px] uppercase tracking-wider text-faint mb-4">Insumos</h2>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Preço filamento (R$/kg)" type="number" step="0.01"
@@ -128,29 +105,29 @@ export function CalculatorPage() {
               value={form.profitMargin} onChange={(v) => update("profitMargin", v)} />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="btn-secondary" onClick={() => saveConfig.mutate()}>
+          <div className="flex justify-end gap-2 pt-4">
+            <button type="button" className="btn-glass" onClick={() => saveConfig.mutate()}>
               Salvar como padrão
             </button>
             <button type="submit" className="btn-primary" disabled={calculate.isPending}>
-              {calculate.isPending ? "Calculando…" : "Calcular"}
+              {calculate.isPending ? <span className="spinner" style={{ width: 18, height: 18 }} /> : "Calcular"}
             </button>
           </div>
         </form>
 
-        <div className="panel p-5">
-          <h2 className="font-semibold mb-3 text-foreground">Resultado</h2>
+        <div className="ep-glass p-6">
+          <h2 className="font-bold text-[14px] uppercase tracking-wider text-faint mb-4">Resultado</h2>
           {!result ? (
-            <p className="text-sm text-muted">Preencha os campos e clique em Calcular.</p>
+            <p className="text-[13px] text-muted">Preencha os campos e clique em Calcular.</p>
           ) : (
-            <dl className="space-y-2 text-sm">
+            <dl className="space-y-2.5 text-[14px]">
               <Row label="Filamento" value={currency(result.filamentCost)} />
               <Row label="Energia" value={currency(result.energyCost)} />
               <Row label="Depreciação" value={currency(result.depreciationCost)} />
-              <div className="border-t border-border my-2" />
+              <div style={{ borderTop: "1px solid var(--ep-border)", margin: "10px 0" }} />
               <Row label="Custo total" value={currency(result.totalCost)} emphasis />
               <Row label={`Lucro (${result.profitMarginPercent}%)`} value={currency(result.profit)} />
-              <div className="border-t border-border my-2" />
+              <div style={{ borderTop: "1px solid var(--ep-border)", margin: "10px 0" }} />
               <Row label="Preço sugerido" value={currency(result.suggestedPrice)} emphasis large />
             </dl>
           )}
@@ -160,18 +137,6 @@ export function CalculatorPage() {
   );
 }
 
-/**
- * Campo de input genérico do formulário da calculadora. Converte string→number
- * automaticamente quando `type="number"`, evitando que React reclame de NaN.
- *
- * **Onde é usado:** somente dentro de `CalculatorPage` (componente interno).
- *
- * @param label - rótulo exibido acima do input
- * @param value - valor atual (qualquer tipo, será convertido se number)
- * @param onChange - callback de atualização
- * @param type - tipo HTML (text/number/etc.)
- * @param step - granularidade para inputs numéricos
- */
 function Field({
   label,
   value,
@@ -186,10 +151,9 @@ function Field({
   step?: string;
 }) {
   return (
-    <div>
-      <label className="label">{label}</label>
+    <div className="field">
+      <label>{label}</label>
       <input
-        className="input"
         type={type}
         step={step}
         value={String(value)}
@@ -199,17 +163,6 @@ function Field({
   );
 }
 
-/**
- * Linha (`<dt>`/`<dd>`) do painel de resultado. Suporta destaque visual
- * (`emphasis`) e tamanho aumentado (`large`) para evidenciar o preço sugerido.
- *
- * **Onde é usada:** dentro de `CalculatorPage` (lista de resultado).
- *
- * @param label - rótulo (esquerda)
- * @param value - valor formatado (direita)
- * @param emphasis - aplica peso negrito
- * @param large - aplica tamanho de fonte maior
- */
 function Row({
   label,
   value,
@@ -224,7 +177,19 @@ function Row({
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted">{label}</dt>
-      <dd className={`${emphasis ? "font-semibold text-foreground" : "text-foreground"} ${large ? "text-lg" : ""}`}>
+      <dd
+        style={{
+          color: emphasis ? "var(--ep-text)" : "var(--ep-text-soft)",
+          fontWeight: emphasis ? 700 : 500,
+          fontSize: large ? 20 : 14,
+          background: large
+            ? "linear-gradient(135deg, var(--ep-primary-soft), var(--ep-accent-soft))"
+            : "none",
+          WebkitBackgroundClip: large ? "text" : "border-box",
+          backgroundClip: large ? "text" : "border-box",
+          WebkitTextFillColor: large ? "transparent" : "currentColor",
+        }}
+      >
         {value}
       </dd>
     </div>
