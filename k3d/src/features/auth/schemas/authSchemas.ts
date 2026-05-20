@@ -1,3 +1,5 @@
+// Podem ser movidas para dentro de src/app/schemas 
+
 import {z} from "zod";
 
 export const loginSchema = z.object({
