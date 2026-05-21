@@ -3,7 +3,7 @@
  * EyePleasure, com pill colorida pra status e tag.
  * @author lukasnascimento1
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -42,6 +42,8 @@ export function KanbanPage() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Order | null>(null);
   const [creating, setCreating] = useState(false);
+  const [activeCol, setActiveCol] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   const { data: orders } = useQuery<Order[]>({
     queryKey: ["orders"],
@@ -117,7 +119,8 @@ export function KanbanPage() {
       </header>
 
       <DndContext sensors={sensors} onDragEnd={onDrop}>
-        <div className="grid grid-cols-3 gap-5 flex-1 min-h-0">
+        {/* Desktop: 3 colunas lado a lado */}
+        <div className="hidden lg:grid grid-cols-3 gap-5 flex-1 min-h-0">
           {COLUMNS.map((column) => (
             <Column
               key={column.id}
@@ -131,6 +134,80 @@ export function KanbanPage() {
               canDelete={user?.role === "MANAGER"}
             />
           ))}
+        </div>
+
+        {/* Mobile/tablet: carrossel */}
+        <div className="lg:hidden flex flex-col flex-1 min-h-0 gap-3">
+          {/* Tabs de navegação */}
+          <div className="flex gap-2">
+            {COLUMNS.map((column, idx) => (
+              <button
+                key={column.id}
+                onClick={() => setActiveCol(idx)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[13px] font-semibold transition-all ${
+                  activeCol === idx
+                    ? "text-white shadow-card"
+                    : "text-muted hover:text-foreground hover:bg-surface-hover"
+                }`}
+                style={
+                  activeCol === idx
+                    ? { background: "linear-gradient(135deg, var(--ep-primary), var(--ep-accent))" }
+                    : { background: "var(--ep-surface)", border: "1px solid var(--ep-border)" }
+                }
+              >
+                {column.title}
+                <span
+                  className="inline-flex items-center justify-center min-w-[20px] h-[18px] px-1.5 rounded-full text-[10px] font-bold"
+                  style={{
+                    background: activeCol === idx ? "rgba(255,255,255,0.25)" : "var(--ep-surface-strong)",
+                    color: activeCol === idx ? "#fff" : "var(--ep-text-muted)",
+                  }}
+                >
+                  {byColumn[COLUMNS[idx].id].length}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Coluna ativa + swipe */}
+          <div
+            className="flex-1 min-h-0"
+            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              if (touchStartX.current === null) return;
+              const diff = touchStartX.current - e.changedTouches[0].clientX;
+              if (diff > 50) setActiveCol((c) => Math.min(c + 1, COLUMNS.length - 1));
+              else if (diff < -50) setActiveCol((c) => Math.max(c - 1, 0));
+              touchStartX.current = null;
+            }}
+          >
+            <Column
+              id={COLUMNS[activeCol].id}
+              title={COLUMNS[activeCol].title}
+              orders={byColumn[COLUMNS[activeCol].id]}
+              onEdit={setEditing}
+              onDelete={(id) => {
+                if (confirm("Tem certeza que deseja remover este pedido?")) deleteMut.mutate(id);
+              }}
+              canDelete={user?.role === "MANAGER"}
+            />
+          </div>
+
+          {/* Indicador de ponto */}
+          <div className="flex justify-center gap-1.5 pb-1">
+            {COLUMNS.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveCol(idx)}
+                className="rounded-full transition-all"
+                style={{
+                  width: activeCol === idx ? 20 : 6,
+                  height: 6,
+                  background: activeCol === idx ? "var(--ep-primary)" : "var(--ep-border-strong)",
+                }}
+              />
+            ))}
+          </div>
         </div>
       </DndContext>
 
