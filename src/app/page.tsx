@@ -1,7 +1,9 @@
-export default function Home() {
-  return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-3xl font-bold">k3d-front</h1>
-    </main>
-  );
+import { redirect } from "next/navigation";
+
+import { getSession } from "@/services/auth/session";
+
+export default async function Home() {
+  const session = await getSession();
+
+  redirect(session ? "/dashboard" : "/auth/login");
 }
