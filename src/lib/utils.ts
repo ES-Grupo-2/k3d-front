@@ -13,6 +13,7 @@ export function currency(value: number): string {
 }
 
 const enumTranslationsMap: Record<string, string> = {
+  UNPAID: 'Não pago',
   HALFPAID: 'Meio pago',
   FULLPAID: 'Pago',
   
