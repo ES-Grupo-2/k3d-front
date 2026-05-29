@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from "react";
-import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { useMemo, useState } from "react";
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { KanbanColumn } from "./kanbanColumn";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
+import { KanbanCard } from "./kanbanCard";
 
 interface KanbanBoardProps {
   orders: Order[];
@@ -30,7 +31,13 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
     return map;
   }, [orders]);
 
-  function onDrop(e: DragEndEvent) {
+  function handleDragStart(e: DragStartEvent) {
+    const orderId = String(e.active.id);
+    const order = orders?.find((o) => o.id === orderId) || null;
+  }
+
+  function handleDragEnd(e: DragEndEvent) {
+
     const orderId = String(e.active.id);
     const target = e.over?.id as ColumnType | undefined;
     
@@ -43,9 +50,14 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={onDrop}>
-      <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex snap-x snap-mandatory pb-4 lg:grid lg:grid-cols-3 lg:gap-3 items-stretch 
+        overflow-x-auto min-h-0 h-full bg-black mx-8">
         {COLUMNS.map((column) => (
+          <div 
+          key={column.id} 
+          className="w-full shrink-0 snap-center lg:w-auto px-4 lg:px-0 overflow-y-auto h-full"
+          >
           <KanbanColumn
             key={column.id}
             id={column.id}
@@ -55,6 +67,7 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
             onDelete={onDeleteOrder}
             isManager={isManager}
           />
+          </div>
         ))}
       </div>
     </DndContext>

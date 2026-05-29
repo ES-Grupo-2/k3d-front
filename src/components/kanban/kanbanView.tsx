@@ -38,6 +38,39 @@ const MOCK_ORDERS: Order[] = [
     client: { id: 'c3', name: 'Cafeteria Delta' },
     tag: { name: 'Hardware', color: '#f59e0b' }, 
   },
+  {
+    id: '4',
+    column: 'DONE',
+    title: 'Roteadores Wi-Fi 6',
+    quantity: 3,
+    price: 1200.0,
+    status: 'HALFPAID',
+    paymentMethod: 'CREDIT_CARD',
+    client: { id: 'c3', name: 'Cafeteria Delta' },
+    tag: { name: 'Hardware', color: '#f59e0b' }, 
+  },
+  {
+    id: '5',
+    column: 'DONE',
+    title: 'Roteadores Wi-Fi 6',
+    quantity: 3,
+    price: 1200.0,
+    status: 'HALFPAID',
+    paymentMethod: 'CREDIT_CARD',
+    client: { id: 'c3', name: 'Cafeteria Delta' },
+    tag: { name: 'Hardware', color: '#f59e0b' }, 
+  },
+  {
+    id: '6',
+    column: 'DONE',
+    title: 'Roteadores Wi-Fi 6',
+    quantity: 3,
+    price: 1200.0,
+    status: 'HALFPAID',
+    paymentMethod: 'CREDIT_CARD',
+    client: { id: 'c3', name: 'Cafeteria Delta' },
+    tag: { name: 'Hardware', color: '#f59e0b' }, 
+  },
 ];
 
 
@@ -68,10 +101,10 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
     };
 
     return (
-      <div className="flex flex-col h-full">
-        <header className="mb-6 flex items-center justify-between">
+      <div className="flex flex-col h-screen overflow-hidden">
+        <header className="flex items-center justify-between shrink-0 m-5">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Quadro de Tarefas</h1>
+            <h1 className="text-2xl font-bold tracking-normal text-foreground">Kanban</h1>
           </div>
           {isManager &&
           <button 
@@ -83,7 +116,7 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
           }
         </header>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0">
           <KanbanBoard
             orders={orders}
             onMoveOrder={handleMoveOrder}

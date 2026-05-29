@@ -1,6 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Order } from "@/types/kanban";
 import { currency, humanizeEnum } from "@/lib/utils";
+import { forwardRef } from "react";
 
 interface KanbanCardProps {
   order: Order;
@@ -9,7 +10,7 @@ interface KanbanCardProps {
   isManager: boolean;
 }
 
-export function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardProps) {
+export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardProps, ref) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: order.id,
   });
@@ -20,11 +21,11 @@ export function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardPro
 
   return (
     <div
-      ref={setNodeRef}
+      ref={ setNodeRef}
       style={style}
-      className={`bg-background border border-border rounded-md text-sm overflow-hidden shadow-sm ${
-        isDragging ? "opacity-50" : ""
-      }`}
+      {...listeners} 
+      {...attributes}
+      className={`bg-background border border-border rounded-md text-sm overflow-hidden`}
     >
       <div
         className="px-3 py-2 flex items-center justify-between border-b border-border"
@@ -36,13 +37,13 @@ export function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardPro
         {isManager && (
         <div className="flex items-center gap-1">
             <button
-              className="text-xs text-subtle hover:text-foreground px-1"
+              className="text-xs text-subtle hover:text-foreground px-1 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
             >
               ✎
           </button>
             <button
-              className="text-xs text-subtle hover:text-danger px-1"
+              className="text-xs text-subtle hover:text-danger px-1 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
             >
               ✕
@@ -63,5 +64,7 @@ export function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardPro
         <span>{humanizeEnum(order.paymentMethod)}</span>
       </div>
     </div>
-  );
-}
+);
+});
+
+KanbanCard.displayName = "KanbanCard";
