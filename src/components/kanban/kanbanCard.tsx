@@ -8,24 +8,39 @@ interface KanbanCardProps {
   onEdit: () => void;
   onDelete: () => void;
   isManager: boolean;
+  isOverlay?: boolean;
 }
 
-export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardProps, ref) {
+export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(function KanbanCard({ order, onEdit, onDelete, isManager, isOverlay }: KanbanCardProps, ref) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: order.id,
   });
   
-  const style = transform
+  const style = transform && isOverlay
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
+  if (isDragging && !isOverlay) {
+    return (
+      <div
+        ref={setNodeRef}
+        className="h-30 w-full bg-border/40 border-2 border-dashed border-border rounded-md opacity-50"
+      />
+    );
+  }
+  
+
   return (
     <div
-      ref={ setNodeRef}
+      ref={isOverlay ? ref : setNodeRef}
       style={style}
-      {...listeners} 
-      {...attributes}
-      className={`bg-background border border-border rounded-md text-sm overflow-hidden`}
+      {...(isOverlay ? {} : listeners)} 
+      {...(isOverlay ? {} : attributes)}
+      className={`bg-background border border-border rounded-md text-sm overflow-hidden ${
+        isOverlay 
+          ? "shadow-2xl rotate-3 scale-105 ring-2 ring-primary cursor-grabbing opacity-90" 
+          : "shadow-sm cursor-grab"
+      }`}
     >
       <div
         className="px-3 py-2 flex items-center justify-between border-b border-border"

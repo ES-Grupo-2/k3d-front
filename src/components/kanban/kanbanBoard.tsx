@@ -22,7 +22,8 @@ const COLUMNS: { id: ColumnType; title: string }[] = [
 
 export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDeleteOrder, isManager }: KanbanBoardProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
-
+  const [orderBeingMoved, setOrderBeingMoved] = useState<Order | null>(null);
+    
   const byColumn = useMemo(() => {
     const map: Record<ColumnType, Order[]> = { TODO: [], DOING: [], DONE: [] };
     orders?.forEach((o) => {
@@ -34,9 +35,11 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
   function handleDragStart(e: DragStartEvent) {
     const orderId = String(e.active.id);
     const order = orders?.find((o) => o.id === orderId) || null;
+    setOrderBeingMoved(order);
   }
 
   function handleDragEnd(e: DragEndEvent) {
+    setOrderBeingMoved(null);
 
     const orderId = String(e.active.id);
     const target = e.over?.id as ColumnType | undefined;
@@ -69,6 +72,18 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
           />
           </div>
         ))}
+
+         <DragOverlay>
+          {orderBeingMoved ? (
+            <KanbanCard
+              order={orderBeingMoved}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              isManager={isManager}
+              isOverlay={true}
+            />
+          ) : null}
+        </DragOverlay>
       </div>
     </DndContext>
   );
