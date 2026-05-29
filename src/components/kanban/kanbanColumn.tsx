@@ -8,10 +8,10 @@ interface KanbanColumnProps {
   orders: Order[];
   onEdit: (o: Order) => void;
   onDelete: (id: string) => void;
-  canDelete: boolean;
+  isManager: boolean;
 }
 
-export function KanbanColumn({ id, title, orders, onEdit, onDelete, canDelete }: KanbanColumnProps) {
+export function KanbanColumn({ id, title, orders, onEdit, onDelete, isManager }: KanbanColumnProps) {
   const { isOver, setNodeRef } = useDroppable({ id });
   
   return (
@@ -31,7 +31,7 @@ export function KanbanColumn({ id, title, orders, onEdit, onDelete, canDelete }:
             order={o}
             onEdit={() => onEdit(o)}
             onDelete={() => onDelete(o.id)}
-            canDelete={canDelete}
+            isManager={isManager}
           />
         ))}
         {orders.length === 0 && (

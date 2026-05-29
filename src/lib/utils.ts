@@ -19,6 +19,8 @@ const enumTranslationsMap: Record<string, string> = {
   
   CREDIT_CARD: 'Cartão de Crédito',
   PIX: 'Pix',
+  DEBIT_CARD: 'Cartão de Débito',
+  CASH: 'Dinheiro',
 };
 
 export function humanizeEnum(value: string): string {

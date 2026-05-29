@@ -73,13 +73,14 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Quadro de Tarefas</h1>
           </div>
-
+          {isManager &&
           <button 
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 transition-colors"
             onClick={() => {console.log("Gerente ON!")}}
           >
             + Novo pedido
           </button>
+          }
         </header>
 
         <div className="flex-1 overflow-hidden">
@@ -88,7 +89,7 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
             onMoveOrder={handleMoveOrder}
             onEditOrder={handleEditOrder}
             onDeleteOrder={handleDeleteOrder}
-            canDelete={true}
+            isManager={isManager}
           />
         </div>
       </div>

@@ -5,13 +5,12 @@ import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } f
 import { KanbanColumn } from "./kanbanColumn";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
 
-// Estes dados viriam do TanStack Query via algum componente superior ou hook msm
 interface KanbanBoardProps {
   orders: Order[];
   onMoveOrder: (orderId: string, targetColumn: ColumnType) => void;
   onEditOrder: (order: Order) => void;
   onDeleteOrder: (orderId: string) => void;
-  canDelete: boolean;
+  isManager: boolean;
 }
 
 const COLUMNS: { id: ColumnType; title: string }[] = [
@@ -20,7 +19,7 @@ const COLUMNS: { id: ColumnType; title: string }[] = [
   { id: "DONE", title: "Concluído" },
 ];
 
-export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDeleteOrder, canDelete }: KanbanBoardProps) {
+export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDeleteOrder, isManager }: KanbanBoardProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const byColumn = useMemo(() => {
@@ -54,7 +53,7 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
             orders={byColumn[column.id]}
             onEdit={onEditOrder}
             onDelete={onDeleteOrder}
-            canDelete={canDelete}
+            isManager={isManager}
           />
         ))}
       </div>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
 import type { AuthUser } from "@/schemas/auth";
 import {
+  Alert,
+  AlertDescription,
   Button,
   Card,
   CardContent,
@@ -48,6 +50,9 @@ export function DashboardClient({ user }: DashboardClientProps) {
             onClick={() => router.push("/auth/register")}
           >
             Cadastro
+          </Button>
+          <Button onClick={() => router.push("/kanban")} variant="outline">
+            Kanban
           </Button>
         </CardContent>
       </Card>

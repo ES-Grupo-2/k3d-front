@@ -6,10 +6,10 @@ interface KanbanCardProps {
   order: Order;
   onEdit: () => void;
   onDelete: () => void;
-  canDelete: boolean;
+  isManager: boolean;
 }
 
-export function KanbanCard({ order, onEdit, onDelete, canDelete }: KanbanCardProps) {
+export function KanbanCard({ order, onEdit, onDelete, isManager }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: order.id,
   });
@@ -33,22 +33,21 @@ export function KanbanCard({ order, onEdit, onDelete, canDelete }: KanbanCardPro
         <span className="text-[10px] uppercase tracking-wider text-muted font-medium">
           {order.tag.name}
         </span>
+        {isManager && (
         <div className="flex items-center gap-1">
-          <button
-            className="text-xs text-subtle hover:text-foreground px-1"
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          >
-            ✎
+            <button
+              className="text-xs text-subtle hover:text-foreground px-1"
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            >
+              ✎
           </button>
-          {canDelete && (
             <button
               className="text-xs text-subtle hover:text-danger px-1"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
             >
               ✕
             </button>
-          )}
-        </div>
+        </div>)}
       </div>
 
       <div className="px-3 py-2 cursor-grab" {...listeners} {...attributes}>
