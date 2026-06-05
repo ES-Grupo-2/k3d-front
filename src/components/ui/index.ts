@@ -21,6 +21,16 @@ export {
 export { Input } from "./input";
 export { Label } from "./label";
 export {
+  Sheet,
+  SheetTrigger,
+  SheetClose,
+  SheetPortal,
+  SheetOverlay,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "./sheet";
+export {
   Select,
   SelectContent,
   SelectGroup,

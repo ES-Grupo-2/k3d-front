@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/navigation";
 import { requireAuth } from "@/services/auth/session";
 
 export default async function PrivateGroupLayout({
@@ -5,7 +6,7 @@ export default async function PrivateGroupLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireAuth();
+  const { user } = await requireAuth();
 
-  return children;
+  return <AppShell user={user}>{children}</AppShell>;
 }
