@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import type { AuthUser, UserRole } from "@/schemas/auth";
 import {
@@ -27,7 +28,8 @@ function readUserSnapshot(
   }
 }
 
-export async function getSession(): Promise<ServerAuthSession | null> {
+export const getSession = cache(
+  async (): Promise<ServerAuthSession | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
 
@@ -49,7 +51,8 @@ export async function getSession(): Promise<ServerAuthSession | null> {
       name: tokenUser.name || snapshot?.name || "",
     },
   };
-}
+  },
+);
 
 export async function requireAuth() {
   const session = await getSession();
