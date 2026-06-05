@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui";
 
+import { MobileTabBar } from "./MobileTabBar";
 import { Navbar } from "./Navbar";
 import { SidebarContent } from "./Sidebar";
 
@@ -42,8 +43,12 @@ export function AppShell({ user, children }: AppShellProps) {
       {/* Coluna de conteúdo (empurrada para a direita no desktop) */}
       <div className="flex min-h-screen flex-col md:pl-64">
         <Navbar user={user} onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        {/* pb extra no mobile reserva espaço para a tab bar flutuante */}
+        <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
       </div>
+
+      {/* Tab bar flutuante (mobile) */}
+      <MobileTabBar user={user} />
     </div>
   );
 }

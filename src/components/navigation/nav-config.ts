@@ -50,6 +50,21 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
+// Itens principais expostos na tab bar mobile (subconjunto das rotas).
+const TAB_ITEMS: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Kanban", href: "/kanban", icon: SquareKanban },
+  { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
+  { label: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["GERENTE"] },
+];
+
+/** Itens da tab bar mobile visíveis para o perfil informado. */
+export function getVisibleTabItems(role: UserRole | undefined): NavItem[] {
+  return TAB_ITEMS.filter(
+    (item) => !item.roles || (role !== undefined && item.roles.includes(role)),
+  );
+}
+
 export const ROLE_LABELS: Record<UserRole, string> = {
   GERENTE: "Gerente",
   OPERACIONAL: "Operacional",
