@@ -1,26 +1,20 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui";
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { requireAuth } from "@/services/auth/session";
 
 export default async function KanbanPage() {
   await requireAuth();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Kanban</CardTitle>
-        <CardDescription>
-          Acompanhe o fluxo de produção em tempo real.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="text-muted-foreground text-sm">
-        Este módulo será desenvolvido em uma próxima task.
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold">Kanban</h2>
+        <p className="text-muted-foreground text-sm">
+          Clique em um card para editar ou use a lixeira para excluir. Quadro de
+          demonstração com dados de exemplo.
+        </p>
+      </div>
+
+      <KanbanBoard />
+    </div>
   );
 }
