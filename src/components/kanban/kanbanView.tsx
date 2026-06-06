@@ -43,10 +43,10 @@ const MOCK_ORDERS: Order[] = [
     column: 'DONE',
     title: 'Roteadores Wi-Fi 6',
     quantity: 3,
-    price: 1200.0,
+    price: 1500.0,
     status: 'HALFPAID',
     paymentMethod: 'CREDIT_CARD',
-    client: { id: 'c3', name: 'Cafeteria Delta' },
+    client: { id: 'c3', name: `${"(Cafeteria Delta\n)".repeat(15)}` },
     tag: { name: 'Hardware', color: '#f59e0b' }, 
   },
   {
@@ -86,9 +86,7 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
     };
 
     const handleEditOrder = (order: Order) => {
-        if(isManager) {
-            console.log('Abrir modal de edição para o pedido:', order.title);
-        }
+        if(isManager) {}
     };
 
     const handleDeleteOrder = (orderId: string) => {

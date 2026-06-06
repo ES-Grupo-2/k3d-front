@@ -1,4 +1,4 @@
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { KanbanCard } from "./kanbanCard";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
 
@@ -13,6 +13,9 @@ interface KanbanColumnProps {
 
 export function KanbanColumn({ id, title, orders, onEdit, onDelete, isManager }: KanbanColumnProps) {
   const { isOver, setNodeRef } = useDroppable({ id });
+  const { active } = useDndContext();
+  const draggedOrder = active?.data.current?.order as Order | undefined
+  const isCardFromOtherColumn = active?.data.current?.originColumn !== id 
   
   return (
     <div
@@ -37,7 +40,17 @@ export function KanbanColumn({ id, title, orders, onEdit, onDelete, isManager }:
             isManager={isManager}
           />
         ))}
-        {orders.length === 0 && (
+        {isOver && isCardFromOtherColumn && draggedOrder &&(
+          <KanbanCard
+            order={draggedOrder}
+            onEdit={() => {}} 
+            onDelete={() => {}}
+            isManager={isManager}
+            isDestinationPlaceHolder={true} 
+          />
+        )}
+
+        {orders.length === 0 && !(isOver && isCardFromOtherColumn) && (
           <p className="text-xs text-subtle text-center py-6">Sem pedidos aqui</p>
         )}
       </div>

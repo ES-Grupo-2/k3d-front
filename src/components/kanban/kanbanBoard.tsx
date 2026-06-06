@@ -55,7 +55,7 @@ export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDelete
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex snap-x snap-mandatory pb-4 lg:grid lg:grid-cols-3 lg:gap-3 items-stretch 
-        overflow-x-auto min-h-0 h-full bg-black mx-8">
+        overflow-x-auto min-h-0 h-full bg-background mx-8">
         {COLUMNS.map((column) => (
           <div 
           key={column.id} 
