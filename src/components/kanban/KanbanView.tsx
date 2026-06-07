@@ -1,6 +1,6 @@
 'use client';
 
-import KanbanBoard from "@/components/kanban/kanbanBoard";
+import KanbanBoard from "./KanbanBoard";
 import {useState} from "react";
 import type { Order, KanbanColumnNames } from "@/types/kanban";
 
@@ -76,7 +76,7 @@ export default function KanbanView({isManager}: {isManager: boolean}) {
           {isManager &&
           <button 
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 transition-colors"
-            onClick={() => {console.log("Gerente ON!")}}
+            onClick={() => {}}
           >
             + Novo pedido
           </button>

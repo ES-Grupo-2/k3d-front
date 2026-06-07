@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { KanbanColumn } from "./kanbanColumn";
+import { KanbanColumn } from "./KanbanColumn";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
 
 interface KanbanBoardProps {

@@ -1,8 +1,6 @@
-'use server';
-
 import { redirect } from "next/navigation";
 import { getSession } from "@/services/auth/session";
-import KanbanView from "../../../components/kanban/kanbanView";
+import KanbanView from "../../../components/kanban/KanbanView";
 
 export default async function KanbanPage() {
     const session = await getSession();
