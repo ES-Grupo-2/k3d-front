@@ -6,17 +6,26 @@ export default async function RegisterPage() {
   await requireRole("GERENTE");
 
   return (
-    <div className="grid min-h-screen grid-cols-2">
-      <RegisterPageClient />
-      <div className="bg-secondary flex items-center justify-center">
-        <Image
-          src="/images/logos/k3d-dark-logo.png"
-          alt="K3D Logo"
-          width={320}
-          height={120}
-          priority
-        />
+    <div className="flex min-h-screen flex-col sm:grid sm:grid-cols-12 sm:h-screen sm:overflow-hidden bg-background">
+      <div className="flex min-h-[60vh] sm:min-h-full items-center justify-center px-4 py-8 sm:px-6 lg:px-8 sm:col-span-7">
+        <div className="w-full max-w-2xl"> 
+          <RegisterPageClient />
+        </div>
       </div>
+
+      <div className="bg-secondary flex min-h-[40vh] sm:min-h-full items-center justify-center p-8 sm:col-span-5">
+        <div className="w-full max-w-[240px] sm:max-w-[320px]">
+          <Image
+            src="/images/logos/k3d-dark-logo.png"
+            alt="K3D Logo"
+            width={320}
+            height={120}
+            className="w-full h-auto object-contain"
+            priority
+          />
+        </div>
+      </div>
+
     </div>
   );
 }
