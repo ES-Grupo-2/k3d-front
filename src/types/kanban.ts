@@ -1,4 +1,3 @@
-
 export type UniqueIdentifier = string | number;
 export type KanbanColumnNames = "TODO" | "DOING" | "DONE";
 export type PaymentStatus = "UNPAID" | "HALFPAID" | "FULLPAID";
@@ -12,12 +11,12 @@ export interface Order {
   price: number;
   status: PaymentStatus;
   paymentMethod: PaymentMethod;
-  
+
   client: {
     id: string;
     name: string;
   };
-  
+
   tag: {
     name: string;
     color: string;
