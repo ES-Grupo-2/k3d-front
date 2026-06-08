@@ -25,7 +25,7 @@ const enumTranslationsMap: Record<string, string> = {
 
 export function humanizeEnum(value: string): string {
   if (!(value in enumTranslationsMap)) {
-    console.warn(`Enum value "${value}" not found.`);
+    console.warn(`Invalid Enum! Value: "${value}" not found.`);
   }
   return enumTranslationsMap[value] || value;
 }
