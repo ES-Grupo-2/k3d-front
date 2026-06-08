@@ -1,8 +1,6 @@
-'use client';
-
 import { useMemo } from "react";
 import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { KanbanColumn } from "./KanbanColumn";
+import { KanbanColumn } from ".";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
 
 interface KanbanBoardProps {
@@ -19,7 +17,7 @@ const COLUMNS: { id: ColumnType; title: string }[] = [
   { id: "DONE", title: "Concluído" },
 ];
 
-export default function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDeleteOrder, isManager }: KanbanBoardProps) {
+export function KanbanBoard({ orders, onMoveOrder, onEditOrder, onDeleteOrder, isManager }: KanbanBoardProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const byColumn = useMemo(() => {

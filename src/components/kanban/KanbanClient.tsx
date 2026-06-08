@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import KanbanBoard from "./KanbanBoard";
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import {useState} from "react";
 import type { Order, KanbanColumnNames } from "@/types/kanban";
 
@@ -41,7 +41,7 @@ const MOCK_ORDERS: Order[] = [
 ];
 
 
-export default function KanbanView({isManager}: {isManager: boolean}) {
+export function KanbanClient({isManager}: {isManager: boolean}) {
     const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
 
     const handleMoveOrder = (orderId: string, targetColumn: KanbanColumnNames) => {

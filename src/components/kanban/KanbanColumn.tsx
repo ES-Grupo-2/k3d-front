@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { KanbanCard } from "./KanbanCard";
+import { KanbanCard } from ".";
 import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
 
 interface KanbanColumnProps {
