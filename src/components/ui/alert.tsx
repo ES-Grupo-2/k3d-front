@@ -4,7 +4,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {}
 
 const alertVariants = cva(
@@ -43,7 +44,10 @@ const AlertTitle = React.forwardRef<
   <h5
     ref={ref}
     data-slot="alert-title"
-    className={cn("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", className)}
+    className={cn(
+      "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
+      className,
+    )}
     {...props}
   />
 ));

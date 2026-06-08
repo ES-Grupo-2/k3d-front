@@ -1,16 +1,9 @@
-'use server';
-
-import { redirect } from "next/navigation";
-import { getSession } from "@/services/auth/session";
-import KanbanView from "../../../components/kanban/kanbanView";
+import { requireAuth } from "@/services/auth/session";
+import { KanbanClient } from "../../../components/kanban/KanbanClient";
 
 export default async function KanbanPage() {
-    const session = await getSession();
-    if(!session) redirect("/auth/login");
+  const { user } = await requireAuth();
+  const isManager = user.role === "GERENTE";
 
-    const isManager = session.user.role === "GERENTE";
-
-    return (
-     <KanbanView isManager={isManager} />
-    );
+  return <KanbanClient isManager={isManager} />;
 }
