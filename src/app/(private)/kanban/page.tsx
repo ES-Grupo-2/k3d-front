@@ -6,3 +6,4 @@ export default async function KanbanPage() {
   const isManager = user.role === "GERENTE";
 
   return <KanbanClient isManager={isManager} />;
+}
