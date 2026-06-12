@@ -90,9 +90,8 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
     );
   };
 
-  const handleEditOrder = (order: Order) => {
-    if (isManager) {
-    }
+  const handleEditOrder = () => {
+    if (isManager) {}
   };
 
   const handleDeleteOrder = (orderId: string) => {

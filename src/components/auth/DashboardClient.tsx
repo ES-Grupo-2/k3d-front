@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
 import type { AuthUser } from "@/schemas/auth";
 import {
-  Alert,
-  AlertDescription,
   Button,
   Card,
   CardContent,
