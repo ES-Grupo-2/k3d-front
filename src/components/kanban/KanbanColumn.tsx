@@ -27,7 +27,7 @@ export function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`panel bg-background flex h-full min-h-0 flex-col rounded-sm border-2 border-solid ${isOver ? "border-primary" : ""}`}
+      className={`panel bg-background flex h-full flex-col rounded-sm border-2 border-solid ${isOver ? "border-primary" : ""}`}
     >
       <header className="border-border flex items-center justify-between border-b px-4 py-3">
         <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
@@ -38,7 +38,7 @@ export function KanbanColumn({
         </span>
       </header>
 
-      <div className="flex-1 space-y-3 overflow-y-auto p-3">
+      <div className="flex-1 space-y-3 p-3">
         {orders.map((o) => (
           <KanbanCard
             key={o.id}

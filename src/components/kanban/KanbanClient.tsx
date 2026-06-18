@@ -3,6 +3,7 @@
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { useState } from "react";
 import type { Order, KanbanColumnNames } from "@/types/kanban";
+import { Button } from "../ui";
 
 const MOCK_ORDERS: Order[] = [
   {
@@ -108,17 +109,12 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <header className="m-5 flex shrink-0 items-center justify-between">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold tracking-normal">
-            Kanban
-          </h1>
-        </div>
+    <div className="flex flex-col ">
+      <header className="mb-5 mr-5 flex shrink-0 justify-end">
         {isManager && (
-          <button className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors">
+          <Button variant="default" className="hover:cursor-pointer hover:bg-primary/90 transition-colors"> 
             + Novo pedido
-          </button>
+          </Button>
         )}
       </header>
 

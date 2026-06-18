@@ -72,11 +72,11 @@ export function KanbanBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="bg-background mx-8 flex h-full min-h-0 snap-x snap-mandatory items-stretch overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:gap-3">
+      <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
         {COLUMNS.map((column) => (
           <div
             key={column.id}
-            className="h-full w-full shrink-0 snap-center overflow-y-auto px-4 lg:w-auto lg:px-0"
+            className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
           >
             <KanbanColumn
               key={column.id}
