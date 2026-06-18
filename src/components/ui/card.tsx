@@ -52,7 +52,7 @@ const CardDescription = React.forwardRef<
   <p
     ref={ref}
     data-slot="card-description"
-    className={cn(" text-sm", className)}
+    className={cn("text-sm", className)}
     {...props}
   />
 ));
@@ -78,4 +78,11 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+};

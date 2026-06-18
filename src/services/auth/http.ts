@@ -20,7 +20,8 @@ function getErrorMessage(status: number, fallback?: string) {
   if (status === 401) return "Credenciais invalidas.";
   if (status === 403) return "Voce nao tem permissao para realizar esta acao.";
   if (status === 409) return "Este usuario ja existe.";
-  if (status >= 500) return "Erro interno da API. Tente novamente em instantes.";
+  if (status >= 500)
+    return "Erro interno da API. Tente novamente em instantes.";
 
   return fallback || "Nao foi possivel concluir a solicitacao.";
 }
