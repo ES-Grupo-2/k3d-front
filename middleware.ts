@@ -3,7 +3,13 @@ import { AUTH_COOKIE_NAME } from "@/services/auth/config";
 
 const PUBLIC_ROUTES = ["/auth/login", "/auth/forgot-password"];
 
-const PROTECTED_ROUTES = ["/auth/register", "/dashboard"];
+const PROTECTED_ROUTES = [
+  "/auth/register",
+  "/dashboard",
+  "/kanban",
+  "/pedidos",
+  "/relatorios",
+];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
