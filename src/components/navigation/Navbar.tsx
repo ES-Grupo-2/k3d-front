@@ -10,7 +10,6 @@ import { getInitials, getPageTitle, ROLE_LABELS } from "./nav-config";
 
 interface NavbarProps {
   user: AuthUser;
-  /** Abre o drawer da SideBar no mobile. */
   onMenuClick: () => void;
 }
 
@@ -20,7 +19,6 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
 
   return (
     <header className="bg-background/80 border-border sticky top-0 z-30 flex h-16 shrink-0 items-center gap-4 border-b px-4 backdrop-blur md:px-8">
-      {/* Gatilho do menu (apenas mobile) */}
       <button
         type="button"
         onClick={onMenuClick}
@@ -33,7 +31,6 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
       <h1 className="flex-1 truncate text-lg font-semibold">{title}</h1>
 
       <div className="flex items-center gap-3">
-        {/* Perfil do usuário logado */}
         <div className="hidden items-center gap-3 sm:flex">
           <div className="text-right">
             <p className="text-sm leading-tight font-medium">
@@ -48,7 +45,6 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
           </span>
         </div>
 
-        {/* Ação rápida de logout */}
         <LogoutButton variant="icon" />
       </div>
     </header>

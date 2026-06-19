@@ -13,7 +13,10 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  /** Perfis autorizados. Ausente = visível para todo usuário autenticado. */
+  /**
+   * Authorized roles.
+   * Absent = visible to all authenticated users.
+   */
   roles?: UserRole[];
 }
 
@@ -50,7 +53,6 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-// Itens principais expostos na tab bar mobile (subconjunto das rotas).
 const TAB_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
@@ -58,7 +60,6 @@ const TAB_ITEMS: NavItem[] = [
   { label: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["GERENTE"] },
 ];
 
-/** Itens da tab bar mobile visíveis para o perfil informado. */
 export function getVisibleTabItems(role: UserRole | undefined): NavItem[] {
   return TAB_ITEMS.filter(
     (item) => !item.roles || (role !== undefined && item.roles.includes(role)),
@@ -70,7 +71,6 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   OPERACIONAL: "Operacional",
 };
 
-/** Retorna apenas as seções/itens que o perfil informado pode visualizar. */
 export function getVisibleSections(role: UserRole | undefined): NavSection[] {
   return NAV_SECTIONS.map((section) => ({
     ...section,
@@ -80,13 +80,11 @@ export function getVisibleSections(role: UserRole | undefined): NavSection[] {
   })).filter((section) => section.items.length > 0);
 }
 
-/** Item ativo: rota exata ou uma sub-rota (ex.: /pedidos/123 ativa /pedidos). */
 export function isItemActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Título da página atual, derivado do menu (fallback genérico). */
 export function getPageTitle(pathname: string): string {
   for (const section of NAV_SECTIONS) {
     for (const item of section.items) {
@@ -96,7 +94,6 @@ export function getPageTitle(pathname: string): string {
   return "K3D";
 }
 
-/** Iniciais para o avatar do usuário. */
 export function getInitials(name?: string, email?: string): string {
   const source = name?.trim() || email?.trim() || "";
   if (!source) return "?";

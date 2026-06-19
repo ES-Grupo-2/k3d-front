@@ -24,12 +24,10 @@ export function AppShell({ user, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen w-full">
-      {/* SideBar fixa (desktop) */}
       <aside className="border-border bg-card fixed inset-y-0 left-0 z-40 hidden w-64 border-r md:block">
         <SidebarContent user={user} />
       </aside>
 
-      {/* SideBar como drawer (mobile / tablet) */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="p-0">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
@@ -40,14 +38,11 @@ export function AppShell({ user, children }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Coluna de conteúdo (empurrada para a direita no desktop) */}
       <div className="flex min-h-screen flex-col md:pl-64">
         <Navbar user={user} onMenuClick={() => setMobileOpen(true)} />
-        {/* pb extra no mobile reserva espaço para a tab bar flutuante */}
         <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
       </div>
 
-      {/* Tab bar flutuante (mobile) */}
       <MobileTabBar user={user} />
     </div>
   );

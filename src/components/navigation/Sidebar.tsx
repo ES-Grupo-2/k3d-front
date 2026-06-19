@@ -16,7 +16,6 @@ import {
 
 interface SidebarContentProps {
   user: AuthUser;
-  /** Disparado ao clicar em um link (usado para fechar o drawer no mobile). */
   onNavigate?: () => void;
 }
 
@@ -26,13 +25,11 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Marca */}
       <div className="border-border flex h-16 shrink-0 items-center gap-2 border-b px-6">
         <span className="text-primary text-xl font-bold tracking-tight">K3D</span>
         <span className="text-muted-foreground text-xs">Gestão</span>
       </div>
 
-      {/* Navegação */}
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
         {sections.map((section) => (
           <div key={section.title} className="space-y-1">
@@ -65,7 +62,6 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
         ))}
       </nav>
 
-      {/* Rodapé: perfil + logout */}
       <div className="border-border shrink-0 border-t p-4">
         <div className="mb-3 flex items-center gap-3">
           <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
