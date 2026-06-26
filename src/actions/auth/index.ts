@@ -97,9 +97,9 @@ export async function registerAction(
     };
   }
 
-  try {
-    const { token } = await requireRole("GERENTE");
+  const { token } = await requireRole("GERENTE");
 
+  try {
     const result = await registerRequest(validation.data, token);
 
     return {

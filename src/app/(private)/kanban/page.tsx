@@ -1,20 +1,9 @@
-import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { requireAuth } from "@/services/auth/session";
+import { KanbanClient } from "../../../components/kanban/KanbanClient";
 
 export default async function KanbanPage() {
-  await requireAuth();
+  const { user } = await requireAuth();
+  const isManager = user.role === "GERENTE";
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Kanban</h2>
-        <p className="text-muted-foreground text-sm">
-          Clique em um card para editar ou use a lixeira para excluir. Quadro de
-          demonstração com dados de exemplo.
-        </p>
-      </div>
-
-      <KanbanBoard />
-    </div>
-  );
+  return <KanbanClient isManager={isManager} />;
 }

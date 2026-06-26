@@ -9,10 +9,8 @@ import { useAuthStore } from "@/store/auth/index";
 import { cn } from "@/lib/utils";
 
 interface LogoutButtonProps {
-  /** "full" = botão com rótulo (rodapé da sidebar); "icon" = ação rápida na navbar. */
   variant?: "full" | "icon";
   className?: string;
-  /** Callback extra após o logout (ex.: fechar o drawer mobile). */
   onLoggedOut?: () => void;
 }
 
@@ -25,11 +23,10 @@ export function LogoutButton({
   const [isPending, startTransition] = useTransition();
   const logout = useAuthStore((state) => state.logout);
 
+  // Clean HttpOnly cookies and client state, then redirect to login.
   function handleLogout() {
     startTransition(async () => {
-      // Server Action: limpa os cookies HttpOnly de sessão.
       await logoutAction();
-      // Limpa o estado client (Zustand) para refletir o logout na UI.
       logout();
       onLoggedOut?.();
       router.replace("/auth/login");
