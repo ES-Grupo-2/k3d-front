@@ -1,6 +1,7 @@
 import {
   ClipboardList,
   FileBarChart,
+  Home,
   LayoutDashboard,
   SquareKanban,
   UserPlus,
@@ -29,6 +30,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: "Operação",
     items: [
+      { label: "Início", href: "/inicio", icon: Home },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Kanban", href: "/kanban", icon: SquareKanban },
       { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
@@ -54,6 +56,7 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 const TAB_ITEMS: NavItem[] = [
+  { label: "Início", href: "/inicio", icon: Home },
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
   { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
