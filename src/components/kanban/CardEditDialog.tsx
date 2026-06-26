@@ -46,7 +46,7 @@ export function CardEditDialog({
 
   useEffect(() => {
     if (open) form.reset(initialValues);
-  }, [open]);
+  }, [open, form, initialValues]);
 
   function handleSave(values: CardFormData) {
     onSave?.(values);

@@ -148,7 +148,7 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
         onClose={() => setEditingOrder(null)}
         initialValues={{
           title: editingOrder?.title ?? "",
-          description: (editingOrder as any)?.description ?? "", 
+          description: "", 
         }}
         onSave={handleSaveEdit}
       />
