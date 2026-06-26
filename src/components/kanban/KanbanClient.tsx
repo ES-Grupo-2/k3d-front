@@ -14,12 +14,12 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
 
   const handleMoveOrder = (
-      orderId: string,
+      orderId: number,
       targetColumn: KanbanTaskStatus,
     ) => {
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, column: targetColumn } : order,
+          Number(order.id) === orderId ? { ...order, section: targetColumn } : order,
         ),
       );
     };
@@ -28,14 +28,14 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       if (isManager) {}
     };
 
-    const handleDeleteOrder = (orderId: string) => {
+    const handleDeleteOrder = (orderId: number) => {
       if (isManager) {
         const confirmDelete = window.confirm(
           "Tem certeza que deseja remover este pedido?",
         );
         if (confirmDelete) {
           setOrders((prevOrders) =>
-            prevOrders.filter((order) => order.id !== orderId),
+            prevOrders.filter((order) => Number(order.id) !== orderId),
           );
         }
       }

@@ -10,21 +10,23 @@ import {
 } from "@dnd-kit/core";
 import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
-import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
+import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+
+const COLUMN_LABELS: Record<ColumnType, string> = {
+  PENDENTE: "A Fazer",
+  FAZENDO: "Em Andamento",
+  FINALIZADO: "Concluído",
+};
+
+const COLUMNS = Object.entries(COLUMN_LABELS) as [ColumnType, string][];
 
 interface KanbanBoardProps {
   orders: Order[];
-  onMoveOrder: (orderId: string, targetColumn: ColumnType) => void;
+  onMoveOrder: (orderId: number, targetColumn: ColumnType) => void;
   onEditOrder: (order: Order) => void;
-  onDeleteOrder: (orderId: string) => void;
+  onDeleteOrder: (orderId: number) => void;
   isManager: boolean;
 }
-
-const COLUMNS: { id: ColumnType; title: string }[] = [
-  { id: "TODO", title: "A Fazer" },
-  { id: "DOING", title: "Fazendo" },
-  { id: "DONE", title: "Concluído" },
-];
 
 export function KanbanBoard({
   orders,
@@ -39,29 +41,34 @@ export function KanbanBoard({
   const [orderBeingMoved, setOrderBeingMoved] = useState<Order | null>(null);
 
   const byColumn = useMemo(() => {
-    const map: Record<ColumnType, Order[]> = { TODO: [], DOING: [], DONE: [] };
+    const map = COLUMNS.reduce((acc, [key]) => {
+      acc[key] = [];
+      return acc;
+    }, {} as Record<ColumnType, Order[]>);
+
     orders?.forEach((o) => {
-      if (map[o.column]) map[o.column].push(o);
+      if (map[o.section]) map[o.section].push(o);
     });
+    
     return map;
   }, [orders]);
 
   function handleDragStart(e: DragStartEvent) {
-    const orderId = String(e.active.id);
-    const order = orders?.find((o) => o.id === orderId) || null;
+    const orderId = Number(e.active.id);
+    const order = orders?.find((o) => Number(o.id) === orderId) || null;
     setOrderBeingMoved(order);
   }
 
   function handleDragEnd(e: DragEndEvent) {
     setOrderBeingMoved(null);
 
-    const orderId = String(e.active.id);
+    const orderId = Number(e.active.id);
     const target = e.over?.id as ColumnType | undefined;
 
     if (!target) return;
 
-    const original = orders?.find((o) => o.id === orderId);
-    if (!original || original.column === target) return;
+    const original = orders?.find((o) => Number(o.id) === orderId);
+    if (!original || original.section === target) return;
 
     onMoveOrder(orderId, target);
   }
@@ -73,16 +80,15 @@ export function KanbanBoard({
       onDragEnd={handleDragEnd}
     >
       <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
-        {COLUMNS.map((column) => (
+        {COLUMNS.map(([id, title]) => (
           <div
-            key={column.id}
+            key={id}
             className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
           >
             <KanbanColumn
-              key={column.id}
-              id={column.id}
-              title={column.title}
-              orders={byColumn[column.id]}
+              id={id}
+              title={title}
+              orders={byColumn[id]}
               onEdit={onEditOrder}
               onDelete={onDeleteOrder}
               isManager={isManager}
