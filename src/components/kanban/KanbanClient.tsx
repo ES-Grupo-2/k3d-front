@@ -3,7 +3,7 @@
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { useState } from "react";
 import { Button } from "../ui";
-import type { Order, KanbanColumnNames } from "@/types/kanban";
+import type { Order, KanbanTaskStatus } from "@/types/kanban";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -11,11 +11,11 @@ type KanbanClientProps = {
 }
 
 export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
-  const [orders, setOrders] = useState<Order[]>(ordersRequest.A_FAZER.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
+  const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
 
   const handleMoveOrder = (
       orderId: string,
-      targetColumn: KanbanColumnNames,
+      targetColumn: KanbanTaskStatus,
     ) => {
       setOrders((prevOrders) =>
         prevOrders.map((order) =>

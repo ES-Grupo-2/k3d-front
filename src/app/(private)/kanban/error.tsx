@@ -26,7 +26,7 @@ export default function KanbanError({
       <p className="text-subtle">
         Não foi possível carregar o quadro de pedidos.
       </p>
-      <Button onClick={() => reset()} variant="outline">
+      <Button onClick={() => reset()} variant="outline" className="cursor-pointer">
         Tentar Novamente
       </Button>
     </div>
