@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { FallbackRouteParam } from "next/dist/build/static-paths/types";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -12,20 +13,36 @@ export function currency(value: number): string {
   }).format(value);
 }
 
-const enumTranslationsMap: Record<string, string> = {
-  UNPAID: "Não pago",
-  HALFPAID: "Meio pago",
-  FULLPAID: "Pago",
-
+const enumPayingMethodMap: Record<string, string> = {
   CREDIT_CARD: "Cartão de Crédito",
   PIX: "Pix",
   DEBIT_CARD: "Cartão de Débito",
   CASH: "Dinheiro",
+  NENHUM: "Nenhum",
 };
 
-export function humanizeEnum(value: string): string {
-  if (!(value in enumTranslationsMap)) {
+const enumPayingStatusMap: Record<string, string> = {
+  UNPAID: "Não pago",
+  HALFPAID: "Meio pago",
+  FULLPAID: "Pago",
+};
+
+export function humanizePayMethod(value: string): string {
+  if (!(value in enumPayingMethodMap)) {
     console.warn(`Invalid Enum! Value: "${value}" not found.`);
   }
-  return enumTranslationsMap[value] || value;
+  return enumPayingMethodMap[value] || value;
+}
+
+export function humanizePayStatus(amountPaid: number, fullPrice: number): string {
+  const value = amountPaid === 0
+    ? "UNPAID"
+    : amountPaid === fullPrice
+      ? "FULLPAID"
+      : "HALFPAID";
+
+  if (!(value in enumPayingStatusMap)) {
+    console.warn(`Invalid Enum! Value: "${value}" not found.`);
+  }
+  return enumPayingStatusMap[value] || value;
 }

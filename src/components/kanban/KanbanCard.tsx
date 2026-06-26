@@ -1,6 +1,6 @@
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { Order } from "@/types/kanban";
-import { currency, humanizeEnum } from "@/lib/utils";
+import { currency, humanizePayMethod, humanizePayStatus } from "@/lib/utils";
 import { forwardRef } from "react";
 
 interface KanbanCardProps {
@@ -30,7 +30,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useDraggable({
         id: draggableId,
-        data: { originColumn: order.column, order: order },
+        data: { originColumn: order.section, order: order },
       });
 
     const { over } = useDndContext();
@@ -41,7 +41,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         : undefined;
 
     const isOriginalCard = isDragging && !isOverlay;
-    const isCardOverOtherColumn = over && over.id !== order.column;
+    const isCardOverOtherColumn = over && over.id !== order.section;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
 
@@ -70,7 +70,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             style={{ borderLeft: `3px solid ${order.tag.color}` }}
           >
             <span className="text-muted text-[10px] font-medium tracking-wider uppercase">
-              {order.tag.name}
+              {order.tag.type}
             </span>
             {isManager && (
               <div className="flex items-center gap-1">
@@ -100,15 +100,15 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             <div className="text-foreground leading-tight font-medium">
               {order.title}
             </div>
-            <div className="text-muted mt-1 text-xs">{order.client.name}</div>
+            <div className="text-subtle mt-1 text-xs">{order.client.name}</div>
             <div className="text-subtle mt-1 text-[11px]">
-              Qtde: {order.quantity} · {currency(order.price)}
+              Qtde: {order.quantity || 1} · {currency(order.price)}
             </div>
           </div>
 
           <div className="border-border text-subtle flex justify-between border-t px-3 py-1.5 text-[10px]">
-            <span>{humanizeEnum(order.status)}</span>
-            <span>{humanizeEnum(order.paymentMethod)}</span>
+            <span>{humanizePayMethod(order.payment_method || "Nenhum")}</span>
+            <span>{humanizePayStatus(order.amount_paid || 0, order.price)}</span>
           </div>
         </div>
       </div>

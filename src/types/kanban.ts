@@ -1,5 +1,4 @@
 export type UniqueIdentifier = string | number;
-// export type KanbanColumnNames = 'PENDENTE' | 'FAZENDO' | 'FINALIZADO'; 
 export type KanbanTaskStatus = 'PENDENTE' | 'FAZENDO' | 'FINALIZADO'; 
 export type PaymentStatus = "UNPAID" | "HALFPAID" | "FULLPAID";
 export type PaymentMethod = "CREDIT_CARD" | "DEBIT_CARD" | "CASH" | "PIX";
@@ -13,38 +12,32 @@ export interface Client {
 
 export interface Tag {
   id: string;
-  label: string;
+  type: string;
   color?: string;
 }
 
-// export interface Order {
-//   id: string;
-//   title: string;
-//   clientId: string;
-//   tagId?: string;
-//   totalPrice: number;
-//   amountPaid?: number;
-//   cost?: number;
-//   quantity: number;
-//   PaymentMethod: string;
-//   fileUrl?: string;
-//   link?: string;
-//   machines?: string;
-//   client?: Client; // A rota GET /orders/:id traz client e tag preenchidos
-//   tag?: Tag;
-//   status: KanbanColumnNames; 
-// }
-
-
 export interface Order {
-  id: string;
+  id: number; 
   title: string;
   section: KanbanTaskStatus;
-  status: string; 
+  status: string;
   price: number;
-  amount_paid?: number;
-  cost?: number;
+  amount_paid: number;
+  cost: number | null;
+  quantity: number;          
+  payment_method: string | null; 
   archive?: string;
+  client: {                  
+    id: number;
+    name: string;
+    phone: string;
+    email: string | null;
+  };
+  tag: {                     
+    id: number;
+    type: string;
+    color?: string; 
+  };
 }
 
 export interface KanbanResponse {
