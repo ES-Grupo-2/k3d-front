@@ -37,14 +37,13 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: ConfirmTone;
-  /** Ação positiva. Se retornar Promise, exibe estado de carregamento. */
   onConfirm: () => void | Promise<void>;
 }
 
 /**
- * PopUp de confirmação para ações interruptivas (ex.: exclusão destrutiva ou
- * aviso de alterações não salvas). A ação só dispara ao clicar no botão de
- * confirmação; fechar (Esc, clique-fora ou cancelar) não executa nada.
+ * Confirmation Popup for initerruptive actions (e.g., destructive deletion or unsaved changes warning). 
+ * The action only triggers when the confirm button is clicked; closing (Esc, outside click, or cancel) 
+ * does not execute anything.
  */
 export function ConfirmDialog({
   open,

@@ -19,7 +19,6 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        // Backdrop escurecido e levemente desfocado para isolar o contexto.
         "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
         "data-[state=open]:animate-[fade-in_0.2s_ease-out]",
         className,
@@ -49,8 +48,6 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogOverlay />
-      {/* Wrapper que centraliza; pointer-events-none deixa o clique-fora
-          chegar ao overlay (Radix fecha via onInteractOutside). */}
       <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <DialogPrimitive.Content
           data-slot="dialog-content"

@@ -104,7 +104,6 @@
   }
 }
 
-/* Entrada do modal: leve scale-up combinado com fade-in */
 @keyframes dialog-pop {
   from {
     opacity: 0;

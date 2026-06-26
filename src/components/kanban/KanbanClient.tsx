@@ -82,15 +82,10 @@ const MOCK_ORDERS: Order[] = [
 
 export function KanbanClient({ isManager }: { isManager: boolean }) {
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
-  
-  // 1. Novos estados importados da branch do colega
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Helper para o modal de deleção saber o nome do pedido
   const deletingOrder = orders.find((order) => order.id === deletingId) ?? null;
-
-  // --- HANDLERS DO BOARD ---
 
   const handleMoveOrder = (orderId: string, targetColumn: KanbanColumnNames) => {
     setOrders((prevOrders) =>
@@ -102,17 +97,15 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
 
   const handleEditOrder = (order: Order) => {
     if (isManager) {
-      setEditingOrder(order); // Abre o modal injetando o objeto
+      setEditingOrder(order);
     }
   };
 
   const handleDeleteOrder = (orderId: string) => {
     if (isManager) {
-      setDeletingId(orderId); // Abre o modal de confirmação
+      setDeletingId(orderId);
     }
   };
-
-  // --- HANDLERS DOS MODAIS ---
 
   const handleSaveEdit = (data: CardFormData) => {
     if (!editingOrder) return;
@@ -122,12 +115,12 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
         order.id === editingOrder.id ? { ...order, ...data } : order,
       ),
     );
-    setEditingOrder(null); // Fecha o modal
+    setEditingOrder(null);
   };
 
   const handleConfirmDelete = () => {
     setOrders((prev) => prev.filter((order) => order.id !== deletingId));
-    setDeletingId(null); // Fecha o modal
+    setDeletingId(null);
   };
 
   return (
@@ -144,7 +137,7 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder} // Passando os novos handlers
+          onEditOrder={handleEditOrder} 
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
         />
@@ -155,8 +148,6 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
         onClose={() => setEditingOrder(null)}
         initialValues={{
           title: editingOrder?.title ?? "",
-          // Nota de tipagem: Se a interface Order oficial não tiver 'description',
-          // o modal do seu colega pode precisar de um ajuste ou você deve mapear esse dado.
           description: (editingOrder as any)?.description ?? "", 
         }}
         onSave={handleSaveEdit}

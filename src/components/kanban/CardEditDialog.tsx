@@ -30,9 +30,9 @@ interface CardEditDialogProps {
 }
 
 /**
- * Modal de edição de card com guarda de alterações não salvas. O formulário
- * só é enviado ao clicar em "Salvar"; ao tentar fechar com modificações
- * pendentes, exibe um aviso antes de descartar.
+ * Edit PopUp for Kanban cards with unsaved changes guard. 
+ * The form is only submitted when clicking "Save".
+ * Attempting to close with pending modifications will show a warning before discarding.
  */
 export function CardEditDialog({
   open,
@@ -44,16 +44,13 @@ export function CardEditDialog({
   const isDirty = form.formState.isDirty;
   const guard = useUnsavedGuard({ isDirty, onClose });
 
-  // Reidrata o formulário com os valores do card sempre que o modal reabre.
   useEffect(() => {
     if (open) form.reset(initialValues);
-    // initialValues é estável por card; reset depende apenas da abertura.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function handleSave(values: CardFormData) {
     onSave?.(values);
-    form.reset(values); // zera o estado "dirty" após salvar
+    form.reset(values);
     onClose();
   }
 
@@ -103,7 +100,6 @@ export function CardEditDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Guarda: aviso de alterações não salvas ao tentar fechar */}
       <ConfirmDialog
         open={guard.warnOpen}
         onOpenChange={guard.setWarnOpen}
