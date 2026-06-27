@@ -1,9 +1,12 @@
 "use client";
 
-import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { useState } from "react";
-import type { Order, KanbanColumnNames } from "@/types/kanban";
 import { Button } from "../ui";
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { CardEditDialog } from "@/components/kanban/CardEditDialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import type { CardFormData } from "@/components/kanban/CardEditDialog";
+import type { Order, KanbanColumnNames } from "@/types/kanban";
 
 const MOCK_ORDERS: Order[] = [
   {
@@ -79,11 +82,12 @@ const MOCK_ORDERS: Order[] = [
 
 export function KanbanClient({ isManager }: { isManager: boolean }) {
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleMoveOrder = (
-    orderId: string,
-    targetColumn: KanbanColumnNames,
-  ) => {
+  const deletingOrder = orders.find((order) => order.id === deletingId) ?? null;
+
+  const handleMoveOrder = (orderId: string, targetColumn: KanbanColumnNames) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
         order.id === orderId ? { ...order, column: targetColumn } : order,
@@ -91,25 +95,36 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
     );
   };
 
-  const handleEditOrder = () => {
-    if (isManager) {}
+  const handleEditOrder = (order: Order) => {
+    if (isManager) {
+      setEditingOrder(order);
+    }
   };
 
   const handleDeleteOrder = (orderId: string) => {
     if (isManager) {
-      const confirmDelete = window.confirm(
-        "Tem certeza que deseja remover este pedido?",
-      );
-      if (confirmDelete) {
-        setOrders((prevOrders) =>
-          prevOrders.filter((order) => order.id !== orderId),
-        );
-      }
+      setDeletingId(orderId);
     }
   };
 
+  const handleSaveEdit = (data: CardFormData) => {
+    if (!editingOrder) return;
+    
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === editingOrder.id ? { ...order, ...data } : order,
+      ),
+    );
+    setEditingOrder(null);
+  };
+
+  const handleConfirmDelete = () => {
+    setOrders((prev) => prev.filter((order) => order.id !== deletingId));
+    setDeletingId(null);
+  };
+
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col h-full">
       <header className="mb-5 mr-5 flex shrink-0 justify-end">
         {isManager && (
           <Button variant="default" className="hover:cursor-pointer hover:bg-primary/90 transition-colors"> 
@@ -122,11 +137,38 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder}
+          onEditOrder={handleEditOrder} 
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
         />
       </div>
+
+      <CardEditDialog
+        open={editingOrder !== null}
+        onClose={() => setEditingOrder(null)}
+        initialValues={{
+          title: editingOrder?.title ?? "",
+          description: "", 
+        }}
+        onSave={handleSaveEdit}
+      />
+
+      <ConfirmDialog
+        open={deletingId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingId(null);
+        }}
+        tone="destructive"
+        title="Excluir card?"
+        description={
+          deletingOrder
+            ? `Tem certeza que deseja excluir “${deletingOrder.title}”? Esta ação não pode ser desfeita.`
+            : ""
+        }
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
