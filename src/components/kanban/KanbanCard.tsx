@@ -107,7 +107,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
           </div>
 
           <div className="border-border text-subtle flex justify-between border-t px-3 py-1.5 text-[10px]">
-            <span>{humanizePayMethod(order.payment_method || "Nenhum")}</span>
+            <span>{humanizePayMethod(order.payment_method || "None")}</span>
             <span>{humanizePayStatus(order.amount_paid || 0, order.price)}</span>
           </div>
         </div>
