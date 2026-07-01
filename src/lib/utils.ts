@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from "clsx";
-import { FallbackRouteParam } from "next/dist/build/static-paths/types";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,7 +17,7 @@ const enumPayingMethodMap: Record<string, string> = {
   PIX: "Pix",
   DEBIT_CARD: "Cartão de Débito",
   CASH: "Dinheiro",
-  NENHUM: "Nenhum",
+  "None": "Nenhum",
 };
 
 const enumPayingStatusMap: Record<string, string> = {
