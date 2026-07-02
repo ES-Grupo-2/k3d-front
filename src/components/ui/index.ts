@@ -21,6 +21,19 @@ export {
 export { Input } from "./input";
 export { Label } from "./label";
 export {
+  Dialog,
+  DialogTrigger,
+  DialogClose,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "./dialog";
+export { ConfirmDialog } from "./confirm-dialog";
+export {
   Sheet,
   SheetTrigger,
   SheetClose,

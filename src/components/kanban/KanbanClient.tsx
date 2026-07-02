@@ -1,8 +1,11 @@
 "use client";
 
-import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { useState } from "react";
 import { Button } from "../ui";
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { CardEditDialog } from "@/components/kanban/CardEditDialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import type { CardFormData } from "@/components/kanban/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
 
 type KanbanClientProps = {
@@ -12,37 +15,49 @@ type KanbanClientProps = {
 
 export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const handleMoveOrder = (
-      orderId: number,
-      targetColumn: KanbanTaskStatus,
-    ) => {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          Number(order.id) === orderId ? { ...order, section: targetColumn } : order,
-        ),
-      );
-    };
+  const deletingOrder = orders.find((order) => Number(order.id) === Number(deletingId)) ?? null;
 
-    const handleEditOrder = () => {
-      if (isManager) {}
-    };
+  const handleMoveOrder = (orderId: number, targetColumn: KanbanTaskStatus) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        Number(order.id) === orderId ? { ...order, section: targetColumn } : order,
+      ),
+    );
+  };
 
-    const handleDeleteOrder = (orderId: number) => {
-      if (isManager) {
-        const confirmDelete = window.confirm(
-          "Tem certeza que deseja remover este pedido?",
-        );
-        if (confirmDelete) {
-          setOrders((prevOrders) =>
-            prevOrders.filter((order) => Number(order.id) !== orderId),
-          );
-        }
-      }
-    };
+  const handleEditOrder = (order: Order) => {
+    if (isManager) {
+      setEditingOrder(order);
+    }
+  };
+
+  const handleDeleteOrder = (orderId: number) => {
+    if (isManager) {
+      setDeletingId(orderId);
+    }
+  };
+
+  const handleSaveEdit = (data: CardFormData) => {
+    if (!editingOrder) return;
+    
+    setOrders((prev) =>
+      prev.map((order) =>
+        Number(order.id) === Number(editingOrder.id) ? { ...order, ...data } : order,
+      ),
+    );
+    setEditingOrder(null);
+  };
+
+  const handleConfirmDelete = () => {
+    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(deletingId)));
+    setDeletingId(null);
+  };
 
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col h-full">
       <header className="mb-5 mr-5 flex shrink-0 justify-end">
         {isManager && (
           <Button variant="default" className="hover:cursor-pointer hover:bg-primary/90 transition-colors"> 
@@ -55,11 +70,38 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder}
+          onEditOrder={handleEditOrder} 
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
         />
       </div>
+
+      <CardEditDialog
+        open={editingOrder !== null}
+        onClose={() => setEditingOrder(null)}
+        initialValues={{
+          title: editingOrder?.title ?? "",
+          description: "", 
+        }}
+        onSave={handleSaveEdit}
+      />
+
+      <ConfirmDialog
+        open={deletingId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingId(null);
+        }}
+        tone="destructive"
+        title="Excluir card?"
+        description={
+          deletingOrder
+            ? `Tem certeza que deseja excluir “${deletingOrder.title}”? Esta ação não pode ser desfeita.`
+            : ""
+        }
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

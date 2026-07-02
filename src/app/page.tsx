@@ -5,5 +5,5 @@ import { getSession } from "@/services/auth/session";
 export default async function Home() {
   const session = await getSession();
 
-  redirect(session ? "/dashboard" : "/auth/login");
+  redirect(session ? "/home" : "/auth/login");
 }

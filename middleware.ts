@@ -5,6 +5,7 @@ const PUBLIC_ROUTES = ["/auth/login", "/auth/forgot-password"];
 
 const PROTECTED_ROUTES = [
   "/auth/register",
+  "/home",
   "/dashboard",
   "/kanban",
   "/pedidos",
@@ -20,7 +21,7 @@ export function middleware(request: NextRequest) {
 
   if (isPublicRoute) {
     if (request.cookies.has(AUTH_COOKIE_NAME)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/home", request.url));
     }
 
     return NextResponse.next();
