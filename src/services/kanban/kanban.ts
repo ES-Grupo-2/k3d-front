@@ -1,5 +1,4 @@
-import { KanbanResponse, KanbanTaskStatus } from "@/types/kanban";
-import { API_URL } from "@/services/auth/config";
+import { KanbanResponse } from "@/types/kanban";
 
 export async function fetchKanbanBoard(token: string) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
