@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -34,9 +35,13 @@ export function KanbanBoard({
   isManager,
 }: KanbanBoardProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 15 },
+    }),
   );
   const [orderBeingMoved, setOrderBeingMoved] = useState<Order | null>(null);
+  const [activeTab, setActiveTab] = useState<ColumnType>("TODO");
 
   const byColumn = useMemo(() => {
     const map: Record<ColumnType, Order[]> = { TODO: [], DOING: [], DONE: [] };
@@ -65,27 +70,47 @@ export function KanbanBoard({
 
     onMoveOrder(orderId, target);
   }
+return (
+  <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
 
-  return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
+    <div className="flex flex-1 flex-col overflow-hidden h-full w-full">
+      
+      <div className="flex shrink-0 overflow-x-auto border-b border-border px-4 lg:hidden">
+        {COLUMNS.map((column) => (
+          <button
+            key={column.id}
+            onClick={() => setActiveTab(column.id)}
+            className={`flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === column.id
+                ? "border-primary text-foreground"
+                : "border-transparent text-subtle hover:text-foreground"
+            }`}
+          >
+            {column.title}
+            <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+              {byColumn[column.id].length}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="mx-4 mt-2 flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:mx-8 lg:mt-0 lg:grid lg:grid-cols-3 lg:gap-3 lg:pb-4">
         {COLUMNS.map((column) => (
           <div
             key={column.id}
-            className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
+            className={`h-full min-h-0 flex-col lg:flex ${
+              activeTab === column.id ? "flex flex-1" : "hidden lg:flex"
+            }`}
           >
             <KanbanColumn
-              key={column.id}
               id={column.id}
               title={column.title}
               orders={byColumn[column.id]}
               onEdit={onEditOrder}
               onDelete={onDeleteOrder}
+              onMoveOrder={onMoveOrder}
               isManager={isManager}
+              allColumns={COLUMNS}
             />
           </div>
         ))}
@@ -97,11 +122,14 @@ export function KanbanBoard({
               onEdit={() => {}}
               onDelete={() => {}}
               isManager={isManager}
-              isOverlay={true}
+              isOverlay
+              onMoveOrder={onMoveOrder}
+              allColumns={COLUMNS}
             />
           ) : null}
         </DragOverlay>
       </div>
-    </DndContext>
-  );
+    </div>
+  </DndContext>
+);
 }

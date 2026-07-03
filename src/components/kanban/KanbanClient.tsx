@@ -122,26 +122,25 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
     setOrders((prev) => prev.filter((order) => order.id !== deletingId));
     setDeletingId(null);
   };
+return (
+  <div className="flex h-svh w-full select-none flex-col overflow-hidden overscroll-none">
+    <header className="flex shrink-0 justify-end px-5 py-4">
+      {isManager && (
+        <Button variant="default" className="transition-colors hover:cursor-pointer hover:bg-primary/90">
+          + Novo pedido
+        </Button>
+      )}
+    </header>
 
-  return (
-    <div className="flex flex-col h-full">
-      <header className="mb-5 mr-5 flex shrink-0 justify-end">
-        {isManager && (
-          <Button variant="default" className="hover:cursor-pointer hover:bg-primary/90 transition-colors"> 
-            + Novo pedido
-          </Button>
-        )}
-      </header>
-
-      <div className="min-h-0 flex-1">
-        <KanbanBoard
-          orders={orders}
-          onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder} 
-          onDeleteOrder={handleDeleteOrder}
-          isManager={isManager}
-        />
-      </div>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <KanbanBoard
+        orders={orders}
+        onMoveOrder={handleMoveOrder}
+        onEditOrder={handleEditOrder}
+        onDeleteOrder={handleDeleteOrder}
+        isManager={isManager}
+      />
+    </div>
 
       <CardEditDialog
         open={editingOrder !== null}
