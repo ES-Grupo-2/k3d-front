@@ -7,6 +7,7 @@ import { CardEditDialog } from "@/components/kanban/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CardFormData } from "@/components/kanban/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
+import { moveKanbanOrder } from "@/services/kanban/kanban";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -20,12 +21,22 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
 
   const deletingOrder = orders.find((order) => Number(order.id) === Number(deletingId)) ?? null;
 
-  const handleMoveOrder = (orderId: number, targetColumn: KanbanTaskStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        Number(order.id) === orderId ? { ...order, section: targetColumn } : order,
+  const handleMoveOrder = async (orderId: number, targetColumn: KanbanTaskStatus) => {
+    const previousOrders = [...orders];
+
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId ? { ...order, section: targetColumn } : order,
       ),
     );
+
+    try {
+      await moveKanbanOrder(orderId, targetColumn);
+    } catch (error) {
+      console.error(error);
+      setOrders(previousOrders);
+      // Toast notification can be added here
+    }
   };
 
   const handleEditOrder = (order: Order) => {

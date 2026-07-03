@@ -1,7 +1,10 @@
-import { KanbanResponse } from "@/types/kanban";
+"use server"
+
+import { KanbanResponse, KanbanTaskStatus } from "@/types/kanban";
+import { API_URL } from "@/services/auth/config";
+import { requireAuth } from "../auth/session";
 
 export async function fetchKanbanBoard(token: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -28,4 +31,37 @@ export async function fetchKanbanBoard(token: string) {
     FAZENDO: doingRes.tasks,
     FINALIZADO: doneRes.tasks,
   };
-}   
+}
+
+export async function moveKanbanOrder(orderId: number, targetSection: KanbanTaskStatus) {
+  const sessionToken = await requireAuth().then(session => session.token);
+  if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
+
+  const response = await fetch(`${API_URL}/orders/${orderId}/move`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionToken}`,
+    },
+    body: JSON.stringify({ destinationSection: targetSection }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao mover o pedido no servidor.\n [ERROR]: " + response.statusText + " " + response.status);
+  }
+  return response.json();
+}
+
+export async function deleteKanbanOrder(orderId: number, token: string) {
+  const response = await fetch(`${API_URL}/orders/${orderId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao excluir o pedido no servidor.");
+  }
+  return response.json(); // Or return true
+}
