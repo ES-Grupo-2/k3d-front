@@ -3,6 +3,7 @@
 import { KanbanResponse, KanbanTaskStatus } from "@/types/kanban";
 import { API_URL } from "@/services/auth/config";
 import { requireAuth } from "../auth/session";
+import { CreateOrderDTO } from "@/types/order";
 
 export async function fetchKanbanBoard(token: string) {
   const headers = {
@@ -52,7 +53,56 @@ export async function moveKanbanOrder(orderId: number, targetSection: KanbanTask
   return response.json();
 }
 
-export async function deleteKanbanOrder(orderId: number, token: string) {
+export async function createKanbanOrder(data: CreateOrderDTO) {
+  const session = await requireAuth();
+  const token = session?.token;
+
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    // Se for o erro 400 (Cliente/Tag inválidos), o backend provavelmente manda uma msg
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || "Falha ao criar o pedido no servidor.");
+  }
+
+  // A API deve retornar 201 com o objeto completo do pedido recém-criado (incluindo o ID)
+  return response.json(); 
+}
+
+// PATCH /orders/:id
+export async function updateKanbanOrder(orderId: number, data: any) {
+  const session = await requireAuth();
+  const token = session?.token;
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/orders/${orderId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error("Falha ao atualizar o pedido.");
+  return response.json();
+}
+
+// DELETE /orders/:id
+export async function deleteKanbanOrder(orderId: number) {
+  const session = await requireAuth();
+  const token = session?.token;
+  if (!token) throw new Error("Acesso não autorizado");
+
   const response = await fetch(`${API_URL}/orders/${orderId}`, {
     method: "DELETE",
     headers: {
@@ -61,7 +111,9 @@ export async function deleteKanbanOrder(orderId: number, token: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Falha ao excluir o pedido no servidor.");
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || "Falha ao deletar o pedido.");
   }
-  return response.json(); // Or return true
+  
+  return true;
 }
