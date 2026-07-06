@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { UploadCloud, UserPlus, Users } from "lucide-react";
-
+import { OrderFormData } from "@/types/order";
+import { enumPayingMethodMap } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -13,16 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
-import type { CreateOrderDTO } from "@/types/order";
-
-// Estendemos o payload para acomodar os dados do NOVO cliente que a API vai precisar
-export interface OrderFormData extends Omit<CreateOrderDTO, 'clientId'> {
-  clientId?: string; // Opcional no form, pois pode ser novo
-  newClientName?: string;
-  newClientPhone?: string;
-  // O arquivo real que será enviado para o endpoint de upload
-  file: FileList | null; 
-}
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -35,8 +26,8 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<OrderFormData>();
   const [clientMode, setClientMode] = useState<"EXISTING" | "NEW">("EXISTING");
 
-  // Mock de dados que deveriam vir da API (GET /clients e GET /tags)
-  const MOCK_CLIENTS = [{ id: "1", name: "João Neves" }, { id: "2", name: "Empresa Alpha" }];
+  // Client and Tag mock data for demonstration purposes
+  const MOCK_CLIENTS = [{ id: "1", name: "Monkey D. Luffy" }, { id: "2", name: "Empresa Alpha" }];
   const MOCK_TAGS = [{ id: "1", type: "Chaveiro" }, { id: "2", type: "Peça Técnica" }];
 
   const onSubmit = async (data: OrderFormData) => {
@@ -45,7 +36,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isLoading && !isOpen && onClose()}>
-      <DialogContent size="2xl">
+      <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle>Novo Pedido</DialogTitle>
           <DialogDescription>Preencha os dados de produção, financeiro e cliente.</DialogDescription>
@@ -53,9 +44,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 overflow-y-auto max-h-[65vh] pr-2 pb-2">
-          {/* COLUNA ESQUERDA: Produção e Cliente */}
           <div className="space-y-6">
-            {/* Dados do Pedido */}
             <div className="space-y-4 rounded-xl border border-border/50 bg-muted/10 p-4">
               <h3 className="text-sm font-semibold text-foreground">Detalhes do Produto</h3>
               <div className="space-y-1.5">
@@ -67,9 +56,11 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                 <div className="space-y-1.5">
                   <Label>Tag / Categoria</Label>
                   <Select onValueChange={(val) => setValue("tagId", Number(val))}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectTrigger className="hover:cursor-pointer">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
                     <SelectContent>
-                      {MOCK_TAGS.map(t => <SelectItem key={t.id} value={t.id}>{t.type}</SelectItem>)}
+                      {MOCK_TAGS.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={t.id}>{t.type}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -80,13 +71,12 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
               </div>
             </div>
 
-            {/* Gestão de Cliente (Toggle Existente/Novo) */}
             <div className="space-y-4 rounded-xl border border-border/50 p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">Cliente</h3>
                 <div className="flex gap-1 rounded-lg bg-muted p-1">
-                  <button type="button" onClick={() => setClientMode("EXISTING")} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${clientMode === "EXISTING" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Users className="inline mr-1.5 size-3"/>Cadastrado</button>
-                  <button type="button" onClick={() => setClientMode("NEW")} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${clientMode === "NEW" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`}><UserPlus className="inline mr-1.5 size-3"/>Novo</button>
+                  <button type="button" onClick={() => setClientMode("EXISTING")} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors hover:cursor-pointer ${clientMode === "EXISTING" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}><Users className="inline mr-1.5 size-3"/>Cadastrado</button>
+                  <button type="button" onClick={() => setClientMode("NEW")} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors hover:cursor-pointer ${clientMode === "NEW" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`}><UserPlus className="inline mr-1.5 size-3"/>Novo</button>
                 </div>
               </div>
 
@@ -94,9 +84,9 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                 <div className="space-y-1.5">
                   <Label>Selecionar Cliente</Label>
                   <Select onValueChange={(val) => setValue("clientId", val)}>
-                    <SelectTrigger><SelectValue placeholder="Busque um cliente..." /></SelectTrigger>
+                    <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Busque um cliente..." /></SelectTrigger>
                     <SelectContent>
-                      {MOCK_CLIENTS.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      {MOCK_CLIENTS.map(c => <SelectItem className="hover:cursor-pointer" key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -115,10 +105,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
             </div>
           </div>
 
-          {/* COLUNA DIREITA: Financeiro e Arquivos */}
           <div className="space-y-6">
-            
-            {/* Financeiro */}
             <div className="space-y-4 rounded-xl border border-border/50 bg-muted/10 p-4">
               <h3 className="text-sm font-semibold text-foreground">Financeiro</h3>
               
@@ -141,18 +128,19 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                 <div className="space-y-1.5">
                   <Label>Método</Label>
                   <Select onValueChange={(val) => setValue("payment_method", val)}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PIX">Pix</SelectItem>
-                      <SelectItem value="CREDIT_CARD">Cartão Crédito</SelectItem>
-                      <SelectItem value="CASH">Dinheiro</SelectItem>
+                      {Object.entries(enumPayingMethodMap).filter(([payMethod, _]) => payMethod !== "None").map(([payMethod, label]) => (
+                        <SelectItem key={payMethod} className="hover:cursor-pointer" value={payMethod}>
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
 
-            {/* Arquivo / GCODE */}
             <div className="space-y-4 rounded-xl border border-dashed border-border p-4">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <UploadCloud className="size-4" />
@@ -161,7 +149,6 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
               
               <div className="space-y-1.5">
                 <Label>Arquivo Modelo / GCODE</Label>
-                {/* O input file captura o arquivo fisicamente no DOM */}
                 <Input type="file" className="cursor-pointer file:text-primary file:bg-primary/10 file:border-0 file:rounded-md file:mr-4 file:px-4 file:py-1 hover:file:bg-primary/20" {...register("file")} />
                 <p className="text-[10px] text-muted-foreground mt-1">Stl, Obj, Gcode ou ZIP (Max 50MB)</p>
               </div>
@@ -173,10 +160,10 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
             </div>
           </div>
         </div>
-          {/* Footer forçando preencher as duas colunas */}
-          <DialogFooter className="col-span-1 md:col-span-2 border-t border-border pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancelar</Button>
-            <Button type="submit" disabled={isLoading}>
+
+          <DialogFooter className="col-span-1 md:col-span-2 border-t border-border pt-6">
+            <Button type="button" className="hover:cursor-pointer" variant="outline" onClick={onClose} disabled={isLoading}>Cancelar</Button>
+            <Button type="submit" className="hover:cursor-pointer" disabled={isLoading}>
               {isLoading ? "Criando Pedido..." : "Salvar Pedido"}
             </Button>
           </DialogFooter>

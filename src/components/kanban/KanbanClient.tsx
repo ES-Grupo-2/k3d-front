@@ -74,6 +74,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
 
 
   /**
+   * WORK IN PROGRESS - THIS FUNCTION WILL BE REFACTORED SINCE THE DELETE ORDER ENDPOINT IS GOING TO CHANGE
  * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
  * * This function executes a multi-step pipeline (Deferred Upload Pattern) to ensure all related 
  * entities (Clients, Orders, and MinIO Storage) are synchronized without passing heavy files 
@@ -103,50 +104,50 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     setIsCreating(true);
     
     try {
-      let finalClientId = formData.clientId;
+    //   let finalClientId = formData.clientId;
 
-      if (!finalClientId && formData.newClientName) {
-        const clientResponse = await createClient({ 
-          name: formData.newClientName, 
-          phone: formData.newClientPhone || "" 
-        });
-        finalClientId = clientResponse.id;
-      }
+    //   if (!finalClientId && formData.newClientName) {
+    //     const clientResponse = await createClient({ 
+    //       name: formData.newClientName, 
+    //       phone: formData.newClientPhone || "" 
+    //     });
+    //     finalClientId = clientResponse.id;
+    //   }
 
-      if (!finalClientId) throw new Error("Cliente é obrigatório!");
+    //   if (!finalClientId) throw new Error("Cliente é obrigatório!");
 
-      const initialPayload: CreateOrderDTO = {
-        title: formData.title,
-        clientId: Number(finalClientId),
-        tagId: formData.tagId,
-        price: formData.price,
-        amount_paid: formData.amount_paid,
-        cost: formData.cost,
-        quantity: formData.quantity,
-        payment_method: formData.payment_method,
-        link: formData.link,
-      };
+    //   const initialPayload: CreateOrderDTO = {
+    //     title: formData.title,
+    //     clientId: Number(finalClientId),
+    //     tagId: formData.tagId,
+    //     price: formData.price,
+    //     amount_paid: formData.amount_paid,
+    //     cost: formData.cost,
+    //     quantity: formData.quantity,
+    //     payment_method: formData.payment_method,
+    //     link: formData.link,
+    //   };
 
-      const newOrder = await createKanbanOrder(initialPayload);
+    //   const newOrder = await createKanbanOrder(initialPayload);
 
-      if (formData.file && formData.file.length > 0) {
-        const fileToUpload = formData.file[0];
+    //   if (formData.file && formData.file.length > 0) {
+    //     const fileToUpload = formData.file[0];
         
-        const { url: presignedUrl } = await getPresignedUrl(
-          String(newOrder.id), 
-          fileToUpload.name, 
-        );
+    //     const { url: presignedUrl } = await getPresignedUrl(
+    //       String(newOrder.id), 
+    //       fileToUpload.name, 
+    //     );
         
-        await uploadFileToMinIO(presignedUrl, fileToUpload);
+    //     await uploadFileToMinIO(presignedUrl, fileToUpload);
 
-        // Patch to update the order with the file URL (filename) in the database
-        // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
+    //     // Patch to update the order with the file URL (filename) in the database
+    //     // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
         
-        newOrder.archive = fileToUpload.name; // Locally updates the UI
-      }
+    //     newOrder.archive = fileToUpload.name; // Locally updates the UI
+      // }
       
-      setOrders((prev) => [newOrder, ...prev]);
-      setCreateModalOpen(false);
+    //   setOrders((prev) => [newOrder, ...prev]);
+    //   setCreateModalOpen(false);
       
       // Confirmation Toast can be added here
 

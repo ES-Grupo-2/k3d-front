@@ -12,10 +12,10 @@ export function currency(value: number): string {
   }).format(value);
 }
 
-const enumPayingMethodMap: Record<string, string> = {
+export const enumPayingMethodMap: Record<string, string> = {
   CREDIT_CARD: "Cartão de Crédito",
-  PIX: "Pix",
   DEBIT_CARD: "Cartão de Débito",
+  PIX: "Pix",
   CASH: "Dinheiro",
   "None": "Nenhum",
 };

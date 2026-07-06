@@ -69,16 +69,13 @@ export async function createKanbanOrder(data: CreateOrderDTO) {
   });
 
   if (!response.ok) {
-    // Se for o erro 400 (Cliente/Tag inválidos), o backend provavelmente manda uma msg
     const errorData = await response.json().catch(() => null);
     throw new Error(errorData?.error || "Falha ao criar o pedido no servidor.");
   }
 
-  // A API deve retornar 201 com o objeto completo do pedido recém-criado (incluindo o ID)
   return response.json(); 
 }
 
-// PATCH /orders/:id
 export async function updateKanbanOrder(orderId: number, data: any) {
   const session = await requireAuth();
   const token = session?.token;
@@ -97,7 +94,6 @@ export async function updateKanbanOrder(orderId: number, data: any) {
   return response.json();
 }
 
-// DELETE /orders/:id
 export async function deleteKanbanOrder(orderId: number) {
   const session = await requireAuth();
   const token = session?.token;
