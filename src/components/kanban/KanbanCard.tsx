@@ -1,5 +1,5 @@
 import { useDraggable, useDndContext } from "@dnd-kit/core";
-import { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
+import { Order } from "@/types/kanban";
 import { currency, humanizeEnum } from "@/lib/utils";
 import { forwardRef } from "react";
 
@@ -10,8 +10,6 @@ interface KanbanCardProps {
   isManager: boolean;
   isOverlay?: boolean;
   isDestinationPlaceHolder?: boolean;
-  onMoveOrder: (orderId: string, targetColumn: ColumnType) => void;
-  allColumns: { id: ColumnType; title: string }[];
 }
 
 export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
@@ -23,8 +21,6 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
       isManager,
       isOverlay,
       isDestinationPlaceHolder,
-      onMoveOrder,
-      allColumns,
     }: KanbanCardProps,
     ref,
   ) {
@@ -48,10 +44,6 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     const isCardOverOtherColumn = over && over.id !== order.column;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
-
-    const columnIndex = allColumns?.findIndex((c) => c.id === order.column) ?? -1;
-    const prevColumn = columnIndex > 0 ? allColumns[columnIndex - 1] : null;
-    const nextColumn = columnIndex !== -1 && columnIndex < allColumns.length - 1 ? allColumns[columnIndex + 1] : null;
 
     if (isOriginalCard && isCardOverOtherColumn) {
       return <div ref={setNodeRef} className="hidden" />;
@@ -80,37 +72,10 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             className="border-border relative flex items-center justify-between border-b px-3 py-2"
             style={{ borderLeft: `3px solid ${order.tag.color}` }}
           >
-            <span className="text-muted text-[10px] font-medium tracking-wider uppercase pr-[120px] truncate">
+            <span className="text-muted text-[10px] font-medium tracking-wider uppercase pr-30 truncate">
               {order.tag.name}
             </span>
-            <div className="absolute right-[60px] top-[16.25px] -translate-y-1/2 flex items-center gap-1 lg:hidden">
-              {prevColumn && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveOrder(order.id, prevColumn.id);
-                  }}
-                  className="flex h-7 w-7 items-center justify-center rounded bg-foreground/10 text-subtle text-xs font-bold hover:bg-foreground/20 active:bg-foreground/30 transition-colors"
-                  title={`Voltar para ${prevColumn.title}`}
-                >
-                  ←
-                </button>
-              )}
-
-              {nextColumn && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveOrder(order.id, nextColumn.id);
-                  }}
-                  className="flex h-7 w-7 items-center justify-center rounded bg-foreground/10 text-subtle text-xs font-bold hover:bg-foreground/20 active:bg-foreground/30 transition-colors"
-                  title={`Avançar para ${nextColumn.title}`}
-                >
-                  →
-                </button>
-              )}
-            </div>
-
+            
             {isManager && (
               <div className="flex items-center gap-1">
                 <button
