@@ -57,6 +57,8 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         {...(isOverlay || isPlaceholder ? {} : attributes)}
         suppressHydrationWarning={true}
         className={`overflow-hidden rounded-md text-sm ${
+          isDragging ? "touch-none opacity-50" : "touch-pan-y"
+        } ${
           isOverlay
             ? "bg-background border-border ring-primary scale-105 rotate-3 cursor-grabbing border opacity-90 shadow-2xl ring-2"
             : isPlaceholder
@@ -65,13 +67,15 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         }`}
       >
         <div className={isPlaceholder ? "invisible" : "visible"}>
+          
           <div
-            className="border-border flex items-center justify-between border-b px-3 py-2"
+            className="border-border relative flex items-center justify-between border-b px-3 py-2"
             style={{ borderLeft: `3px solid ${order.tag.color}` }}
           >
-            <span className="text-muted text-[10px] font-medium tracking-wider uppercase">
+            <span className="text-muted text-[10px] font-medium tracking-wider uppercase pr-30 truncate">
               {order.tag.name}
             </span>
+            
             {isManager && (
               <div className="flex items-center gap-1">
                 <button
