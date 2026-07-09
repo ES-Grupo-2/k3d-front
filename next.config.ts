@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Garante o Content-Type correto e impede cache do service worker,
-        // para que novas versões sejam sempre baixadas.
+        // Ensures correct Content-Type and prevents caching of the service worker,
+        // so that new versions are always downloaded.
         source: "/sw.js",
         headers: [
           {

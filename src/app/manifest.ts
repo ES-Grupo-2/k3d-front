@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
 
-// Web App Manifest do K3D — descreve a aplicação para o navegador permitir a
-// instalação na tela inicial (PWA). Cores alinhadas ao tema escuro do app:
-// theme_color âmbar (barra do SO) e background escuro (splash de abertura).
+  /**  
+  * K3D Web App Manifest — describe an application for the browser to allow
+  * installation on the home screen (PWA). Colors aligned with the dark theme of the app:
+  * theme_color amber (status bar) and dark background (splash screen).
+  */ 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Kria 3D",

@@ -1,10 +1,11 @@
-// Service Worker do K3D (PWA).
-// Estratégia pensada para um app autenticado por cookie:
-//  - Navegações (HTML): network-first com fallback para /offline. NÃO cacheia a
-//    resposta, evitando guardar conteúdo de uma sessão no dispositivo.
-//  - Estáticos públicos (_next/static, ícones, fontes): stale-while-revalidate.
-//  - Demais requisições passam direto pela rede.
-// Também traz handlers de push/notificationclick prontos para uso futuro.
+/** K3D Service Worker (PWA).
+* Strategy designed for an app authenticated by cookie:
+*  - Navigations (HTML): network-first with fallback to /offline. Does NOT cache
+*    the response, avoiding storing session content on the device.
+*  - Public statics (_next/static, icons, fonts): stale-while-revalidate.
+*  - Other requests go straight to the network.
+* Also includes push/notificationclick handlers ready for future use.
+**/
 
 const VERSION = "v1";
 const PRECACHE = `k3d-precache-${VERSION}`;

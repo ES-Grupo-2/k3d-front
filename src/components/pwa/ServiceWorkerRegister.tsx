@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 
-// Registra o service worker do PWA após o carregamento da página.
-// Roda apenas em produção para não interferir no hot-reload do desenvolvimento.
+/**
+ *  Registers the service worker for the PWA after the page has loaded.
+ *  Runs only in production to avoid interfering with hot-reload during development.
+ */
 export function ServiceWorkerRegister() {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
@@ -13,12 +15,13 @@ export function ServiceWorkerRegister() {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/", updateViaCache: "none" })
         .catch(() => {
-          // Falha no registro não deve quebrar a aplicação.
         });
     };
 
-    // Em apps React o efeito pode rodar após o evento `load` já ter disparado;
-    // nesse caso registra imediatamente, senão aguarda o `load`.
+    /**
+     * In React apps, the effect may run after the `load` event has already fired;
+     * in that case, register immediately; otherwise, wait for the `load` event.
+     */
     if (document.readyState === "complete") {
       register();
       return;
