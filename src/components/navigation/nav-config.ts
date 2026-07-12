@@ -1,4 +1,5 @@
 import {
+  Calculator,
   ClipboardList,
   FileBarChart,
   Home,
@@ -28,25 +29,31 @@ export interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: "Operação",
+    title: "Opera\u00e7\u00e3o",
     items: [
-      { label: "Início", href: "/inicio", icon: Home },
+      { label: "In\u00edcio", href: "/inicio", icon: Home },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Kanban", href: "/kanban", icon: SquareKanban },
       { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
     ],
   },
   {
-    title: "Gestão",
+    title: "Gest\u00e3o",
     items: [
       {
-        label: "Registrar usuário",
+        label: "Calculadora",
+        href: "/calculadora",
+        icon: Calculator,
+        roles: ["GERENTE"],
+      },
+      {
+        label: "Registrar usu\u00e1rio",
         href: "/auth/register",
         icon: UserPlus,
         roles: ["GERENTE"],
       },
       {
-        label: "Relatórios",
+        label: "Relat\u00f3rios",
         href: "/relatorios",
         icon: FileBarChart,
         roles: ["GERENTE"],
@@ -56,11 +63,22 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 const TAB_ITEMS: NavItem[] = [
-  { label: "Início", href: "/inicio", icon: Home },
+  { label: "In\u00edcio", href: "/inicio", icon: Home },
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
   { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
-  { label: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["GERENTE"] },
+  {
+    label: "Calculadora",
+    href: "/calculadora",
+    icon: Calculator,
+    roles: ["GERENTE"],
+  },
+  {
+    label: "Relat\u00f3rios",
+    href: "/relatorios",
+    icon: FileBarChart,
+    roles: ["GERENTE"],
+  },
 ];
 
 export function getVisibleTabItems(role: UserRole | undefined): NavItem[] {
@@ -108,3 +126,4 @@ export function getInitials(name?: string, email?: string): string {
 
   return source.slice(0, 2).toUpperCase();
 }
+

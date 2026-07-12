@@ -9,6 +9,7 @@ const PROTECTED_ROUTES = [
   "/dashboard",
   "/kanban",
   "/pedidos",
+  "/calculadora",
   "/relatorios",
 ];
 
