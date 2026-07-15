@@ -14,14 +14,16 @@ import {
 } from "@/components/ui";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui";
 
-// Barra de filtros da tela de Pedidos.
-// É a única parte interativa (client) da tela: não guarda os pedidos em estado,
-// apenas empurra a busca e os filtros para a URL. O Server Component da página
-// reage à mudança de `searchParams` e devolve a lista já filtrada.
-// No desktop os controles ficam inline; no mobile são reduzidos a dois botões
-// (Pesquisar e Filtro) para não poluir a tela, abrindo input e drawer sob demanda.
+// Filter bar for the Orders screen.
+// It's the only interactive (client) part of the screen: it never keeps the
+// orders in state, it just pushes the search and filters into the URL. The
+// page's Server Component reacts to the `searchParams` change and returns the
+// already-filtered list.
+// On desktop the controls stay inline; on mobile they collapse into two buttons
+// (Search and Filter) to avoid cluttering the screen, opening the input and the
+// drawer on demand.
 
-// Valor sentinela do Select para "sem filtro" — o Radix não aceita item vazio.
+// Sentinel Select value for "no filter" — Radix doesn't accept an empty item.
 const ALL = "ALL";
 
 const COLUMN_OPTIONS = [
@@ -43,7 +45,7 @@ interface PedidosFiltersProps {
   initialPayment: string;
 }
 
-// Grupo de opções em chips usado no drawer de filtros do mobile.
+// Chip option group used in the mobile filters drawer.
 function FilterChips({
   label,
   value,
@@ -97,7 +99,17 @@ export function PedidosFilters({
   const [filterOpen, setFilterOpen] = useState(false);
   const isFirstRender = useRef(true);
 
-  // Reescreve a URL preservando os demais parâmetros; valor vazio remove a chave.
+  // Re-syncs the search when the URL changes externally (e.g. browser
+  // back/forward), so we don't keep text typed on a previous visit. Done as a
+  // render-time adjustment (React's recommended pattern for deriving state from
+  // a prop) instead of an effect that calls setState.
+  const [syncedQuery, setSyncedQuery] = useState(initialQuery);
+  if (initialQuery !== syncedQuery) {
+    setSyncedQuery(initialQuery);
+    setQuery(initialQuery);
+  }
+
+  // Rewrites the URL preserving the other params; an empty value drops the key.
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
@@ -108,7 +120,7 @@ export function PedidosFilters({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  // Debounce da busca textual para não disparar uma requisição a cada tecla.
+  // Debounces the text search so we don't fire a request on every keystroke.
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -122,7 +134,7 @@ export function PedidosFilters({
   const activeFilterCount = (initialColumn ? 1 : 0) + (initialPayment ? 1 : 0);
   const hasActiveFilters = query !== "" || activeFilterCount > 0;
 
-  // Remove apenas os filtros (status e pagamento), preservando a busca textual.
+  // Clears only the filters (status and payment), keeping the text search.
   function clearFilters() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("status");
@@ -137,7 +149,7 @@ export function PedidosFilters({
 
   return (
     <>
-      {/* Mobile: dois botões discretos (Pesquisar abre input inline, Filtro abre drawer) */}
+      {/* Mobile: two discreet buttons (Search opens an inline input, Filter opens a drawer) */}
       <div className="flex gap-2 md:hidden">
         {searchOpen ? (
           <div className="relative flex-1">
@@ -195,7 +207,7 @@ export function PedidosFilters({
         </button>
       </div>
 
-      {/* Desktop: controles inline */}
+      {/* Desktop: inline controls */}
       <div className="hidden gap-3 md:flex md:items-center">
         <div className="relative flex-1">
           <Search className="text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
@@ -262,7 +274,7 @@ export function PedidosFilters({
         )}
       </div>
 
-      {/* Drawer de filtros (mobile) */}
+      {/* Filters drawer (mobile) */}
       <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
         <SheetContent side="right" className="w-80 max-w-[85vw] gap-6 p-6">
           <SheetTitle>Filtros</SheetTitle>

@@ -5,10 +5,10 @@ import type {
   PaymentStatus,
 } from "@/types/kanban";
 
-// Fonte única de dados dos pedidos enquanto não há backend.
-// Centraliza o dataset e a lógica de busca/filtro para que a tela de Pedidos
-// (e futuramente o Kanban) consumam o mesmo lugar — basta trocar `queryOrders`
-// por uma chamada HTTP real quando a API existir.
+// Single source of orders data while there's no backend.
+// Centralizes the dataset and the search/filter logic so the Orders screen (and
+// later the Kanban) consume the same place — just swap `queryOrders` for a real
+// HTTP call once the API exists.
 
 const MOCK_ORDERS: Order[] = [
   {
@@ -152,7 +152,7 @@ export interface OrderFilters {
   status?: PaymentStatus;
 }
 
-// Normaliza texto para busca acento-insensível e caixa-insensível.
+// Normalizes text for accent-insensitive and case-insensitive search.
 function normalize(value: string): string {
   return value
     .toLowerCase()
@@ -160,9 +160,9 @@ function normalize(value: string): string {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-// Simula a busca no backend: aplica a query textual e os filtros recebidos.
-// É assíncrona de propósito, para que a troca por uma chamada HTTP real
-// não exija mudar quem consome.
+// Simulates the backend search: applies the text query and the given filters.
+// Async on purpose, so swapping it for a real HTTP call won't require changing
+// its consumers.
 export async function queryOrders(
   filters: OrderFilters = {},
 ): Promise<Order[]> {

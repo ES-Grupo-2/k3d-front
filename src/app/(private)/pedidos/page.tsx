@@ -5,10 +5,10 @@ import { queryOrders } from "@/data/orders";
 import { requireAuth } from "@/services/auth/session";
 import type { KanbanColumnNames, PaymentMethod } from "@/types/kanban";
 
-// Tela de histórico/listagem de pedidos.
-// Server Component: lê os filtros direto de `searchParams`, busca a lista já
-// filtrada no servidor e a entrega para renderização. A interatividade fica
-// isolada em `PedidosFilters`, que apenas reescreve a URL.
+// Orders history/listing screen.
+// Server Component: reads the filters straight from `searchParams`, fetches the
+// already-filtered list on the server and hands it off for rendering. All the
+// interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
 
 const COLUMNS: KanbanColumnNames[] = ["TODO", "DOING", "DONE"];
 const PAYMENT_METHODS: PaymentMethod[] = [
@@ -18,8 +18,8 @@ const PAYMENT_METHODS: PaymentMethod[] = [
   "PIX",
 ];
 
-// Garante que só valores válidos do enum cheguem ao filtro (ignora lixo na URL).
-function pick<T extends string>(
+// Ensures only valid enum values reach the filter (ignores junk in the URL).
+function parseEnumParam<T extends string>(
   value: string | undefined,
   allowed: T[],
 ): T | "" {
@@ -33,19 +33,19 @@ export default async function PedidosPage({
 }) {
   await requireAuth();
 
-  const sp = await searchParams;
-  const q = typeof sp.q === "string" ? sp.q : "";
-  const column = pick(
-    typeof sp.status === "string" ? sp.status : undefined,
+  const params = await searchParams;
+  const orderQuery = typeof params.q === "string" ? params.q : "";
+  const column = parseEnumParam(
+    typeof params.status === "string" ? params.status : undefined,
     COLUMNS,
   );
-  const paymentMethod = pick(
-    typeof sp.payment === "string" ? sp.payment : undefined,
+  const paymentMethod = parseEnumParam(
+    typeof params.payment === "string" ? params.payment : undefined,
     PAYMENT_METHODS,
   );
 
   const orders = await queryOrders({
-    q,
+    q: orderQuery,
     column: column || undefined,
     paymentMethod: paymentMethod || undefined,
   });
@@ -60,7 +60,7 @@ export default async function PedidosPage({
       </header>
 
       <PedidosFilters
-        initialQuery={q}
+        initialQuery={orderQuery}
         initialColumn={column}
         initialPayment={paymentMethod}
       />

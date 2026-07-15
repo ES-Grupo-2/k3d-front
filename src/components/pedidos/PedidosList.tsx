@@ -1,18 +1,18 @@
 import type { KanbanColumnNames, Order, PaymentStatus } from "@/types/kanban";
 import { currency, humanizeEnum } from "@/lib/utils";
 
-// Listagem dos pedidos da tela de histórico.
-// Componente puramente visual (renderizado no servidor): recebe a lista já
-// filtrada e a apresenta como tabela no desktop e como cards no mobile.
+// Orders listing for the history screen.
+// Purely visual component (server-rendered): receives the already-filtered list
+// and presents it as a table on desktop and as cards on mobile.
 
-// Cores dos selos por status de fluxo (coluna do Kanban).
+// Badge colors by flow status (Kanban column).
 const COLUMN_BADGE: Record<KanbanColumnNames, string> = {
   TODO: "bg-zinc-500/15 text-zinc-300",
   DOING: "bg-amber-500/15 text-amber-300",
   DONE: "bg-emerald-500/15 text-emerald-300",
 };
 
-// Cores dos selos por status de pagamento.
+// Badge colors by payment status.
 const PAYMENT_BADGE: Record<PaymentStatus, string> = {
   UNPAID: "bg-red-500/15 text-red-300",
   HALFPAID: "bg-amber-500/15 text-amber-300",
@@ -44,7 +44,7 @@ function TagPill({ name, color }: { name: string; color: string }) {
 export function PedidosList({ orders }: { orders: Order[] }) {
   return (
     <>
-      {/* Desktop: tabela */}
+      {/* Desktop: table */}
       <div className="border-border bg-card hidden overflow-hidden rounded-xl border md:block">
         <table className="w-full text-left text-sm">
           <thead className="text-muted-foreground border-border border-b text-xs uppercase">

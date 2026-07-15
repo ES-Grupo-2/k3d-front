@@ -28,7 +28,7 @@ export function HomeView({ user }: HomeViewProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {shortcuts.map((item) => {
           const Icon = item.icon;
 
