@@ -25,6 +25,8 @@ const enumTranslationsMap: Record<string, string> = {
   TODO: "A Fazer",
   DOING: "Fazendo",
   DONE: "Concluído",
+
+  "None": "Nenhum",
 };
 
 export function humanizeEnum(value: string): string {

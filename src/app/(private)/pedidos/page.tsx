@@ -1,9 +1,7 @@
 import { PackageSearch } from "lucide-react";
-
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
-import { queryOrders } from "@/data/orders";
-import { requireAuth } from "@/services/auth/session";
-import type { KanbanColumnNames, PaymentMethod } from "@/types/kanban";
+import { queryOrders } from "@/services/orders"; 
+import type { KanbanColumnNames, PaymentMethod, PaymentStatus } from "@/types/kanban";
 
 // Orders history/listing screen.
 // Server Component: reads the filters straight from `searchParams`, fetches the
@@ -17,6 +15,7 @@ const PAYMENT_METHODS: PaymentMethod[] = [
   "CASH",
   "PIX",
 ];
+const PAYMENT_STATUS: PaymentStatus[] = ["UNPAID", "HALFPAID", "FULLPAID"];
 
 // Ensures only valid enum values reach the filter (ignores junk in the URL).
 function parseEnumParam<T extends string>(
@@ -31,24 +30,30 @@ export default async function PedidosPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireAuth();
-
   const params = await searchParams;
-  const orderQuery = typeof params.q === "string" ? params.q : "";
+  const orderQuery = typeof params.queryInput === "string" ? params.queryInput : "";
+  
   const column = parseEnumParam(
     typeof params.status === "string" ? params.status : undefined,
     COLUMNS,
   );
   const paymentMethod = parseEnumParam(
     typeof params.payment === "string" ? params.payment : undefined,
-    PAYMENT_METHODS,
+    PAYMENT_STATUS,
   );
+  
+  const page = typeof params.page === "string" ? params.page : "1";
 
-  const orders = await queryOrders({
-    q: orderQuery,
-    column: column || undefined,
-    paymentMethod: paymentMethod || undefined,
+  const response = await queryOrders({
+    queryInput: orderQuery,
+    status: column || undefined,
+    payment: paymentMethod || undefined,
+    page: page,
   });
+
+  const orders = response.data;
+  const totalItems = response.meta.totalItems;
+  console.log(orders[0])
 
   return (
     <div className="flex flex-col gap-6">
@@ -66,8 +71,8 @@ export default async function PedidosPage({
       />
 
       <p className="text-muted-foreground text-sm">
-        {orders.length}{" "}
-        {orders.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
+        {totalItems}{" "}
+        {totalItems === 1 ? "pedido encontrado" : "pedidos encontrados"}
       </p>
 
       {orders.length > 0 ? (
