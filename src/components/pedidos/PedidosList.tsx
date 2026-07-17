@@ -91,7 +91,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                   {currency(order.price)}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col items-start gap-1">
                     <Badge
                       className={PAYMENT_BADGE[order.status]}
                       label={humanizeEnum(order.status)}

@@ -10,8 +10,11 @@ export async function queryOrders(
   if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
 
   if (filters.queryInput) searchParams.append("search", filters.queryInput);
-  if (filters.status) searchParams.append("status", filters.status);
-  if (filters.payment) searchParams.append("paymentMethod", filters.payment);
+  if (filters.section) searchParams.append("section", filters.section);
+  if (filters.payment) {
+    const apiPaymentValue = filters.payment === "None" ? "NULL" : filters.payment;
+    searchParams.append("payment_method", apiPaymentValue);
+  }
   if (filters.page) searchParams.append("page", filters.page);
 
   const queryString = searchParams.toString();

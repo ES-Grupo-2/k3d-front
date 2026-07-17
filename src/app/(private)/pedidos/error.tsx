@@ -33,7 +33,7 @@ export default function OrdersError({
         variant="outline"
         className="mt-4 gap-2"
       >
-        <RefreshCcw className="size-4" />
+        <RefreshCcw className="size-4 hover:cursor-pointer" />
         Tentar Novamente
       </Button>
     </div>

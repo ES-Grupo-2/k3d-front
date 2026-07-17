@@ -17,6 +17,14 @@ const enumTranslationsMap: Record<string, string> = {
   HALFPAID: "Meio pago",
   FULLPAID: "Pago",
 
+  NAO_PAGO: "Não pago",
+  PAGO_PARCIAL: "Meio pago",
+  PAGO: "Pago",
+
+  PENDENTE: "Pendente",
+  FAZENDO: "Fazendo",
+  CONCLUIDO: "Concluído",
+
   CREDIT_CARD: "Cartão de Crédito",
   PIX: "Pix",
   DEBIT_CARD: "Cartão de Débito",

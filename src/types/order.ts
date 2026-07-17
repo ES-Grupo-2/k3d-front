@@ -1,6 +1,6 @@
 export interface GetOrdersFilters {
   queryInput?: string;
-  status?: string;
+  section?: string;
   payment?: string;
   page?: string;
 }

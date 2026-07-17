@@ -8,14 +8,8 @@ import type { KanbanColumnNames, PaymentMethod, PaymentStatus } from "@/types/ka
 // already-filtered list on the server and hands it off for rendering. All the
 // interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
 
-const COLUMNS: KanbanColumnNames[] = ["TODO", "DOING", "DONE"];
-const PAYMENT_METHODS: PaymentMethod[] = [
-  "CREDIT_CARD",
-  "DEBIT_CARD",
-  "CASH",
-  "PIX",
-];
-const PAYMENT_STATUS: PaymentStatus[] = ["UNPAID", "HALFPAID", "FULLPAID"];
+const SECTIONS = ["PENDENTE", "FAZENDO", "CONCLUIDO"];
+const PAYMENT_METHODS = ["CREDIT_CARD", "DEBIT_CARD", "CASH", "PIX", "None"];
 
 // Ensures only valid enum values reach the filter (ignores junk in the URL).
 function parseEnumParam<T extends string>(
@@ -33,28 +27,26 @@ export default async function PedidosPage({
   const params = await searchParams;
   const orderQuery = typeof params.queryInput === "string" ? params.queryInput : "";
   
-  const column = parseEnumParam(
-    typeof params.status === "string" ? params.status : undefined,
-    COLUMNS,
+  const section = parseEnumParam(
+    typeof params.section === "string" ? params.section : undefined,
+    SECTIONS,
   );
   const paymentMethod = parseEnumParam(
     typeof params.payment === "string" ? params.payment : undefined,
-    PAYMENT_STATUS,
+    PAYMENT_METHODS,
   );
   
   const page = typeof params.page === "string" ? params.page : "1";
 
   const response = await queryOrders({
     queryInput: orderQuery,
-    status: column || undefined,
+    section: section || undefined,
     payment: paymentMethod || undefined,
     page: page,
   });
 
   const orders = response.data;
   const totalItems = response.meta.totalItems;
-  console.log(orders[0])
-
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -66,7 +58,7 @@ export default async function PedidosPage({
 
       <PedidosFilters
         initialQuery={orderQuery}
-        initialColumn={column}
+        initialSection={section}
         initialPayment={paymentMethod}
       />
 
