@@ -27,7 +27,7 @@ return (
   <div
     ref={setNodeRef}
     className={`panel flex flex-1 h-full min-h-0 w-full flex-col overflow-hidden rounded-sm border-2 border-solid transition-colors ${
-        isOver ? "border-primary bg-primary/5" : "bg-background border-border"
+        isOver ? "border-primary bg-primary/5" : "bg-muted border-border"
       }`}
   >
     <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
