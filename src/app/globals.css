@@ -8,9 +8,8 @@
 /* Tema claro (default do CSS). O tema efetivo é escolhido pelo ThemeProvider,
    que aplica a classe `.dark` no <html> — ver src/components/theme/. */
 :root {
-  /* Base — creme claro derivado do bege do ícone (mais claro e menos saturado
-     que o ícone, para um visual mais leve). */
-  --background: #fbf5e7;
+  /* Base — creme/greige claro derivado do bege do ícone. */
+  --background: #ede8d0;
   --foreground: #1a1c1c;
 
   /* Components — superfícies brancas que "sobem" sobre o creme (borda + sombra). */
