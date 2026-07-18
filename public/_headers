@@ -1,0 +1,7 @@
+# Assets estáticos do Next são versionados por hash — cache imutável e longo.
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
+
+# Service worker do PWA nunca é cacheado, para novas versões sempre baixarem.
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
