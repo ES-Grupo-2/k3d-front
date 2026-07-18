@@ -1,7 +1,6 @@
 import { PackageSearch } from "lucide-react";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
 import { queryOrders } from "@/services/orders"; 
-import type { KanbanColumnNames, PaymentMethod, PaymentStatus } from "@/types/kanban";
 
 // Orders history/listing screen.
 // Server Component: reads the filters straight from `searchParams`, fetches the
