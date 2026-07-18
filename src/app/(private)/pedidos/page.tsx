@@ -3,14 +3,14 @@ import { PackageSearch } from "lucide-react";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
 import { queryOrders } from "@/data/orders";
 import { requireAuth } from "@/services/auth/session";
-import type { KanbanColumnNames, PaymentMethod } from "@/types/kanban";
+import type { KanbanTaskStatus, PaymentMethod } from "@/types/kanban";
 
 // Orders history/listing screen.
 // Server Component: reads the filters straight from `searchParams`, fetches the
 // already-filtered list on the server and hands it off for rendering. All the
 // interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
 
-const COLUMNS: KanbanColumnNames[] = ["TODO", "DOING", "DONE"];
+const COLUMNS: KanbanTaskStatus[] = ["PENDENTE", "FAZENDO", "FINALIZADO"];
 const PAYMENT_METHODS: PaymentMethod[] = [
   "CREDIT_CARD",
   "DEBIT_CARD",

@@ -45,7 +45,7 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
           </span>
         </div>
 
-        <LogoutButton variant="icon" />
+        <LogoutButton variant="icon" className="hover:cursor-pointer"/>
       </div>
     </header>
   );

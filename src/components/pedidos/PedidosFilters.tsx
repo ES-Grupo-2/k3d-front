@@ -27,9 +27,9 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui";
 const ALL = "ALL";
 
 const COLUMN_OPTIONS = [
-  { value: "TODO", label: "A Fazer" },
-  { value: "DOING", label: "Fazendo" },
-  { value: "DONE", label: "Concluído" },
+  { value: "PENDENTE", label: "Pendente" },
+  { value: "FAZENDO", label: "Fazendo" },
+  { value: "FINALIZADO", label: "Finalizado" },
 ];
 
 const PAYMENT_OPTIONS = [
