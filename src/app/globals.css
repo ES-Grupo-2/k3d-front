@@ -27,9 +27,9 @@
   --secondary: #efe4c2;
   --secondary-foreground: #1a1c1c;
 
-  /* Muted */
-  --muted: #f2ecdc;
-  --muted-foreground: #6b6d6d;
+  /* Muted — greige mais fundo; usado nas colunas do Kanban (trilha recuada). */
+  --muted: #e4dcbf;
+  --muted-foreground: #5c5f5f;
 
   /* Accent */
   --accent: #efe4c2;
