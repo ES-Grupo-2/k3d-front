@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -18,7 +19,11 @@ const COLUMN_LABELS: Record<ColumnType, string> = {
   FINALIZADO: "Concluído",
 };
 
-const COLUMNS = Object.entries(COLUMN_LABELS) as [ColumnType, string][];
+// const COLUMNS = Object.entries(COLUMN_LABELS) as [ColumnType, string][];
+const COLUMNS = Object.entries(COLUMN_LABELS).map(([id, title]) => ({
+  id: id as ColumnType,
+  title,
+}));
 
 interface KanbanBoardProps {
   orders: Order[];
@@ -36,13 +41,18 @@ export function KanbanBoard({
   isManager,
 }: KanbanBoardProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 10 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 10 },
+    }),
   );
   const [orderBeingMoved, setOrderBeingMoved] = useState<Order | null>(null);
+  const [activeTab, setActiveTab] = useState<ColumnType>("PENDENTE");
+  const boardContainerRef = useRef<HTMLDivElement>(null);
 
   const byColumn = useMemo(() => {
-    const map = COLUMNS.reduce((acc, [key]) => {
-      acc[key] = [];
+    const map = COLUMNS.reduce((acc, column) => {
+      acc[column.id] = [];
       return acc;
     }, {} as Record<ColumnType, Order[]>);
 
@@ -73,41 +83,128 @@ export function KanbanBoard({
     onMoveOrder(orderId, target);
   }
 
-  return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch 
-      overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
-        {COLUMNS.map(([id, title]) => (
-          <div
-            key={id}
-            className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
-          >
-            <KanbanColumn
-              id={id}
-              title={title}
-              orders={byColumn[id]}
-              onEdit={onEditOrder}
-              onDelete={onDeleteOrder}
-              isManager={isManager}
-            />
-          </div>
-        ))}
+  // return (
+  //   <DndContext
+  //     sensors={sensors}
+  //     onDragStart={handleDragStart}
+  //     onDragEnd={handleDragEnd}
+  //   >
+  //     <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch 
+  //     overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
+  //       {COLUMNS.map(([id, title]) => (
+  //         <div
+  //           key={id}
+  //           className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
+  //         >
+  //           <KanbanColumn
+  //             id={id}
+  //             title={title}
+  //             orders={byColumn[id]}
+  //             onEdit={onEditOrder}
+  //             onDelete={onDeleteOrder}
+  //             isManager={isManager}
+  //           />
+  //         </div>
+  //       ))}
+  /**
+   * Sync the active tab with the scroll position of the board container.
+   * @returns 
+   */
+  function handleScroll() {
+    if (!boardContainerRef.current || window.innerWidth >= 1024) return;
+    
+    const scrollLeft = boardContainerRef.current.scrollLeft;
+    const width = boardContainerRef.current.clientWidth;
+    const index = Math.round(scrollLeft / width);
+    
+    if (COLUMNS[index]) {
+      setActiveTab(COLUMNS[index].id);
+    }
+  };
 
-        <DragOverlay>
-          {orderBeingMoved ? (
-            <KanbanCard
-              order={orderBeingMoved}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              isManager={isManager}
-              isOverlay={true}
-            />
-          ) : null}
-        </DragOverlay>
+  /**
+   * When the user clicks on a tab, scroll the board container to the corresponding column.
+   * @param columnId 
+   * @param index 
+   * @returns 
+   */
+  function scrollToColumn(columnId: ColumnType, index: number) {
+    setActiveTab(columnId);
+    if (!boardContainerRef.current) return;
+
+    const width = boardContainerRef.current.clientWidth;
+    boardContainerRef.current.scrollTo({
+      left: index * width,
+      behavior: "smooth",
+    });
+  };
+
+return (
+  <DndContext 
+  sensors={sensors} 
+  onDragStart={handleDragStart} 
+  onDragEnd={handleDragEnd}
+  autoScroll={{ threshold: {x: 0.12, y: 0}, acceleration: 10, interval: 10 }}
+  >
+
+    <div className="flex flex-1 flex-col gap-2 overflow-hidden h-full w-full">
+        {/* Fixed because we're considering that will only be three main columns */}
+        <div className={`flex md:hidden shrink-0 justify-center overflow-x-hidden border-b border-border px-4 bg-background`}>
+          {COLUMNS.map((column, index) => (
+            <button
+              key={column.id}
+              type="button"
+              onClick={() => scrollToColumn(column.id, index)}
+              className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === column.id
+                  ? "border-primary bg-muted text-foreground"
+                  : "border-transparent bg-background text-bg-background-foreground"
+              }`}
+            >
+              {column.title}
+              <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+                {byColumn[column.id].length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div
+          ref={boardContainerRef}
+          onScroll={handleScroll}
+          className={`flex flex-1 h-full w-full min-h-0 overflow-x-auto overflow-y-hidden pb-4 pt-2 scroll-smooth select-none 
+                      scrollbar-none lg:grid lg:grid-cols-3 lg:gap-3 lg:px-8 lg:pb-4 lg:overflow-x-visible lg:snap-none
+                     ${orderBeingMoved ? 'snap-none' : 'snap-x snap-mandatory'}`}
+        >
+          {COLUMNS.map((column) => (
+            <div
+              key={column.id}
+              className="w-full shrink-0 snap-center px-4 h-full min-h-0 flex flex-col 
+                         lg:w-auto lg:shrink lg:snap-none lg:px-0"
+            >
+              <KanbanColumn
+                id={column.id}
+                title={column.title}
+                orders={byColumn[column.id]}
+                onEdit={onEditOrder}
+                onDelete={onDeleteOrder}
+                isManager={isManager}
+              />
+            </div>
+          ))}
+
+          <DragOverlay dropAnimation={null}>
+            {orderBeingMoved ? (
+              <KanbanCard
+                order={orderBeingMoved}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                isManager={isManager}
+                isOverlay
+              />
+            ) : null}
+          </DragOverlay>
+        </div>
       </div>
     </DndContext>
   );

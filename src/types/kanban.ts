@@ -1,6 +1,6 @@
 export type UniqueIdentifier = string | number;
 export type KanbanTaskStatus = 'PENDENTE' | 'FAZENDO' | 'FINALIZADO'; 
-export type PaymentStatus = "UNPAID" | "HALFPAID" | "FULLPAID";
+export type PaymentStatus = "NAO_PAGO" | "PAGO_PARCIAL" | "PAGO";
 export type PaymentMethod = "CREDIT_CARD" | "DEBIT_CARD" | "CASH" | "PIX";
 
 export interface Client {
@@ -20,12 +20,12 @@ export interface Order {
   id: number; 
   title: string;
   section: KanbanTaskStatus;
-  status: string;
+  status: PaymentStatus;
   price: number;
   amount_paid: number;
   cost: number | null;
   quantity: number;          
-  payment_method: string | null; 
+  payment_method: PaymentMethod | string | null; 
   archive?: string;
   client: {                  
     id: number;

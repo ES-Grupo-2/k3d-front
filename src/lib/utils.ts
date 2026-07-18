@@ -20,11 +20,24 @@ const enumPayingMethodMap: Record<string, string> = {
   "None": "Nenhum",
 };
 
+const enumSectionMap: Record<string, string> = {
+  PENDENTE: "Pendente",
+  FAZENDO: "Fazendo",
+  FINALIZADO: "Finalizado",
+};
+
 const enumPayingStatusMap: Record<string, string> = {
   UNPAID: "Não pago",
   HALFPAID: "Meio pago",
   FULLPAID: "Pago",
 };
+
+export function humanizeSection(value: string): string {
+  if (!(value in enumSectionMap)) {
+    console.warn(`Invalid Enum! Value: "${value}" not found.`);
+  }
+  return enumSectionMap[value] || value;
+}
 
 export function humanizePayMethod(value: string): string {
   if (!(value in enumPayingMethodMap)) {
