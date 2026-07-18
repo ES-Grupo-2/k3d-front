@@ -8,12 +8,12 @@
 /* Tema claro (default do CSS). O tema efetivo é escolhido pelo ThemeProvider,
    que aplica a classe `.dark` no <html> — ver src/components/theme/. */
 :root {
-  /* Base — bege do ícone Kria 3D. As superfícies (card, popover, track do
-     theme switch) são brancas e se destacam sobre o bege. */
-  --background: #f8ecca;
+  /* Base — creme claro derivado do bege do ícone (mais claro e menos saturado
+     que o ícone, para um visual mais leve). */
+  --background: #fbf5e7;
   --foreground: #1a1c1c;
 
-  /* Components */
+  /* Components — superfícies brancas que "sobem" sobre o creme (borda + sombra). */
   --card: #ffffff;
   --card-foreground: #1a1c1c;
 
@@ -24,24 +24,24 @@
   --primary: #ffc94d;
   --primary-foreground: #1a1c1c;
 
-  /* Secondary — bege mais fundo, para se distinguir do fundo bege. */
-  --secondary: #efdeaa;
+  /* Secondary — tan quente, distinto do fundo e dos cards brancos. */
+  --secondary: #efe4c2;
   --secondary-foreground: #1a1c1c;
 
   /* Muted */
-  --muted: #efe8d6;
-  --muted-foreground: #5c5f5f;
+  --muted: #f2ecdc;
+  --muted-foreground: #6b6d6d;
 
   /* Accent */
-  --accent: #efdeaa;
+  --accent: #efe4c2;
   --accent-foreground: #1a1c1c;
 
   /* States */
   --destructive: #dc2626;
 
-  /* Borders/Input */
-  --border: rgba(26, 28, 28, 0.14);
-  --input: rgba(26, 28, 28, 0.14);
+  /* Borders/Input — tan visível para separar bem os componentes do fundo. */
+  --border: #e3d5b2;
+  --input: #e3d5b2;
 
   /* Focus */
   --ring: #ffc94d;
