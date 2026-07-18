@@ -76,7 +76,7 @@ export async function createKanbanOrder(data: CreateOrderDTO) {
   return response.json(); 
 }
 
-export async function updateKanbanOrder(orderId: number, data: any) {
+export async function updateKanbanOrder(orderId: number, data: any ) {
   const session = await requireAuth();
   const token = session?.token;
   if (!token) throw new Error("Acesso não autorizado");

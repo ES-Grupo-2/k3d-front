@@ -23,22 +23,25 @@ export function KanbanColumn({
   const { active } = useDndContext();
   const draggedOrder = active?.data.current?.order as Order | undefined;
   const isCardFromOtherColumn = active?.data.current?.originColumn !== id;
-
   return (
-    <div
-      ref={setNodeRef}
-      className={`panel bg-background flex h-full flex-col rounded-sm border-2 border-solid ${isOver ? "border-primary" : ""}`}
-    >
-      <header className="border-border flex items-center justify-between border-b px-4 py-3">
-        <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
-          {title}
-        </h2>
-        <span className="text-subtle bg-foreground/10 rounded-full border-0 px-3 py-1 text-xs">
-          {orders.length}
-        </span>
-      </header>
+  <div
+    ref={setNodeRef}
+    className={`panel flex flex-1 h-full min-h-0 w-full flex-col overflow-hidden rounded-sm border-2 border-solid transition-colors ${
+        isOver ? "border-primary bg-primary/5" : "bg-background border-border"
+      }`}
+  >
+    <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
+      <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
+        {title}
+      </h2>
+      <span className="text-subtle rounded-full bg-foreground/10 px-3 py-1 text-xs">
+        {orders.length}
+      </span>
+    </header>
 
-      <div className="flex-1 space-y-3 p-3">
+   
+    <div className="min-h-0 flex-1 overflow-y-auto p-3 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="space-y-3 pb-4"> 
         {orders.map((o) => (
           <KanbanCard
             key={Number(o.id)}
@@ -48,22 +51,22 @@ export function KanbanColumn({
             isManager={isManager}
           />
         ))}
+
         {isOver && isCardFromOtherColumn && draggedOrder && (
           <KanbanCard
             order={draggedOrder}
             onEdit={() => {}}
             onDelete={() => {}}
             isManager={isManager}
-            isDestinationPlaceHolder={true}
+            isDestinationPlaceHolder
           />
         )}
 
         {orders.length === 0 && !(isOver && isCardFromOtherColumn) && (
-          <p className="text-subtle py-6 text-center text-xs">
-            Sem pedidos aqui
-          </p>
+          <p className="text-subtle py-6 text-center text-xs">Sem pedidos aqui</p>
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }

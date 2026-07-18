@@ -23,7 +23,8 @@ interface CreateOrderDialogProps {
 }
 
 export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOrderDialogProps) {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<OrderFormData>();
+  const { register, handleSubmit, setValue } = useForm<OrderFormData>();
+  //const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<OrderFormData>(); OLDER STATE
   const [clientMode, setClientMode] = useState<"EXISTING" | "NEW">("EXISTING");
 
   // Client and Tag mock data for demonstration purposes

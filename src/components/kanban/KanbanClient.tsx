@@ -7,9 +7,8 @@ import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
-import { CreateOrderDTO, OrderFormData } from "@/types/order";
-import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
+import { moveKanbanOrder } from "@/services/kanban/kanban";
+import { OrderFormData } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
 
 type KanbanClientProps = {
@@ -40,7 +39,6 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     } catch (error) {
       console.error(error);
       setOrders(previousOrders);
-      // Toast notification can be added here
     }
   };
 
@@ -72,7 +70,6 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     setDeletingId(null);
   };
 
-
   /**
    * WORK IN PROGRESS - THIS FUNCTION WILL BE REFACTORED SINCE THE DELETE ORDER ENDPOINT IS GOING TO CHANGE
  * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
@@ -96,61 +93,55 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
  * immediately on the Kanban board and safely closes the modal.
  * * @throws {Error} Will throw an error if client creation fails, order creation fails, 
  * or if the storage upload process is interrupted.
- * * @todo Discuss with the backend team regarding a compensation transaction (Rollback) 
- * if steps 3-5 fail. Currently, the DELETE endpoint is restricted to Managers, 
- * preventing automated rollbacks for Operational users if an upload fails mid-flight.
  */
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
-    
     try {
-    //   let finalClientId = formData.clientId;
+  //     let finalClientId = formData.clientId;
 
-    //   if (!finalClientId && formData.newClientName) {
-    //     const clientResponse = await createClient({ 
-    //       name: formData.newClientName, 
-    //       phone: formData.newClientPhone || "" 
-    //     });
-    //     finalClientId = clientResponse.id;
-    //   }
+  //     if (!finalClientId && formData.newClientName) {
+  //       const clientResponse = await createClient({ 
+  //         name: formData.newClientName, 
+  //         phone: formData.newClientPhone || "" 
+  //       });
+  //       finalClientId = clientResponse.id;
+  //     }
 
-    //   if (!finalClientId) throw new Error("Cliente é obrigatório!");
+  //     if (!finalClientId) throw new Error("Cliente é obrigatório!");
 
-    //   const initialPayload: CreateOrderDTO = {
-    //     title: formData.title,
-    //     clientId: Number(finalClientId),
-    //     tagId: formData.tagId,
-    //     price: formData.price,
-    //     amount_paid: formData.amount_paid,
-    //     cost: formData.cost,
-    //     quantity: formData.quantity,
-    //     payment_method: formData.payment_method,
-    //     link: formData.link,
-    //   };
+  //     const initialPayload: CreateOrderDTO = {
+  //       title: formData.title,
+  //       clientId: Number(finalClientId),
+  //       tagId: formData.tagId,
+  //       price: formData.price,
+  //       amount_paid: formData.amount_paid,
+  //       cost: formData.cost,
+  //       quantity: formData.quantity,
+  //       payment_method: formData.payment_method,
+  //       link: formData.link,
+  //     };
 
-    //   const newOrder = await createKanbanOrder(initialPayload);
+  //     const newOrder = await createKanbanOrder(initialPayload);
 
-    //   if (formData.file && formData.file.length > 0) {
-    //     const fileToUpload = formData.file[0];
+  //     if (formData.file && formData.file.length > 0) {
+  //       const fileToUpload = formData.file[0];
         
-    //     const { url: presignedUrl } = await getPresignedUrl(
-    //       String(newOrder.id), 
-    //       fileToUpload.name, 
-    //     );
+  //       const { url: presignedUrl } = await getPresignedUrl(
+  //         String(newOrder.id), 
+  //         fileToUpload.name, 
+  //       );
         
-    //     await uploadFileToMinIO(presignedUrl, fileToUpload);
+  //       await uploadFileToMinIO(presignedUrl, fileToUpload);
 
-    //     // Patch to update the order with the file URL (filename) in the database
-    //     // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
+  //       // Patch to update the order with the file URL (filename) in the database
+  //       // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
         
-    //     newOrder.archive = fileToUpload.name; // Locally updates the UI
-      // }
+  //       newOrder.archive = fileToUpload.name; // Locally updates the UI
+  //     }
       
-    //   setOrders((prev) => [newOrder, ...prev]);
-    //   setCreateModalOpen(false);
+  //     setOrders((prev) => [newOrder, ...prev]);
+  //     setCreateModalOpen(false);
       
-      // Confirmation Toast can be added here
-
     } catch (error) {
       console.error(error);
     } finally {
@@ -158,17 +149,17 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  return (
-    <div className="flex flex-col h-full">
-      <header className="mb-5 mr-5 flex shrink-0 justify-end">
-        {isManager && (
-          <Button variant="default" className="hover:cursor-pointer hover:bg-primary/90 transition-colors" onClick={() => setCreateModalOpen(true)}> 
-            + Novo pedido
-          </Button>
-        )}
-      </header>
+return (
+  <div className="flex h-svh w-full select-none flex-col overflow-hidden overscroll-none">
+    <header className="flex shrink-0 justify-end px-5 py-4">
+      {isManager && (
+        <Button variant="default" className="transition-colors hover:cursor-pointer hover:bg-primary/90" onClick={() => setCreateModalOpen(true)}>
+          + Novo pedido
+        </Button>
+      )}
+    </header>
 
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 flex-col overflow-hidden">
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}

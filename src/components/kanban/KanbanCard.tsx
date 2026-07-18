@@ -59,7 +59,9 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
         suppressHydrationWarning={true}
-        className={`relative overflow-hidden rounded-lg transition-colors ${
+        className={`relative overflow-hidden rounded-md text-sm transition-colors ${
+          isDragging ? "touch-none opacity-50" : "touch-pan-y"
+        } ${
           isOverlay
             ? "bg-muted ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
             : isPlaceholder
