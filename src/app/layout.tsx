@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 
 import { AuthProvider } from "@/components/auth";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { ThemeProvider } from "@/components/theme";
 
 import "./globals.css";
 
@@ -27,7 +28,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1a1c1c",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8ecca" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1c1c" },
+  ],
 };
 
 export default function RootLayout({
@@ -36,11 +40,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="dark h-full">
+    <html lang="pt-BR" className="h-full" suppressHydrationWarning>
       <body
         className={`${poppins.className} flex min-h-full flex-col antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
         <ServiceWorkerRegister />
       </body>
     </html>
