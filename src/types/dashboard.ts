@@ -7,8 +7,8 @@ export type OperationalDashboardApiData = {
 }
 
 export type OperationalTagsApiData = {
-    tagId: string;
-    name: string;
+    tagName: string;
+    tagType: string;
     color: string;
     quantidade: number;
 }

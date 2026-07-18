@@ -11,7 +11,7 @@ import type {
 import { authHttp } from "@/services/auth/http";
 import type { 
   OperationalDashboardApiData,
-  OperationalTagsApiData, 
+  OperationalTagsApiData,
   FinancialDashboardApiData, 
   ProductsBreakdownApiData, 
   ProductBreakdownApi } from "@/types/dashboard"; 
@@ -31,14 +31,13 @@ export async function getOperationalDashboard(
     `/dashboard/operacional?periodo=${periodToPeriodo[period]}`,
     { token },
   );
-
   return {
     period: period,
     totalOrders: backendData.totalPedidos,
-    byCategory: backendData.tags.map((tag: OperationalTagsApiData) => ({
-      tagId: tag.tagId,
-      name: tag.name,
-      color: tag.color,
+    byCategory: backendData.tags.map((tag: OperationalTagsApiData, idx) => ({
+      tagId: String(idx+1),
+      name: tag.tagType, 
+      color: "#ffc94d", // Placeholder color since backend doesn't provide it
       total: tag.quantidade,
     })),
   };
