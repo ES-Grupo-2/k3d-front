@@ -16,7 +16,7 @@ import type {
   FinancialDashboardData,
   Period,
   ProductsBreakdownData,
-} from "@/schemas/dashboard";
+} from "@/schemas/dashboard/dashboard";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
 import { PeriodFilter } from "./PeriodFilter";

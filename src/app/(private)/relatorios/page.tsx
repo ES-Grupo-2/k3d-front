@@ -7,7 +7,7 @@ import {
   type FinancialDashboardData,
   parsePeriod,
   type ProductsBreakdownData,
-} from "@/schemas/dashboard";
+} from "@/schemas/dashboard/dashboard";
 import { requireRole } from "@/services/auth/session";
 import {
   getFinancialDashboard,

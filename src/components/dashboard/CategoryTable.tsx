@@ -1,7 +1,7 @@
 // Tabela de detalhamento por categoria do dashboard operacional. Lista cada
 // categoria com a quantidade de pedidos e sua participação (%) no total.
 // Author: lukasnascimento1
-import type { OperationalDashboardData } from "@/schemas/dashboard";
+import type { OperationalDashboardData } from "@/schemas/dashboard/dashboard";
 
 interface CategoryTableProps {
   categories: OperationalDashboardData["byCategory"];

@@ -8,14 +8,13 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
-import type { OperationalDashboardData } from "@/schemas/dashboard";
+import type { OperationalDashboardData } from "@/schemas/dashboard/dashboard";
 import { useChartTheme } from "./chart-theme";
 
 interface OperationalChartProps {
@@ -25,10 +24,15 @@ interface OperationalChartProps {
 export function OperationalChart({ data }: OperationalChartProps) {
   const theme = useChartTheme();
 
+  const chartData = data.map((entry) => ({
+    ...entry,
+    fill: entry.color || theme.primary,
+  }));
+
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} />
           <XAxis dataKey="name" stroke={theme.axis} tick={{ fontSize: 12 }} />
           <YAxis stroke={theme.axis} allowDecimals={false} width={32} />
@@ -42,11 +46,12 @@ export function OperationalChart({ data }: OperationalChartProps) {
             labelStyle={{ color: theme.foreground }}
             itemStyle={{ color: theme.foreground }}
           />
-          <Bar dataKey="total" name="Pedidos" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => (
-              <Cell key={entry.tagId} fill={entry.color || theme.primary} />
-            ))}
-          </Bar>
+          
+          <Bar 
+            dataKey="total" 
+            name="Pedidos" 
+            radius={[4, 4, 0, 0]} 
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

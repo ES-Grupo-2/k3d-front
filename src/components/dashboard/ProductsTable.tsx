@@ -3,7 +3,7 @@
 // e quantidade. Compartilhada entre os dois dashboards.
 // Author: lukasnascimento1
 import { currency } from "@/lib/utils";
-import type { ProductBreakdown } from "@/schemas/dashboard";
+import type { ProductBreakdown } from "@/schemas/dashboard/dashboard";
 
 interface ProductsTableProps {
   products: ProductBreakdown[];

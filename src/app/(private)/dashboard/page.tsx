@@ -7,7 +7,7 @@ import {
   type OperationalDashboardData,
   parsePeriod,
   type ProductsBreakdownData,
-} from "@/schemas/dashboard";
+} from "@/schemas/dashboard/dashboard";
 import { requireAuth } from "@/services/auth/session";
 import {
   getOperationalDashboard,

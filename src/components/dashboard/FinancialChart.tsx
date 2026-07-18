@@ -7,7 +7,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,7 +14,7 @@ import {
 } from "recharts";
 
 import { currency } from "@/lib/utils";
-import type { FinancialDashboardData } from "@/schemas/dashboard";
+import type { FinancialDashboardData } from "@/schemas/dashboard/dashboard";
 import { useChartTheme } from "./chart-theme";
 
 interface FinancialChartProps {
@@ -55,11 +54,11 @@ export function FinancialChart({ data }: FinancialChartProps) {
             itemStyle={{ color: theme.foreground }}
             formatter={(value) => currency(Number(value))}
           />
-          <Bar dataKey="value" name="Valor" radius={[4, 4, 0, 0]}>
-            {chartData.map((entry) => (
-              <Cell key={entry.name} fill={entry.fill} />
-            ))}
-          </Bar>
+          <Bar 
+            dataKey="value" 
+            name="Valor" 
+            radius={[4, 4, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

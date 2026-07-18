@@ -63,3 +63,4 @@ export interface ProductsBreakdownData {
   period: Period;
   products: ProductBreakdown[];
 }
+

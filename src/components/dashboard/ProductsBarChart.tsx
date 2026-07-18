@@ -8,7 +8,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -16,7 +15,7 @@ import {
 } from "recharts";
 
 import { currency } from "@/lib/utils";
-import type { ProductBreakdown } from "@/schemas/dashboard";
+import type { ProductBreakdown } from "@/schemas/dashboard/dashboard";
 import { useChartTheme } from "./chart-theme";
 
 interface ProductsBarChartProps {
@@ -36,11 +35,16 @@ export function ProductsBarChart({
   const format = (value: number) =>
     kind === "currency" ? currency(value) : String(value);
 
+  const chartData = products.map((product) => ({
+    ...product,
+    fill: product.tagColor || theme.primary,
+  }));
+
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={products}
+          data={chartData}
           layout="vertical"
           margin={{ left: 16, right: 16 }}
         >
@@ -69,14 +73,11 @@ export function ProductsBarChart({
             itemStyle={{ color: theme.foreground }}
             formatter={(value) => format(Number(value))}
           />
-          <Bar dataKey={dataKey} name={label} radius={[0, 4, 4, 0]}>
-            {products.map((product) => (
-              <Cell
-                key={product.name}
-                fill={product.tagColor || theme.primary}
-              />
-            ))}
-          </Bar>
+          <Bar 
+            dataKey={dataKey} 
+            name={label} 
+            radius={[0, 4, 4, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

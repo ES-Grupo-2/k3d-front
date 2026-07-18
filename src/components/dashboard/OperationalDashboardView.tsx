@@ -15,7 +15,7 @@ import type {
   OperationalDashboardData,
   Period,
   ProductsBreakdownData,
-} from "@/schemas/dashboard";
+} from "@/schemas/dashboard/dashboard";
 import { CategoryTable } from "./CategoryTable";
 import { MetricCard } from "./MetricCard";
 import { OperationalChart } from "./OperationalChart";

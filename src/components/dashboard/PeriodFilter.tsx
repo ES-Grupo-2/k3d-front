@@ -5,7 +5,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
-import { PERIOD_LABELS, PERIODS, type Period } from "@/schemas/dashboard";
+import { PERIOD_LABELS, PERIODS, type Period } from "@/schemas/dashboard/dashboard";
 
 interface PeriodFilterProps {
   basePath: string;

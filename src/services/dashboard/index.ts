@@ -7,39 +7,86 @@ import type {
   OperationalDashboardData,
   Period,
   ProductsBreakdownData,
-} from "@/schemas/dashboard";
+} from "@/schemas/dashboard/dashboard";
 import { authHttp } from "@/services/auth/http";
+import type { 
+  OperationalDashboardApiData,
+  OperationalTagsApiData, 
+  FinancialDashboardApiData, 
+  ProductsBreakdownApiData, 
+  ProductBreakdownApi } from "@/types/dashboard"; 
+
+const periodToPeriodo: Record<Period, string> = {
+  WEEKLY: "SEMANAL",
+  MONTHLY: "MENSAL",
+  SEMIANNUAL: "SEMESTRAL",
+};
 
 // Busca a agregação operacional (pedidos por categoria) do período informado.
-export function getOperationalDashboard(
+export async function getOperationalDashboard(
   period: Period,
   token: string,
 ): Promise<OperationalDashboardData> {
-  return authHttp<OperationalDashboardData>(
-    `/dashboard/operational?period=${period}`,
+  const backendData = await authHttp<OperationalDashboardApiData>(
+    `/dashboard/operacional?periodo=${periodToPeriodo[period]}`,
     { token },
   );
+
+  return {
+    period: period,
+    totalOrders: backendData.totalPedidos,
+    byCategory: backendData.tags.map((tag: OperationalTagsApiData) => ({
+      tagId: tag.tagId,
+      name: tag.name,
+      color: tag.color,
+      total: tag.quantidade,
+    })),
+  };
 }
 
 // Busca os indicadores financeiros (receita, custo, lucro, ticket) do período.
-export function getFinancialDashboard(
+export async function getFinancialDashboard(
   period: Period,
   token: string,
 ): Promise<FinancialDashboardData> {
-  return authHttp<FinancialDashboardData>(
-    `/dashboard/financial?period=${period}`,
+  const backendData = await authHttp<FinancialDashboardApiData>(
+    `/dashboard/financeiro?periodo=${periodToPeriodo[period]}`,
     { token },
   );
+
+  return {
+    period: period,
+    revenue: backendData.receitaTotal,
+    cost: backendData.custoTotal,
+    profit: backendData.lucroTotal,
+    averageTicket: backendData.ticketMedio,
+    totalOrders: backendData.totalPedidos,
+  };
 }
 
 // Busca o detalhamento por produto (receita, custo, lucro, margem, quantidade).
 // Requer perfil Gerente no backend.
-export function getProductsBreakdown(
+export async function getProductsBreakdown(
   period: Period,
   token: string,
 ): Promise<ProductsBreakdownData> {
-  return authHttp<ProductsBreakdownData>(
-    `/dashboard/financial/products?period=${period}`,
+  const backendData = await authHttp<ProductsBreakdownApiData>(
+    `/dashboard/financeiro/produtos?periodo=${periodToPeriodo[period]}`,
     { token },
   );
+
+  return {
+    period: period,
+    products: backendData.produtos?.map((prod: ProductBreakdownApi) => ({
+      name: prod.nome,
+      tagName: prod.tagType,
+      revenue: prod.receita,
+      cost: prod.custo,
+      profit: prod.lucro,
+      quantity: prod.quantidade,
+      orders: prod.pedidos,
+      profitMarginPercent: prod.margemLucro,
+      tagColor: "#ffc94d"
+    })) || []
+  };
 }
