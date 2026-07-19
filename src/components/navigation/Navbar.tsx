@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import type { AuthUser } from "@/schemas/auth";
+import { ThemeToggle } from "@/components/theme";
 
 import { LogoutButton } from "./LogoutButton";
 import { getInitials, getPageTitle, ROLE_LABELS } from "./nav-config";
@@ -45,7 +46,9 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
           </span>
         </div>
 
-        <LogoutButton variant="icon" className="hover:cursor-pointer"/>
+        <ThemeToggle />
+
+        <LogoutButton variant="icon" />
       </div>
     </header>
   );

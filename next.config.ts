@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -30,3 +31,6 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Expõe os bindings do Cloudflare durante `next dev` (necessário pelo adaptador OpenNext).
+initOpenNextCloudflareForDev();
