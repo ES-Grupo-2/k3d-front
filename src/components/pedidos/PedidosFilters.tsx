@@ -19,7 +19,7 @@ const ALL = "ALL";
 const SECTION_OPTIONS = [
   { value: "PENDENTE", label: "Pendente" },
   { value: "FAZENDO", label: "Fazendo" },
-  { value: "CONCLUIDO", label: "Concluído" },
+  { value: "FINALIZADO", label: "Finalizado" },
 ];
 
 const PAYMENT_OPTIONS = [

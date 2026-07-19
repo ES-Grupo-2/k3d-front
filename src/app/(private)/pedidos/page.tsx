@@ -7,7 +7,7 @@ import { queryOrders } from "@/services/orders";
 // already-filtered list on the server and hands it off for rendering. All the
 // interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
 
-const SECTIONS = ["PENDENTE", "FAZENDO", "CONCLUIDO"];
+const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
 const PAYMENT_METHODS = ["CREDIT_CARD", "DEBIT_CARD", "CASH", "PIX", "None"];
 
 // Ensures only valid enum values reach the filter (ignores junk in the URL).
