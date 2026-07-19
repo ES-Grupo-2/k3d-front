@@ -1,6 +1,6 @@
-import type { KanbanTaskStatus, Order, PaymentStatus } from "@/types/kanban";
+import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
-
+import type { ApiOrder } from "@/types/order";
 // Orders listing for the history screen.
 // Purely visual component (server-rendered): receives the already-filtered list
 // and presents it as a table on desktop and as cards on mobile.
@@ -41,7 +41,7 @@ function TagPill({ name, color }: { name: string; color: string }) {
   );
 }
 
-export function PedidosList({ orders }: { orders: Order[] }) {
+export function PedidosList({ orders }: { orders: ApiOrder[] }) {
   return (
     <>
       {/* Desktop: table */}
@@ -71,7 +71,7 @@ export function PedidosList({ orders }: { orders: Order[] }) {
                   <div className="text-foreground font-medium">
                     {order.title}
                   </div>
-                  <TagPill name={order.tag.type} color={order.tag.color || "#777"} />
+                  <TagPill name={order.tag.type} color={"#777"} />
                 </td>
                 <td className="text-muted-foreground px-4 py-3">
                   {order.client.name}
@@ -89,7 +89,7 @@ export function PedidosList({ orders }: { orders: Order[] }) {
                   {currency(order.price)}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col items-start gap-1">
                     <Badge
                       className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
                       label={humanizePayStatus(order.amount_paid, order.price)}
@@ -111,7 +111,7 @@ export function PedidosList({ orders }: { orders: Order[] }) {
           <div
             key={order.id}
             className="border-border bg-card rounded-xl border p-4"
-            style={{ borderLeft: `3px solid ${order.tag.color}` }}
+            style={{ borderLeft: `3px solid ${"#89CFF0"}` }}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -136,7 +136,7 @@ export function PedidosList({ orders }: { orders: Order[] }) {
                 className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
                 label={humanizePayStatus(order.amount_paid, order.price)}
                 />
-              <TagPill name={order.tag.type} color={order.tag.color || "#777"} />
+              <TagPill name={order.tag.type} color={"#777"} />
             </div>
 
             <div className="border-border/60 text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t pt-3 text-sm">

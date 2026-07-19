@@ -4,29 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
-import { Input } from "@/components/ui";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui";
+} from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
-// Filter bar for the Orders screen.
-// It's the only interactive (client) part of the screen: it never keeps the
-// orders in state, it just pushes the search and filters into the URL. The
-// page's Server Component reacts to the `searchParams` change and returns the
-// already-filtered list.
-// On desktop the controls stay inline; on mobile they collapse into two buttons
-// (Search and Filter) to avoid cluttering the screen, opening the input and the
-// drawer on demand.
-
-// Sentinel Select value for "no filter" — Radix doesn't accept an empty item.
 const ALL = "ALL";
 
-const COLUMN_OPTIONS = [
+const SECTION_OPTIONS = [
   { value: "PENDENTE", label: "Pendente" },
   { value: "FAZENDO", label: "Fazendo" },
   { value: "FINALIZADO", label: "Finalizado" },
@@ -37,15 +27,15 @@ const PAYMENT_OPTIONS = [
   { value: "CREDIT_CARD", label: "Cartão de Crédito" },
   { value: "DEBIT_CARD", label: "Cartão de Débito" },
   { value: "CASH", label: "Dinheiro" },
+  { value: "None", label: "Nenhum" },
 ];
 
 interface PedidosFiltersProps {
   initialQuery: string;
-  initialColumn: string;
+  initialSection: string; 
   initialPayment: string;
 }
 
-// Chip option group used in the mobile filters drawer.
 function FilterChips({
   label,
   value,
@@ -87,7 +77,7 @@ function FilterChips({
 
 export function PedidosFilters({
   initialQuery,
-  initialColumn,
+  initialSection,
   initialPayment,
 }: PedidosFiltersProps) {
   const router = useRouter();
@@ -99,17 +89,12 @@ export function PedidosFilters({
   const [filterOpen, setFilterOpen] = useState(false);
   const isFirstRender = useRef(true);
 
-  // Re-syncs the search when the URL changes externally (e.g. browser
-  // back/forward), so we don't keep text typed on a previous visit. Done as a
-  // render-time adjustment (React's recommended pattern for deriving state from
-  // a prop) instead of an effect that calls setState.
   const [syncedQuery, setSyncedQuery] = useState(initialQuery);
   if (initialQuery !== syncedQuery) {
     setSyncedQuery(initialQuery);
     setQuery(initialQuery);
   }
 
-  // Rewrites the URL preserving the other params; an empty value drops the key.
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
@@ -120,7 +105,6 @@ export function PedidosFilters({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  // Debounces the text search so we don't fire a request on every keystroke.
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -131,13 +115,12 @@ export function PedidosFilters({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  const activeFilterCount = (initialColumn ? 1 : 0) + (initialPayment ? 1 : 0);
+  const activeFilterCount = (initialSection ? 1 : 0) + (initialPayment ? 1 : 0);
   const hasActiveFilters = query !== "" || activeFilterCount > 0;
 
-  // Clears only the filters (status and payment), keeping the text search.
   function clearFilters() {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("status");
+    params.delete("section"); 
     params.delete("payment");
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
@@ -149,7 +132,6 @@ export function PedidosFilters({
 
   return (
     <>
-      {/* Mobile: two discreet buttons (Search opens an inline input, Filter opens a drawer) */}
       <div className="flex gap-2 md:hidden">
         {searchOpen ? (
           <div className="relative flex-1">
@@ -161,12 +143,10 @@ export function PedidosFilters({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por título, cliente ou ID…"
               className="pr-9 pl-9"
-              aria-label="Buscar pedidos"
             />
             <button
               type="button"
               onClick={() => setSearchOpen(false)}
-              aria-label="Fechar busca"
               className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2 p-1"
             >
               <X className="size-4" />
@@ -190,7 +170,6 @@ export function PedidosFilters({
         <button
           type="button"
           onClick={() => setFilterOpen(true)}
-          aria-label="Abrir filtros"
           className={`relative flex shrink-0 items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors ${
             activeFilterCount > 0
               ? "border-primary text-foreground"
@@ -207,7 +186,6 @@ export function PedidosFilters({
         </button>
       </div>
 
-      {/* Desktop: inline controls */}
       <div className="hidden gap-3 md:flex md:items-center">
         <div className="relative flex-1">
           <Search className="text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
@@ -217,23 +195,22 @@ export function PedidosFilters({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por título, cliente ou ID…"
             className="pl-9"
-            aria-label="Buscar pedidos"
           />
         </div>
 
         <Select
-          value={initialColumn || ALL}
+          value={initialSection || ALL}
           onValueChange={(value) =>
-            updateParam("status", value === ALL ? "" : value)
+            updateParam("section", value === ALL ? "" : value) // Corrigido para section
           }
         >
-          <SelectTrigger className="w-44" aria-label="Filtrar por status">
-            <SelectValue placeholder="Status" />
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Status da Produção" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="hover:cursor-pointer">
             <SelectItem value={ALL}>Todos os status</SelectItem>
-            {COLUMN_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+            {SECTION_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value} className="hover:cursor-pointer">
                 {option.label}
               </SelectItem>
             ))}
@@ -246,16 +223,13 @@ export function PedidosFilters({
             updateParam("payment", value === ALL ? "" : value)
           }
         >
-          <SelectTrigger
-            className="w-48"
-            aria-label="Filtrar por forma de pagamento"
-          >
+          <SelectTrigger className="w-48">
             <SelectValue placeholder="Pagamento" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Toda forma de pagamento</SelectItem>
             {PAYMENT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.value} value={option.value} className="hover:cursor-pointer">
                 {option.label}
               </SelectItem>
             ))}
@@ -266,7 +240,7 @@ export function PedidosFilters({
           <button
             type="button"
             onClick={clearAll}
-            className="text-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors"
+            className="text-muted-foreground hover:cursor-pointer hover:text-foreground inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors"
           >
             <X className="size-4" />
             Limpar
@@ -274,16 +248,15 @@ export function PedidosFilters({
         )}
       </div>
 
-      {/* Filters drawer (mobile) */}
       <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
         <SheetContent side="right" className="w-80 max-w-[85vw] gap-6 p-6">
           <SheetTitle>Filtros</SheetTitle>
 
           <FilterChips
-            label="Status"
-            value={initialColumn}
-            options={[{ value: "", label: "Todos" }, ...COLUMN_OPTIONS]}
-            onSelect={(value) => updateParam("status", value)}
+            label="Status da Produção"
+            value={initialSection}
+            options={[{ value: "", label: "Todos" }, ...SECTION_OPTIONS]}
+            onSelect={(value) => updateParam("section", value)}
           />
 
           <FilterChips
