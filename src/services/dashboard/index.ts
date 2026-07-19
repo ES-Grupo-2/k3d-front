@@ -69,23 +69,31 @@ export async function getProductsBreakdown(
   period: Period,
   token: string,
 ): Promise<ProductsBreakdownData> {
-  const backendData = await authHttp<ProductsBreakdownApiData>(
-    `/dashboard/financeiro/produtos?periodo=${periodToPeriodo[period]}`,
-    { token },
-  );
+  try {
+    const backendData = await authHttp<ProductsBreakdownApiData>(
+      `/dashboard/financeiro/produtos?periodo=${periodToPeriodo[period]}`,
+      { token },
+    );
 
-  return {
-    period: period,
-    products: backendData.produtos?.map((prod: ProductBreakdownApi) => ({
-      name: prod.nome,
-      tagName: prod.tagType,
-      revenue: prod.receita,
-      cost: prod.custo,
-      profit: prod.lucro,
-      quantity: prod.quantidade,
-      orders: prod.pedidos,
-      profitMarginPercent: prod.margemLucro,
-      tagColor: "#ffc94d"
-    })) || []
-  };
+    return {
+      period: period,
+      products: backendData.produtos?.map((prod: ProductBreakdownApi) => ({
+        name: prod.nome,
+        tagName: prod.tagType,
+        revenue: prod.receita,
+        cost: prod.custo,
+        profit: prod.lucro,
+        quantity: prod.quantidade,
+        orders: prod.pedidos,
+        profitMarginPercent: prod.margemLucro,
+        tagColor: "#ffc94d"
+      })) || []
+    };
+  } catch (error) {
+    console.warn("[Dashboard] Endpoint de produtos não encontrado", error);
+    return {
+      period: period,
+      products: []
+    };
+  }
 }

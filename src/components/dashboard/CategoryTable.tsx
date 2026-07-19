@@ -20,7 +20,7 @@ export function CategoryTable({ categories, totalOrders }: CategoryTableProps) {
           </tr>
         </thead>
         <tbody>
-          {categories.map((category, idx) => {
+          {categories.map((category) => {
             const share =
               totalOrders > 0 ? (category.total / totalOrders) * 100 : 0;
 

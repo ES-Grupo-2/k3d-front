@@ -1,18 +1,13 @@
 // Página do Dashboard Operacional (rota /dashboard). Busca no servidor os dados
-// operacionais e o breakdown por produto com o token da sessão e entrega à view.
+// operacionais com o token da sessão e entrega à view.
 // Acessível a Gerente e Operacional.
-// Author: lukasnascimento1
 import { OperationalDashboardView } from "@/components/dashboard";
 import {
   type OperationalDashboardData,
   parsePeriod,
-  type ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { requireAuth } from "@/services/auth/session";
-import {
-  getOperationalDashboard,
-  getProductsBreakdown,
-} from "@/services/dashboard";
+import { getOperationalDashboard } from "@/services/dashboard";
 
 interface DashboardPageProps {
   searchParams: Promise<{ period?: string }>;
@@ -36,20 +31,12 @@ export default async function DashboardPage({
         : "Erro ao carregar o dashboard.";
   }
 
-  // Breakdown por produto é restrito a Gerente no backend; para Operacional a
-  // chamada falha (403) e a seção de produtos simplesmente não aparece.
-  let products: ProductsBreakdownData | null = null;
-  try {
-    products = await getProductsBreakdown(period, token);
-  } catch {
-    products = null;
-  }
+  // Feature de Produtos removida devido à ausência de endpoint no backend.
 
   return (
     <OperationalDashboardView
       period={period}
       data={data}
-      products={products}
       error={error}
     />
   );
