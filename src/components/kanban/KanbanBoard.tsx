@@ -11,21 +11,27 @@ import {
 } from "@dnd-kit/core";
 import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
-import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
+import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+
+const COLUMN_LABELS: Record<ColumnType, string> = {
+  PENDENTE: "A Fazer",
+  FAZENDO: "Em Andamento",
+  FINALIZADO: "Concluído",
+};
+
+// const COLUMNS = Object.entries(COLUMN_LABELS) as [ColumnType, string][];
+const COLUMNS = Object.entries(COLUMN_LABELS).map(([id, title]) => ({
+  id: id as ColumnType,
+  title,
+}));
 
 interface KanbanBoardProps {
   orders: Order[];
-  onMoveOrder: (orderId: string, targetColumn: ColumnType) => void;
+  onMoveOrder: (orderId: number, targetColumn: ColumnType) => void;
   onEditOrder: (order: Order) => void;
-  onDeleteOrder: (orderId: string) => void;
+  onDeleteOrder: (orderId: number) => void;
   isManager: boolean;
 }
-
-const COLUMNS: { id: ColumnType; title: string }[] = [
-  { id: "TODO", title: "A Fazer" },
-  { id: "DOING", title: "Fazendo" },
-  { id: "DONE", title: "Concluído" },
-];
 
 export function KanbanBoard({
   orders,
@@ -41,37 +47,65 @@ export function KanbanBoard({
     }),
   );
   const [orderBeingMoved, setOrderBeingMoved] = useState<Order | null>(null);
-  const [activeTab, setActiveTab] = useState<ColumnType>("TODO");
+  const [activeTab, setActiveTab] = useState<ColumnType>("PENDENTE");
   const boardContainerRef = useRef<HTMLDivElement>(null);
 
   const byColumn = useMemo(() => {
-    const map: Record<ColumnType, Order[]> = { TODO: [], DOING: [], DONE: [] };
+    const map = COLUMNS.reduce((acc, column) => {
+      acc[column.id] = [];
+      return acc;
+    }, {} as Record<ColumnType, Order[]>);
+
     orders?.forEach((o) => {
-      if (map[o.column]) map[o.column].push(o);
+      if (map[o.section]) map[o.section].push(o);
     });
+    
     return map;
   }, [orders]);
 
   function handleDragStart(e: DragStartEvent) {
-    const orderId = String(e.active.id);
-    const order = orders?.find((o) => o.id === orderId) || null;
+    const orderId = Number(e.active.id);
+    const order = orders?.find((o) => Number(o.id) === orderId) || null;
     setOrderBeingMoved(order);
   }
 
   function handleDragEnd(e: DragEndEvent) {
     setOrderBeingMoved(null);
 
-    const orderId = String(e.active.id);
+    const orderId = Number(e.active.id);
     const target = e.over?.id as ColumnType | undefined;
 
     if (!target) return;
 
-    const original = orders?.find((o) => o.id === orderId);
-    if (!original || original.column === target) return;
+    const original = orders?.find((o) => Number(o.id) === orderId);
+    if (!original || original.section === target) return;
 
     onMoveOrder(orderId, target);
   }
 
+  // return (
+  //   <DndContext
+  //     sensors={sensors}
+  //     onDragStart={handleDragStart}
+  //     onDragEnd={handleDragEnd}
+  //   >
+  //     <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch 
+  //     overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
+  //       {COLUMNS.map(([id, title]) => (
+  //         <div
+  //           key={id}
+  //           className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
+  //         >
+  //           <KanbanColumn
+  //             id={id}
+  //             title={title}
+  //             orders={byColumn[id]}
+  //             onEdit={onEditOrder}
+  //             onDelete={onDeleteOrder}
+  //             isManager={isManager}
+  //           />
+  //         </div>
+  //       ))}
   /**
    * Sync the active tab with the scroll position of the board container.
    * @returns 
@@ -124,7 +158,7 @@ return (
               className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
                 activeTab === column.id
                   ? "border-primary bg-muted text-foreground"
-                  : "border-transparent bg-background text-babg-background-foreground"
+                  : "border-transparent bg-background text-bg-background-foreground"
               }`}
             >
               {column.title}

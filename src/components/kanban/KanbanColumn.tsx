@@ -1,13 +1,13 @@
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { KanbanCard } from ".";
-import type { KanbanColumnNames as ColumnType, Order } from "@/types/kanban";
+import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
 
 interface KanbanColumnProps {
   id: ColumnType;
   title: string;
   orders: Order[];
   onEdit: (o: Order) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   isManager: boolean;
 }
 
@@ -23,7 +23,7 @@ export function KanbanColumn({
   const { active } = useDndContext();
   const draggedOrder = active?.data.current?.order as Order | undefined;
   const isCardFromOtherColumn = active?.data.current?.originColumn !== id;
-return (
+  return (
   <div
     ref={setNodeRef}
     className={`panel flex flex-1 h-full min-h-0 w-full flex-col overflow-hidden rounded-sm border-2 border-solid transition-colors ${
@@ -43,14 +43,13 @@ return (
     <div className="min-h-0 flex-1 overflow-y-auto p-3 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div className="space-y-3 pb-4"> 
         {orders.map((o) => (
-          <div key={o.id} className="group relative">
-            <KanbanCard
-              order={o}
-              onEdit={() => onEdit(o)}
-              onDelete={() => onDelete(o.id)}
-              isManager={isManager}
-            />
-          </div>
+          <KanbanCard
+            key={Number(o.id)}
+            order={o}
+            onEdit={() => onEdit(o)}
+            onDelete={() => onDelete(Number(o.id))}
+            isManager={isManager}
+          />
         ))}
 
         {isOver && isCardFromOtherColumn && draggedOrder && (

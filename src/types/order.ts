@@ -15,7 +15,7 @@ export interface PaginatedOrders {
   };
 }
 
-export type sectionNames = "PENDENTE" | "FAZENDO" | "CONCLUIDO";
+export type sectionNames = "PENDENTE" | "FAZENDO" | "FINALIZADO";
 export type paymentStatus = "NAO_PAGO" | "PAGO_PARCIAL" | "PAGO";
 
 export interface ApiOrder {

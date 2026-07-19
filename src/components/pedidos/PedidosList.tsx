@@ -1,19 +1,19 @@
-import type { ApiOrder, sectionNames, paymentStatus } from "@/types/order";
-import { currency, humanizeEnum } from "@/lib/utils";
-
+import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
+import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
+import type { ApiOrder } from "@/types/order";
 // Orders listing for the history screen.
 // Purely visual component (server-rendered): receives the already-filtered list
 // and presents it as a table on desktop and as cards on mobile.
 
 // Badge colors by flow status (Kanban column).
-const COLUMN_BADGE: Record<sectionNames, string> = {
+const COLUMN_BADGE: Record<KanbanTaskStatus, string> = {
   PENDENTE: "bg-zinc-500/15 text-zinc-300",
   FAZENDO: "bg-amber-500/15 text-amber-300",
-  CONCLUIDO: "bg-emerald-500/15 text-emerald-300",
+  FINALIZADO: "bg-emerald-500/15 text-emerald-300",
 };
 
 // Badge colors by payment status.
-const PAYMENT_BADGE: Record<paymentStatus, string> = {
+const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
   NAO_PAGO: "bg-red-500/15 text-red-300",
   PAGO_PARCIAL: "bg-amber-500/15 text-amber-300",
   PAGO: "bg-emerald-500/15 text-emerald-300",
@@ -71,9 +71,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                   <div className="text-foreground font-medium">
                     {order.title}
                   </div>
-                  <TagPill 
-                  name={String(order.tag.type)[0].toUpperCase() + String(order.tag.type).slice(1).toLowerCase()} 
-                  color={"#89CFF0"} />
+                  <TagPill name={order.tag.type} color={"#777"} />
                 </td>
                 <td className="text-muted-foreground px-4 py-3">
                   {order.client.name}
@@ -81,7 +79,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 <td className="px-4 py-3">
                   <Badge
                     className={COLUMN_BADGE[order.section]}
-                    label={humanizeEnum(order.section)}
+                    label={humanizeSection(order.section)}
                   />
                 </td>
                 <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
@@ -93,11 +91,11 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 <td className="px-4 py-3">
                   <div className="flex flex-col items-start gap-1">
                     <Badge
-                      className={PAYMENT_BADGE[order.status]}
-                      label={humanizeEnum(order.status)}
+                      className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                      label={humanizePayStatus(order.amount_paid, order.price)}
                     />
                     <span className="text-muted-foreground text-xs">
-                      {humanizeEnum(order.payment_method || "None")}
+                      {humanizePayMethod(order.payment_method || "None")}
                     </span>
                   </div>
                 </td>
@@ -132,20 +130,18 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge
                 className={COLUMN_BADGE[order.section]}
-                label={humanizeEnum(order.section)}
+                label={humanizeSection(order.section)}
               />
               <Badge
-                className={PAYMENT_BADGE[order.status]}
-                label={humanizeEnum(order.status)}
-              />
-              <TagPill 
-                  name={String(order.tag.type)[0].toUpperCase() + String(order.tag.type).slice(1).toLowerCase()} 
-                  color={"#89CFF0"} />
+                className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                label={humanizePayStatus(order.amount_paid, order.price)}
+                />
+              <TagPill name={order.tag.type} color={"#777"} />
             </div>
 
             <div className="border-border/60 text-muted-foreground mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t pt-3 text-sm">
               <span>
-                Qtde: {order.quantity} · {humanizeEnum(order.payment_method || "None")}
+                Qtde: {order.quantity} · {humanizePayMethod(order.payment_method || "None")}
               </span>
               <span className="text-foreground font-medium">
                 {currency(order.price)}
