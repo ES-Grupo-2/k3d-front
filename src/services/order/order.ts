@@ -1,6 +1,6 @@
 "use server"
 import { API_URL } from "../auth/config";
-import { Client, ClientApi, CreateClientDTO } from "@/types/order";
+import { ClientApi, CreateClientDTO } from "@/types/order";
 import { requireAuth } from "../auth/session";
 
 export async function createClient(data: CreateClientDTO) {

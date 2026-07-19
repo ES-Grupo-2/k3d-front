@@ -76,23 +76,24 @@ export async function createKanbanOrder(data: CreateOrderDTO) {
   return response.json(); 
 }
 
-export async function updateKanbanOrder(orderId: number, data: any ) {
-  const session = await requireAuth();
-  const token = session?.token;
-  if (!token) throw new Error("Acesso não autorizado");
+// CURRENTLY NOT USED, BUT KEPT FOR FUTURE REFERENCE
+// export async function updateKanbanOrder(orderId: number, data: any ) {
+//   const session = await requireAuth();
+//   const token = session?.token;
+//   if (!token) throw new Error("Acesso não autorizado");
 
-  const response = await fetch(`${API_URL}/orders/${orderId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
+//   const response = await fetch(`${API_URL}/orders/${orderId}`, {
+//     method: "PATCH",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify(data),
+//   });
 
-  if (!response.ok) throw new Error("Falha ao atualizar o pedido.");
-  return response.json();
-}
+//   if (!response.ok) throw new Error("Falha ao atualizar o pedido.");
+//   return response.json();
+// }
 
 export async function deleteKanbanOrder(orderId: number) {
   const session = await requireAuth();

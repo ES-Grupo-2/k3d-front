@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
 import { createKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
-import { CreateOrderDTO, OrderFormData } from "@/types/order";
+import { OrderFormData } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
 import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
 

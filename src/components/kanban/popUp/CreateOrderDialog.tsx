@@ -39,16 +39,22 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
    * Fetches clients and tags simultaneously when the dialog is opened
    */
   useEffect(() => {
-    if (open) {
+    const carregarDadosAuxiliares = async () => {
       setIsLoadingData(true);
       
-      Promise.all([getClients(), getTags()])
-        .then(([clientsRes, tagsRes]) => {
-          setClients(clientsRes.data || []);
-          setTags(Array.isArray(tagsRes) ? tagsRes : tagsRes.data || []);
-        })
-        .catch((error) => console.error("[CreateOrderDialog] Erro ao carregar dados auxiliares:", error))
-        .finally(() => setIsLoadingData(false));
+      try {
+        const [clientsRes, tagsRes] = await Promise.all([getClients(), getTags()]);
+        setClients(clientsRes.data || []);
+        setTags(Array.isArray(tagsRes) ? tagsRes : tagsRes.data || []);
+      } catch (error) {
+        console.error("[CreateOrderDialog] Erro ao carregar dados auxiliares:", error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    if (open) {
+      carregarDadosAuxiliares();
     }
   }, [open]);
 
@@ -74,8 +80,8 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                 <div className="space-y-1.5">
                   <Label>Tag / Categoria</Label>
                   <Select onValueChange={(val) => setValue("tagType", val, {shouldValidate: true})}>
-                    <SelectTrigger className="hover:cursor-pointer">
-                      <SelectValue placeholder="Selecione" />
+                    <SelectTrigger className="hover:cursor-pointer" disabled={isLoadingData}>
+                      <SelectValue placeholder={isLoadingData ? "Carregando..." : "Selecione"} />
                     </SelectTrigger>
                     <SelectContent>
                       {tags.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={String(t.type)}>{t.type}</SelectItem>)}
@@ -102,7 +108,9 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                 <div className="space-y-1.5">
                   <Label>Selecionar Cliente</Label>
                   <Select onValueChange={(val) => setValue("clientId", val)}>
-                    <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Busque um cliente..." /></SelectTrigger>
+                    <SelectTrigger className="hover:cursor-pointer" disabled={isLoadingData}>
+                      <SelectValue placeholder={isLoadingData ? "Carregando clientes..." : "Busque um cliente..."} />
+                    </SelectTrigger>
                     <SelectContent>
                       {clients.map(c => <SelectItem className="hover:cursor-pointer" key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                     </SelectContent>
@@ -148,7 +156,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                   <Select onValueChange={(val) => setValue("payment_method", val)}>
                     <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      {Object.entries(enumPayingMethodMap).filter(([payMethod, _]) => payMethod !== "None").map(([payMethod, label]) => (
+                      {Object.entries(enumPayingMethodMap).filter(([payMethod]) => payMethod !== "None").map(([payMethod, label]) => (
                         <SelectItem key={payMethod} className="hover:cursor-pointer" value={payMethod}>
                           {label}
                         </SelectItem>
