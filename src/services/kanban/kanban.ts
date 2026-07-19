@@ -1,7 +1,11 @@
-import { KanbanResponse } from "@/types/kanban";
+"use server"
+
+import { KanbanResponse, KanbanTaskStatus } from "@/types/kanban";
+import { API_URL } from "@/services/auth/config";
+import { requireAuth } from "../auth/session";
+import { CreateOrderDTO } from "@/types/order";
 
 export async function fetchKanbanBoard(token: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -28,4 +32,85 @@ export async function fetchKanbanBoard(token: string) {
     FAZENDO: doingRes.tasks,
     FINALIZADO: doneRes.tasks,
   };
-}   
+}
+
+export async function moveKanbanOrder(orderId: number, targetSection: KanbanTaskStatus) {
+  const sessionToken = await requireAuth().then(session => session.token);
+  if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
+
+  const response = await fetch(`${API_URL}/orders/${orderId}/move`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionToken}`,
+    },
+    body: JSON.stringify({ destinationSection: targetSection }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao mover o pedido no servidor.\n [ERROR]: " + response.statusText + " " + response.status);
+  }
+  return response.json();
+}
+
+export async function createKanbanOrder(data: CreateOrderDTO) {
+  const session = await requireAuth();
+  const token = session?.token;
+
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || "Falha ao criar o pedido no servidor.");
+  }
+
+  return response.json(); 
+}
+
+// CURRENTLY NOT USED, BUT KEPT FOR FUTURE REFERENCE
+// export async function updateKanbanOrder(orderId: number, data: any ) {
+//   const session = await requireAuth();
+//   const token = session?.token;
+//   if (!token) throw new Error("Acesso não autorizado");
+
+//   const response = await fetch(`${API_URL}/orders/${orderId}`, {
+//     method: "PATCH",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify(data),
+//   });
+
+//   if (!response.ok) throw new Error("Falha ao atualizar o pedido.");
+//   return response.json();
+// }
+
+export async function deleteKanbanOrder(orderId: number) {
+  const session = await requireAuth();
+  const token = session?.token;
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/orders/${orderId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || "Falha ao deletar o pedido.");
+  }
+  
+  return true;
+}
