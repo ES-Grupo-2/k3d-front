@@ -76,7 +76,7 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
             </p>
           </div>
         </div>
-        <LogoutButton variant="full" className="w-full" onLoggedOut={onNavigate} />
+        <LogoutButton variant="full" className="w-full hover:cursor-pointer" onLoggedOut={onNavigate} />
       </div>
     </div>
   );

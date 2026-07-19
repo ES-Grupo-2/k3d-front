@@ -1,24 +1,46 @@
 export type UniqueIdentifier = string | number;
-export type KanbanColumnNames = "TODO" | "DOING" | "DONE";
-export type PaymentStatus = "UNPAID" | "HALFPAID" | "FULLPAID";
+export type KanbanTaskStatus = 'PENDENTE' | 'FAZENDO' | 'FINALIZADO'; 
+export type PaymentStatus = "NAO_PAGO" | "PAGO_PARCIAL" | "PAGO";
 export type PaymentMethod = "CREDIT_CARD" | "DEBIT_CARD" | "CASH" | "PIX";
 
-export interface Order {
+export interface Client {
   id: string;
-  column: KanbanColumnNames;
+  name: string;
+  phone: string;
+  email?: string;
+}
+
+export interface Tag {
+  id: string;
+  type: string;
+  color?: string;
+}
+
+export interface Order {
+  id: number; 
   title: string;
-  quantity: number;
-  price: number;
+  section: KanbanTaskStatus;
   status: PaymentStatus;
-  paymentMethod: PaymentMethod;
-
-  client: {
-    id: string;
+  price: number;
+  amount_paid: number;
+  cost: number | null;
+  quantity: number;          
+  payment_method: PaymentMethod | string | null; 
+  archive?: string;
+  client: {                  
+    id: number;
     name: string;
+    phone: string;
+    email: string | null;
   };
-
-  tag: {
-    name: string;
-    color: string;
+  tag: {                     
+    id: number;
+    type: string;
+    color?: string; 
   };
 }
+
+export interface KanbanResponse {
+  taskStatus: string;
+  tasks: Order[];
+};
