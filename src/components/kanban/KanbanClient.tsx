@@ -7,9 +7,10 @@ import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { moveKanbanOrder } from "@/services/kanban/kanban";
-import { OrderFormData } from "@/types/order";
+import { createKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
+import { CreateOrderDTO, OrderFormData } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
+import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -97,50 +98,55 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
-  //     let finalClientId = formData.clientId;
+      let finalClientId = formData.clientId;
 
-  //     if (!finalClientId && formData.newClientName) {
-  //       const clientResponse = await createClient({ 
-  //         name: formData.newClientName, 
-  //         phone: formData.newClientPhone || "" 
-  //       });
-  //       finalClientId = clientResponse.id;
-  //     }
+      if (!finalClientId && formData.newClientName) {
+        const clientResponse = await createClient({ 
+          name: formData.newClientName, 
+          phone: formData.newClientPhone || "" 
+        });
 
-  //     if (!finalClientId) throw new Error("Cliente é obrigatório!");
+        // Garante que a API de clientes retornou um ID válido
+        if (!clientResponse || !clientResponse.id) {
+            throw new Error("Falha ao criar o novo cliente. ID não retornado.");
+        }
+        finalClientId = clientResponse.id;
+        }
 
-  //     const initialPayload: CreateOrderDTO = {
-  //       title: formData.title,
-  //       clientId: Number(finalClientId),
-  //       tagId: formData.tagId,
-  //       price: formData.price,
-  //       amount_paid: formData.amount_paid,
-  //       cost: formData.cost,
-  //       quantity: formData.quantity,
-  //       payment_method: formData.payment_method,
-  //       link: formData.link,
-  //     };
+      if (!finalClientId) throw new Error("Cliente é obrigatório!");
 
-  //     const newOrder = await createKanbanOrder(initialPayload);
+      const initialPayload = {
+        title: formData.title,
+        client_id: Number(finalClientId), 
+        tagType: formData.tagType,          
+        price: formData.price,
+        amount_paid: formData.amount_paid,
+        cost: formData.cost,
+        quantity: formData.quantity,
+        payment_method: formData.payment_method,
+        archive: formData.archive,           
+      };
 
-  //     if (formData.file && formData.file.length > 0) {
-  //       const fileToUpload = formData.file[0];
+      const newOrder = await createKanbanOrder(initialPayload);
+
+      if (formData.file && formData.file.length > 0) {
+        const fileToUpload = formData.file[0];
         
-  //       const { url: presignedUrl } = await getPresignedUrl(
-  //         String(newOrder.id), 
-  //         fileToUpload.name, 
-  //       );
+        const { url: presignedUrl } = await getPresignedUrl(
+          String(newOrder.id), 
+          fileToUpload.name, 
+        );
         
-  //       await uploadFileToMinIO(presignedUrl, fileToUpload);
+        await uploadFileToMinIO(presignedUrl, fileToUpload);
 
-  //       // Patch to update the order with the file URL (filename) in the database
-  //       // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
+        // Patch to update the order with the file URL (filename) in the database
+        // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
         
-  //       newOrder.archive = fileToUpload.name; // Locally updates the UI
-  //     }
+        newOrder.archive = fileToUpload.name; // Locally updates the UI
+      }
       
-  //     setOrders((prev) => [newOrder, ...prev]);
-  //     setCreateModalOpen(false);
+      setOrders((prev) => [newOrder, ...prev]);
+      setCreateModalOpen(false);
       
     } catch (error) {
       console.error(error);

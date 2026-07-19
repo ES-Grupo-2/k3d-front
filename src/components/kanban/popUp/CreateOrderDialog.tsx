@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { UploadCloud, UserPlus, Users } from "lucide-react";
-import { OrderFormData } from "@/types/order";
+import { Client, OrderFormData } from "@/types/order";
 import { enumPayingMethodMap } from "@/lib/utils";
 import {
   Dialog,
@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
+import { getClients } from "@/services/order/order";
+import { getTags, TagResponse } from "@/services/tags";
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -24,16 +26,31 @@ interface CreateOrderDialogProps {
 
 export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOrderDialogProps) {
   const { register, handleSubmit, setValue } = useForm<OrderFormData>();
-  //const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<OrderFormData>(); OLDER STATE
   const [clientMode, setClientMode] = useState<"EXISTING" | "NEW">("EXISTING");
-
-  // Client and Tag mock data for demonstration purposes
-  const MOCK_CLIENTS = [{ id: "1", name: "Monkey D. Luffy" }, { id: "2", name: "Empresa Alpha" }];
-  const MOCK_TAGS = [{ id: "1", type: "Chaveiro" }, { id: "2", type: "Peça Técnica" }];
+  const [clients, setClients] = useState<Client[]>([]);
+  const [tags, setTags] = useState<TagResponse[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const onSubmit = async (data: OrderFormData) => {
     await onSave(data);
   };
+
+  /**
+   * Fetches clients and tags simultaneously when the dialog is opened
+   */
+  useEffect(() => {
+    if (open) {
+      setIsLoadingData(true);
+      
+      Promise.all([getClients(), getTags()])
+        .then(([clientsRes, tagsRes]) => {
+          setClients(clientsRes.data || []);
+          setTags(Array.isArray(tagsRes) ? tagsRes : tagsRes.data || []);
+        })
+        .catch((error) => console.error("[CreateOrderDialog] Erro ao carregar dados auxiliares:", error))
+        .finally(() => setIsLoadingData(false));
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isLoading && !isOpen && onClose()}>
@@ -56,12 +73,12 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Tag / Categoria</Label>
-                  <Select onValueChange={(val) => setValue("tagId", Number(val))}>
+                  <Select onValueChange={(val) => setValue("tagType", val, {shouldValidate: true})}>
                     <SelectTrigger className="hover:cursor-pointer">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      {MOCK_TAGS.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={t.id}>{t.type}</SelectItem>)}
+                      {tags.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={String(t.type)}>{t.type}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -87,7 +104,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                   <Select onValueChange={(val) => setValue("clientId", val)}>
                     <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Busque um cliente..." /></SelectTrigger>
                     <SelectContent>
-                      {MOCK_CLIENTS.map(c => <SelectItem className="hover:cursor-pointer" key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      {clients.map(c => <SelectItem className="hover:cursor-pointer" key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -156,7 +173,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
               <div className="space-y-1.5">
                 <Label>Link Externo (Drive/Thingiverse)</Label>
-                <Input placeholder="https://..." {...register("link")} />
+                <Input placeholder="https://..." {...register("archive")} />
               </div>
             </div>
           </div>

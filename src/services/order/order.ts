@@ -1,6 +1,6 @@
 "use server"
 import { API_URL } from "../auth/config";
-import { CreateClientDTO } from "@/types/order";
+import { Client, ClientApi, CreateClientDTO } from "@/types/order";
 import { requireAuth } from "../auth/session";
 
 export async function createClient(data: CreateClientDTO) {
@@ -85,4 +85,26 @@ export async function uploadFileToMinIO(presignedUrl: string, file: File) {
   }
 
   return true;
+}
+
+export async function getClients(): Promise<ClientApi> {
+  const session = await requireAuth();
+  const token = session?.token;
+  
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/clients`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao buscar a lista de clientes.");
+  }
+  
+  const jsonResponse = await response.json();
+  return jsonResponse;
 }

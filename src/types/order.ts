@@ -1,15 +1,16 @@
 export interface CreateOrderDTO {
   title: string;
-  clientId: number;
-  tagId?: number;
-  price: number; 
-  amount_paid?: number; 
-  cost?: number;
+  client_id: number;
+  tagType: string;
+  price: number;
+  amount_paid: number;
   quantity: number;
-  payment_method: string;
-  fileUrl?: string;
-  link?: string;
-  machines?: string[];
+  
+  cost?: number;
+  payment_method?: string;
+  archive?: string;
+  section?: "PENDENTE" | "FAZENDO" | "FINALIZADO";
+  status?: string;
 }
 
 /**
@@ -39,4 +40,15 @@ export interface Tag {
   id: string;
   type: string;
   color?: string;
+}
+
+export interface ClientApi {
+  data: Client[];
+  meta: {
+    currentPage?: number,
+    itemCount?: number,
+    pageSize?: number,
+    totalItems?: number,
+    totalPages?: number
+  };
 }
