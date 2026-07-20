@@ -7,16 +7,18 @@ import type { ApiOrder } from "@/types/order";
 
 // Badge colors by flow status (Kanban column).
 const COLUMN_BADGE: Record<KanbanTaskStatus, string> = {
-  PENDENTE: "bg-zinc-500/15 text-zinc-300",
-  FAZENDO: "bg-amber-500/15 text-amber-300",
-  FINALIZADO: "bg-emerald-500/15 text-emerald-300",
+  PENDENTE: "bg-zinc-200 text-zinc-700 dark:bg-zinc-500/15 dark:text-zinc-300",
+  FAZENDO: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+  FINALIZADO:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
 
 // Badge colors by payment status.
 const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
-  NAO_PAGO: "bg-red-500/15 text-red-300",
-  PAGO_PARCIAL: "bg-amber-500/15 text-amber-300",
-  PAGO: "bg-emerald-500/15 text-emerald-300",
+  NAO_PAGO: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
+  PAGO_PARCIAL:
+    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+  PAGO: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
 
 function Badge({ className, label }: { className: string; label: string }) {
