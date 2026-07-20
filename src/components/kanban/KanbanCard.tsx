@@ -59,14 +59,14 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
         suppressHydrationWarning={true}
-        className={`relative overflow-hidden rounded-md text-sm transition-colors ${
+        className={`k3d-kanban-card relative overflow-hidden rounded-md text-sm transition-colors ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
         } ${
           isOverlay
-            ? "bg-card dark:bg-[#383e3e] border border-border ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
+            ? "bg-card border border-border ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
             : isPlaceholder
               ? "bg-border/20 border-border border-2 border-dashed opacity-50 cursor-grabbing"
-              : "bg-card dark:bg-[#383e3e] border border-border cursor-grab hover:border-primary/50 shadow-sm active:cursor-grabbing"
+              : "bg-card border border-border cursor-grab hover:border-primary/50 shadow-sm active:cursor-grabbing"
         }`}
       >
         <div 
@@ -127,8 +127,8 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             
             <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${
               order.amount_paid >= order.price 
-                ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400"
-                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-500"
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
             }`}>
               {humanizePayStatus(order.amount_paid || 0, order.price)}
             </span>
