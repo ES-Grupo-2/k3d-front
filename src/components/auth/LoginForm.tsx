@@ -88,6 +88,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   <FormControl>
                     <Input
                       autoComplete="username"
+                      className="bg-card"
                       placeholder="E-mail"
                       type="email"
                       {...field}
@@ -106,6 +107,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   <FormControl>
                     <PasswordInput
                       autoComplete="new-password"
+                      className="bg-card"
                       placeholder="Senha"
                       {...field}
                     />
