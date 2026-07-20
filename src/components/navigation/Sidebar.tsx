@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme";
 
 import { LogoutButton } from "./LogoutButton";
 import {
@@ -67,7 +68,7 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
           <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
             {getInitials(user.name, user.email)}
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">
               {user.name || user.email}
             </p>
@@ -75,6 +76,7 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
               {ROLE_LABELS[user.role]}
             </p>
           </div>
+          <ThemeToggle className="shrink-0" />
         </div>
         <LogoutButton variant="full" className="w-full hover:cursor-pointer" onLoggedOut={onNavigate} />
       </div>
