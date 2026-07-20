@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 // Página do Dashboard Operacional (rota /dashboard). Busca no servidor os dados
 // operacionais com o token da sessão e entrega à view.
 // Acessível a Gerente e Operacional.

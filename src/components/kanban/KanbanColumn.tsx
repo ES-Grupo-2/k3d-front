@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";

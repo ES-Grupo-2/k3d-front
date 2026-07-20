@@ -1,3 +1,5 @@
+# @author lukasnascimento1
+# @author jvs-neves
 name: Preview
 
 # Deploy de preview (Worker separado k3d-front-preview) a cada push na preview-stage.

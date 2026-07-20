@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, X } from "lucide-react";

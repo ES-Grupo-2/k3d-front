@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

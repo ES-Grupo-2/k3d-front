@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { PackageSearch } from "lucide-react";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
 import { queryOrders } from "@/services/orders"; 

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoginForm } from "@/components/auth";

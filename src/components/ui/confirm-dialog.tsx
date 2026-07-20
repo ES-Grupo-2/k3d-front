@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import * as React from "react";
 import { AlertTriangle } from "lucide-react";
 

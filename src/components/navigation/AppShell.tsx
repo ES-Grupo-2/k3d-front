@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useState } from "react";
 
 import type { AuthUser } from "@/schemas/auth";

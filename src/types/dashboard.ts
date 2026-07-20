@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { Period } from "@/schemas/dashboard/dashboard";
 
 export type OperationalDashboardApiData = {

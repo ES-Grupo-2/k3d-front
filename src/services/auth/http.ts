@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { API_URL } from "./config";
 
 type RequestOptions = Omit<RequestInit, "body"> & {

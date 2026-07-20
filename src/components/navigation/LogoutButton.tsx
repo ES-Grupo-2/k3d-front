@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";

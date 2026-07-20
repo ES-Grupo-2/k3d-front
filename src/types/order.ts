@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 export interface CreateOrderDTO {
   title: string;
   client_id: number;

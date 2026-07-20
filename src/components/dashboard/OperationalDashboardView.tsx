@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 // Tela do Dashboard Operacional: volume de pedidos por categoria
 // no período selecionado. Acessível a Gerente e Operacional. Reúne cards de
 // totais, gráfico (por categoria) e tabela de detalhamento.

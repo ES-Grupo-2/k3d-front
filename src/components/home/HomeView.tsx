@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { UploadCloud, UserPlus, Users } from "lucide-react";

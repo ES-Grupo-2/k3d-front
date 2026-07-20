@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useCallback, useEffect, useState } from "react";
 
 interface UseUnsavedGuardOptions {

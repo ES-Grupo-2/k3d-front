@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { API_URL } from "@/services/auth/config";
 import { GetOrdersFilters, PaginatedOrders } from "@/types/order";
 import { requireAuth } from "../auth/session";

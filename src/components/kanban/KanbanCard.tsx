@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { Order } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus } from "@/lib/utils";

@@ -1,5 +1,10 @@
 "use server"
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { KanbanResponse, KanbanTaskStatus } from "@/types/kanban";
 import { API_URL } from "@/services/auth/config";
 import { requireAuth } from "../auth/session";

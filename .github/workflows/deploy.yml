@@ -1,3 +1,5 @@
+# @author lukasnascimento1
+# @author jvs-neves
 name: Deploy
 
 # Faz deploy do frontend (OpenNext -> Cloudflare Workers) a cada push na stage.

@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/services/auth/session";

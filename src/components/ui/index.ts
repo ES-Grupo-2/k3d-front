@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 export { Alert, AlertDescription, AlertTitle } from "./alert";
 export { Button } from "./button";
 export {

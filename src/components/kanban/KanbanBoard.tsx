@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useMemo, useState, useRef } from "react";
 import {
   DndContext,

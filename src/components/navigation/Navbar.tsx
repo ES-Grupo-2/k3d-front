@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 

@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { HomeView } from "@/components/home/HomeView";
 import { requireAuth } from "@/services/auth/session";
 

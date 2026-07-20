@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
 import type { ApiOrder } from "@/types/order";
