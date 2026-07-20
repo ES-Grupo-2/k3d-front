@@ -3,16 +3,13 @@
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-import type { AuthUser } from "@/schemas/auth";
-
-import { getInitials, getPageTitle, ROLE_LABELS } from "./nav-config";
+import { getPageTitle } from "./nav-config";
 
 interface NavbarProps {
-  user: AuthUser;
   onMenuClick: () => void;
 }
 
-export function Navbar({ user, onMenuClick }: NavbarProps) {
+export function Navbar({ onMenuClick }: NavbarProps) {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
 
@@ -29,22 +26,8 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
 
       <h1 className="flex-1 truncate text-lg font-semibold">{title}</h1>
 
-      <div className="flex items-center gap-3">
-        <div className="hidden items-center gap-3 sm:flex">
-          <div className="text-right">
-            <p className="text-sm leading-tight font-medium">
-              {user.name || user.email}
-            </p>
-            <p className="text-muted-foreground text-xs leading-tight">
-              {ROLE_LABELS[user.role]}
-            </p>
-          </div>
-          <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-full text-sm font-semibold">
-            {getInitials(user.name, user.email)}
-          </span>
-        </div>
-
-      </div>
+      {/* Slot para ações específicas da página (ex: "Novo pedido" no Kanban). */}
+      <div id="header-slot" className="flex items-center gap-2" />
     </header>
   );
 }

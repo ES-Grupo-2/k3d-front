@@ -39,7 +39,7 @@ export function AppShell({ user, children }: AppShellProps) {
       </Sheet>
 
       <div className="flex min-h-screen flex-col md:pl-64">
-        <Navbar user={user} onMenuClick={() => setMobileOpen(true)} />
+        <Navbar onMenuClick={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
       </div>
 

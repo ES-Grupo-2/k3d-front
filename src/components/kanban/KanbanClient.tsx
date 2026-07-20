@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
@@ -155,15 +156,27 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
+  // Injeta o botão "Novo pedido" no slot do header compartilhado (Navbar),
+  // liberando o espaço que ele ocupava no topo da área principal.
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setHeaderSlot(document.getElementById("header-slot"));
+  }, []);
+
 return (
   <div className="flex h-svh w-full select-none flex-col overflow-hidden overscroll-none">
-    <header className="flex shrink-0 justify-end px-5 py-4">
-      {isManager && (
-        <Button variant="default" className="transition-colors hover:cursor-pointer hover:bg-primary/90" onClick={() => setCreateModalOpen(true)}>
+    {isManager &&
+      headerSlot &&
+      createPortal(
+        <Button
+          variant="default"
+          className="transition-colors hover:cursor-pointer hover:bg-primary/90"
+          onClick={() => setCreateModalOpen(true)}
+        >
           + Novo pedido
-        </Button>
+        </Button>,
+        headerSlot,
       )}
-    </header>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
         <KanbanBoard
