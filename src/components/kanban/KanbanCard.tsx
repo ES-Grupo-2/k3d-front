@@ -63,10 +63,10 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
         } ${
           isOverlay
-            ? "bg-card border border-border ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
+            ? "bg-card dark:bg-[#383e3e] border border-border ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
             : isPlaceholder
               ? "bg-border/20 border-border border-2 border-dashed opacity-50 cursor-grabbing"
-              : "bg-card border border-border cursor-grab hover:bg-muted/40 shadow-sm active:cursor-grabbing"
+              : "bg-card dark:bg-[#383e3e] border border-border cursor-grab hover:border-primary/50 shadow-sm active:cursor-grabbing"
         }`}
       >
         <div 
