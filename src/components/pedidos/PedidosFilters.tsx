@@ -32,7 +32,6 @@ const PAYMENT_OPTIONS = [
   { value: "CREDIT_CARD", label: "Cartão de Crédito" },
   { value: "DEBIT_CARD", label: "Cartão de Débito" },
   { value: "CASH", label: "Dinheiro" },
-  { value: "None", label: "Nenhum" },
 ];
 
 interface PedidosFiltersProps {
@@ -193,13 +192,13 @@ export function PedidosFilters({
 
       <div className="hidden gap-3 md:flex md:items-center">
         <div className="relative flex-1">
-          <Search className="text-muted-foreground/60 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Search className="text-foreground/75 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por título, cliente ou ID…"
-            className="pl-9"
+            className="pl-9 text-foreground/90 placeholder:text-foreground/75"
           />
         </div>
 

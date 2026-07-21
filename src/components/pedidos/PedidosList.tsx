@@ -25,6 +25,16 @@ const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
   PAGO: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
 
+function getStatusByAmountPaid(amountPaid: number, fullPrice: number): PaymentStatus {
+  if (amountPaid === 0) {
+    return "NAO_PAGO";
+  } else if (amountPaid === fullPrice) {
+    return "PAGO";
+  } else {
+    return "PAGO_PARCIAL";
+  }
+}
+
 function Badge({ className, label }: { className: string; label: string }) {
   return (
     <span
@@ -97,10 +107,11 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 <td className="px-4 py-3">
                   <div className="flex flex-col items-start gap-1">
                     <Badge
-                      className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                      className={PAYMENT_STATUS_BADGE[getStatusByAmountPaid(order.amount_paid, order.price)] || PAYMENT_STATUS_BADGE.NAO_PAGO}
                       label={humanizePayStatus(order.amount_paid, order.price)}
                     />
                     <span className="text-muted-foreground text-xs">
+                      {/* The None fallback just exists because the payment_method can be null. */}
                       {humanizePayMethod(order.payment_method || "None")}
                     </span>
                   </div>
@@ -139,7 +150,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 label={humanizeSection(order.section)}
               />
               <Badge
-                className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.PAGO}
                 label={humanizePayStatus(order.amount_paid, order.price)}
                 />
               <TagPill name={order.tag.type} color={"#777"} />

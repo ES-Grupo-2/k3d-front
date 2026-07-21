@@ -157,7 +157,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                   <Input type="number" step="0.01" defaultValue="0" {...register("amount_paid", { valueAsNumber: true })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Método</Label>
+                  <Label>Método <span className="text-red-500 ">*</span></Label>
                   <Select onValueChange={(val) => setValue("payment_method", val)}>
                     <SelectTrigger className="hover:cursor-pointer"><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
