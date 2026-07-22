@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
+import { Button, ConfirmDialog, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
 import { getClients } from "@/services/order/order";
 import { getTags, TagResponse } from "@/services/tags";
 
@@ -52,60 +52,49 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
   const selectedClientId = watch("clientId");
 
-  // const [errors,setErrors] = useState<string[]>([]);
+  const [alert, setAlert] = useState<string | null>(null);
 
   const onSubmit = async (data: OrderFormData) => {
-    // // Array temporário para acumular todos os erros encontrados de uma vez
-    // const validationErrors: string[] = [];
+    if (!data.title?.trim()) {
+      return setAlert("O título do pedido é obrigatório.");
+    }
+    if (!data.tagType) {
+      return setAlert("Por favor, selecione uma tag/categoria.");
+    }
+    if (!data.quantity || data.quantity < 1) {
+      return setAlert("A quantidade do pedido deve ser de pelo menos 1.");
+    }
 
-    // // 1. Validações de Produto
-    // if (!data.title?.trim()) {
-    //   validationErrors.push("O título do pedido é obrigatório.");
-    // }
-    // if (!data.tagType) {
-    //   validationErrors.push("Por favor, selecione uma tag/categoria.");
-    // }
-    // if (!data.quantity || data.quantity < 1) {
-    //   validationErrors.push("A quantidade do pedido deve ser de pelo menos 1.");
-    // }
+    if (clientMode === "NEW") {
+      const newName = data.newClientName?.trim();
+      const newPhone = data.newClientPhone?.trim();
 
-    // // 2. Validações de Cliente e Duplicidade
-    // if (clientMode === "NEW") {
-    //   const newName = data.newClientName?.trim();
-    //   const newPhone = data.newClientPhone?.trim();
+      if (!newName) {
+        return setAlert("O nome do cliente é obrigatório para um novo cadastro.");
+      }
 
-    //   if (!newName) {
-    //     validationErrors.push("O nome do cliente é obrigatório para um novo cadastro.");
-    //   }
+      const clientExists = clients.some(c => {
+        const nameMatches = c.name?.toLowerCase() === newName.toLowerCase();
+        const phoneMatches = c.phone && newPhone && c.phone === newPhone;
+        return nameMatches || phoneMatches;
+      });
 
-    //   const clientExists = clients.some(c => {
-    //     const nameMatches = c.name?.toLowerCase() === newName?.toLowerCase();
-    //     const phoneMatches = c.phone && newPhone && c.phone === newPhone;
-    //     return nameMatches || phoneMatches;
-    //   });
+      if (clientExists) {
+        return setAlert("Um cliente com este exato nome ou telefone já existe na aba 'Cadastrado'.");
+      }
+    } else {
+      if (!data.clientId) {
+        return setAlert("Por favor, selecione um cliente da lista ou mude para a aba 'Novo'.");
+      }
+    }
 
-    //   if (clientExists) {
-    //     validationErrors.push("Um cliente com este exato nome ou telefone já existe na aba 'Cadastrado'.");
-    //   }
-    // } else {
-    //   if (!data.clientId) {
-    //     validationErrors.push("Por favor, selecione um cliente da lista ou mude para a aba 'Novo'.");
-    //   }
-    // }
+    if (!data.payment_method || data.payment_method === "None") {
+      return setAlert("Por favor, selecione um método de pagamento obrigatório.");
+    }
 
-    // // 3. Validação Financeira
-    // if (!data.payment_method || data.payment_method === "None") {
-    //   validationErrors.push("Por favor, selecione um método de pagamento obrigatório.");
-    // }
-
-    // // Se houver qualquer erro, atualiza a tela e aborta o envio
-    // if (validationErrors.length > 0) {
-    //   setErrors(validationErrors);
-    //   return; 
-    // }
-
-    // // Se passou liso por tudo, limpa qualquer erro antigo da tela e envia!
-    // setErrors([]);
+    if (!data.file || data.archive === ""){
+      return setAlert("Por favor, selecione um arquivo ou insira um link externo.");
+    }
     await onSave(data);
   };
 
@@ -137,6 +126,25 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
   });
 
   return (
+    alert ? (
+      <div>
+        <ConfirmDialog
+          open={alert !== null}
+          onOpenChange={(open) => {
+            if (!open) setAlert(null);
+          }}
+          tone="destructive"
+          title="Atenção!"
+          description={
+            alert
+              ? `${alert}`
+              : ""
+          }
+          confirmLabel="Fechar"
+          onConfirm={() => setAlert(null)}
+        />
+      </div>
+    ) : (
     <Dialog open={open} onOpenChange={(isOpen) => !isLoading && !isOpen && onClose()}>
       <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col p-0">
         <div className="px-6 pt-6 pb-2">
@@ -157,7 +165,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                   
                   <div className="space-y-1.5">
                     <Label>Título do Pedido</Label>
-                    <Input placeholder="Ex: Lote de Chaveiros" {...register("title", { required: true })} />
+                    <Input placeholder="Ex: Lote de Chaveiros" {...register("title")} />
                   </div>
 
                   <div className="space-y-1.5">
@@ -307,5 +315,6 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
         </form>
       </DialogContent>
     </Dialog>
+    )
   );
 }
