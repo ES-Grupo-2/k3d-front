@@ -6,15 +6,10 @@ import { PackageSearch } from "lucide-react";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
 import { queryOrders } from "@/services/orders"; 
 
-// Orders history/listing screen.
-// Server Component: reads the filters straight from `searchParams`, fetches the
-// already-filtered list on the server and hands it off for rendering. All the
-// interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
-
 const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
-const PAYMENT_METHODS = ["CREDIT_CARD", "DEBIT_CARD", "CASH", "PIX", "None"];
 
-// Ensures only valid enum values reach the filter (ignores junk in the URL).
+const PAYMENT_METHODS = ["CARTAO_CREDITO", "CARTAO_DEBITO", "DINHEIRO", "PIX"];
+
 function parseEnumParam<T extends string>(
   value: string | undefined,
   allowed: T[],
@@ -28,12 +23,16 @@ export default async function PedidosPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const orderQuery = typeof params.queryInput === "string" ? params.queryInput : "";
+  
+  // A MÁGICA AQUI: Lemos "params.search" (ou "params.q" dependendo do que o PedidosFilters coloca na URL)
+  // E salvamos na variável orderQuery
+  const orderQuery = typeof params.search === "string" ? params.search : "";
   
   const section = parseEnumParam(
     typeof params.section === "string" ? params.section : undefined,
     SECTIONS,
   );
+  
   const paymentMethod = parseEnumParam(
     typeof params.payment === "string" ? params.payment : undefined,
     PAYMENT_METHODS,
@@ -42,7 +41,7 @@ export default async function PedidosPage({
   const page = typeof params.page === "string" ? params.page : "1";
 
   const response = await queryOrders({
-    queryInput: orderQuery,
+    queryInput: orderQuery, // Agora sim, passamos a string lida da URL para a chave que a função exige!
     section: section || undefined,
     payment: paymentMethod || undefined,
     page: page,
@@ -50,6 +49,7 @@ export default async function PedidosPage({
 
   const orders = response.data;
   const totalItems = response.meta.totalItems;
+  
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">

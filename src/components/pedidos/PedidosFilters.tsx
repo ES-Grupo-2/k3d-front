@@ -29,9 +29,9 @@ const SECTION_OPTIONS = [
 
 const PAYMENT_OPTIONS = [
   { value: "PIX", label: "Pix" },
-  { value: "CREDIT_CARD", label: "Cartão de Crédito" },
-  { value: "DEBIT_CARD", label: "Cartão de Débito" },
-  { value: "CASH", label: "Dinheiro" },
+  { value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
+  { value: "CARTAO_DEBITO", label: "Cartão de Débito" },
+  { value: "DINHEIRO", label: "Dinheiro" },
 ];
 
 interface PedidosFiltersProps {
@@ -109,16 +109,15 @@ export function PedidosFilters({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
-  useEffect(() => {
+ useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    const timeout = setTimeout(() => updateParam("q", query.trim()), 350);
+    const timeout = setTimeout(() => updateParam("search", query.trim()), 350);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
-
   const activeFilterCount = (initialSection ? 1 : 0) + (initialPayment ? 1 : 0);
   const hasActiveFilters = query !== "" || activeFilterCount > 0;
 
