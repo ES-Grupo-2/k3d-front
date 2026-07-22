@@ -52,11 +52,60 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
   const selectedClientId = watch("clientId");
 
+  // const [errors,setErrors] = useState<string[]>([]);
+
   const onSubmit = async (data: OrderFormData) => {
-    if (!data.payment_method || data.payment_method === "None") {
-      alert("Por favor, selecione um método de pagamento obrigatório.");
-      return;
-    }
+    // // Array temporário para acumular todos os erros encontrados de uma vez
+    // const validationErrors: string[] = [];
+
+    // // 1. Validações de Produto
+    // if (!data.title?.trim()) {
+    //   validationErrors.push("O título do pedido é obrigatório.");
+    // }
+    // if (!data.tagType) {
+    //   validationErrors.push("Por favor, selecione uma tag/categoria.");
+    // }
+    // if (!data.quantity || data.quantity < 1) {
+    //   validationErrors.push("A quantidade do pedido deve ser de pelo menos 1.");
+    // }
+
+    // // 2. Validações de Cliente e Duplicidade
+    // if (clientMode === "NEW") {
+    //   const newName = data.newClientName?.trim();
+    //   const newPhone = data.newClientPhone?.trim();
+
+    //   if (!newName) {
+    //     validationErrors.push("O nome do cliente é obrigatório para um novo cadastro.");
+    //   }
+
+    //   const clientExists = clients.some(c => {
+    //     const nameMatches = c.name?.toLowerCase() === newName?.toLowerCase();
+    //     const phoneMatches = c.phone && newPhone && c.phone === newPhone;
+    //     return nameMatches || phoneMatches;
+    //   });
+
+    //   if (clientExists) {
+    //     validationErrors.push("Um cliente com este exato nome ou telefone já existe na aba 'Cadastrado'.");
+    //   }
+    // } else {
+    //   if (!data.clientId) {
+    //     validationErrors.push("Por favor, selecione um cliente da lista ou mude para a aba 'Novo'.");
+    //   }
+    // }
+
+    // // 3. Validação Financeira
+    // if (!data.payment_method || data.payment_method === "None") {
+    //   validationErrors.push("Por favor, selecione um método de pagamento obrigatório.");
+    // }
+
+    // // Se houver qualquer erro, atualiza a tela e aborta o envio
+    // if (validationErrors.length > 0) {
+    //   setErrors(validationErrors);
+    //   return; 
+    // }
+
+    // // Se passou liso por tudo, limpa qualquer erro antigo da tela e envia!
+    // setErrors([]);
     await onSave(data);
   };
 
