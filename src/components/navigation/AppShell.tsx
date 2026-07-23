@@ -50,6 +50,11 @@ export function AppShell({ user, children }: AppShellProps) {
     });
   };
 
+  const expandSidebar = () => {
+    setCollapsed(false);
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, "false");
+  };
+
   return (
     <div className="min-h-screen w-full">
       <aside
@@ -58,7 +63,11 @@ export function AppShell({ user, children }: AppShellProps) {
           collapsed ? "w-16" : "w-64",
         )}
       >
-        <SidebarContent user={user} collapsed={collapsed} />
+        <SidebarContent
+          user={user}
+          collapsed={collapsed}
+          onExpand={expandSidebar}
+        />
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

@@ -23,14 +23,17 @@ interface SidebarContentProps {
   user: AuthUser;
   onNavigate?: () => void;
   // Modo compacto (só ícones) — usado apenas na sidebar fixa do desktop.
-  // O botão de recolher/expandir fica no header (Navbar), não aqui.
+  // O toggle recolher/expandir fica no header (Navbar); aqui, a logo e o avatar
+  // de perfil expandem a sidebar via onExpand.
   collapsed?: boolean;
+  onExpand?: () => void;
 }
 
 export function SidebarContent({
   user,
   onNavigate,
   collapsed = false,
+  onExpand,
 }: SidebarContentProps) {
   const pathname = usePathname();
   const sections = getVisibleSections(user.role);
@@ -45,9 +48,15 @@ export function SidebarContent({
         )}
       >
         {collapsed ? (
-          <span className="text-primary text-lg font-bold tracking-tight">
+          <button
+            type="button"
+            onClick={onExpand}
+            title="Expandir menu"
+            aria-label="Expandir menu"
+            className="text-primary text-lg font-bold tracking-tight hover:cursor-pointer"
+          >
             K3D
-          </span>
+          </button>
         ) : (
           <>
             <span className="text-primary text-xl font-bold tracking-tight">
@@ -108,7 +117,17 @@ export function SidebarContent({
         )}
       >
         {collapsed ? (
-          <LogoutButton variant="icon" onLoggedOut={onNavigate} />
+          <button
+            type="button"
+            onClick={onExpand}
+            title="Perfil — expandir menu"
+            aria-label="Expandir menu"
+            className="hover:cursor-pointer"
+          >
+            <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-full text-sm font-semibold">
+              {getInitials(user.name, user.email)}
+            </span>
+          </button>
         ) : (
           <>
             <div className="mb-3 flex items-center gap-3">
