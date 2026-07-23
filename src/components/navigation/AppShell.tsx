@@ -5,9 +5,10 @@
  * @author jvs-neves
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { AuthUser } from "@/schemas/auth";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -24,13 +25,44 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
+const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
+
 export function AppShell({ user, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Modo compacto da sidebar (só desktop), persistido entre sessões.
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    // Deferido para não chamar setState de forma síncrona no efeito.
+    const timer = setTimeout(() => {
+      if (localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true") {
+        setCollapsed(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleCollapse = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen w-full">
-      <aside className="border-border bg-card fixed inset-y-0 left-0 z-40 hidden w-64 border-r md:block">
-        <SidebarContent user={user} />
+      <aside
+        className={cn(
+          "border-border bg-card fixed inset-y-0 left-0 z-40 hidden border-r transition-[width] duration-200 md:block",
+          collapsed ? "w-16" : "w-64",
+        )}
+      >
+        <SidebarContent
+          user={user}
+          collapsed={collapsed}
+          onToggleCollapse={toggleCollapse}
+        />
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -43,7 +75,12 @@ export function AppShell({ user, children }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      <div className="flex min-h-screen flex-col md:pl-64">
+      <div
+        className={cn(
+          "flex min-h-screen flex-col transition-[padding] duration-200",
+          collapsed ? "md:pl-16" : "md:pl-64",
+        )}
+      >
         <Navbar onMenuClick={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
       </div>

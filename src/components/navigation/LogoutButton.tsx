@@ -104,9 +104,8 @@ export function LogoutButton({
         <div
           role="dialog"
           className={cn(
-            "border-border bg-card absolute bottom-full z-50 mb-2 w-56 rounded-lg border p-3 shadow-lg",
+            "border-border bg-card absolute bottom-full left-0 z-50 mb-2 w-56 rounded-lg border p-3 shadow-lg",
             "animate-in fade-in slide-in-from-bottom-1",
-            variant === "icon" ? "right-0" : "left-0",
           )}
         >
           <p className="text-foreground text-sm font-medium">Sair da conta?</p>
