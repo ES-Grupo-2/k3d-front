@@ -97,7 +97,7 @@
    escuro — como post-its num quadro escuro. Redefine os tokens só na subárvore
    do card, então título, cliente, bordas e badges acompanham automaticamente. */
 .dark .k3d-kanban-card {
-  --card: #e5e3dc;
+  --card: #efe8d3;
   --card-foreground: #26221c;
   --foreground: #26221c;
   --muted-foreground: #6b6357;
