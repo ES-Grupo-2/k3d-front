@@ -10,11 +10,11 @@ import { createPortal } from "react-dom";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
+import { CardDetailDialog } from "@/components/kanban/popUp/CardDetailDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
-import { OrderFormData } from "@/types/order";
+import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
+import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
 import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
 
@@ -25,7 +25,9 @@ type KanbanClientProps = {
 
 export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
+  const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [, setIsDeleting] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -48,6 +50,11 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       console.error(error);
       setOrders(previousOrders);
     }
+  };
+
+  // Clicar no card abre os detalhes (qualquer perfil).
+  const handleViewOrder = (order: Order) => {
+    setViewingOrder(order);
   };
 
   const handleEditOrder = (order: Order) => {
@@ -83,15 +90,28 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  const handleSaveEdit = (data: CardFormData) => {
-    if (!editingOrder) return;
-    
-    setOrders((prev) =>
-      prev.map((order) =>
-        Number(order.id) === Number(editingOrder.id) ? { ...order, ...data } : order,
-      ),
-    );
-    setEditingOrder(null);
+  // Persiste a edição no backend e aplica o patch otimista à UI só no sucesso.
+  const handleSaveEdit = async (
+    orderId: number,
+    payload: UpdateOrderPayload,
+    localPatch: Partial<Order>,
+  ) => {
+    setIsSavingEdit(true);
+    try {
+      await updateKanbanOrder(orderId, payload);
+      setOrders((prev) =>
+        prev.map((order) =>
+          Number(order.id) === Number(orderId)
+            ? ({ ...order, ...localPatch } as Order)
+            : order,
+        ),
+      );
+      setEditingOrder(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   /**
@@ -210,7 +230,8 @@ return (
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder} 
+          onViewOrder={handleViewOrder}
+          onEditOrder={handleEditOrder}
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
         />
@@ -223,14 +244,23 @@ return (
         isLoading={isCreating}
       />
 
+      <CardDetailDialog
+        open={viewingOrder !== null}
+        onClose={() => setViewingOrder(null)}
+        order={viewingOrder}
+        isManager={isManager}
+        onEdit={() => {
+          setEditingOrder(viewingOrder);
+          setViewingOrder(null);
+        }}
+      />
+
       <CardEditDialog
         open={editingOrder !== null}
         onClose={() => setEditingOrder(null)}
-        initialValues={{
-          title: editingOrder?.title ?? "",
-          description: "", 
-        }}
+        order={editingOrder}
         onSave={handleSaveEdit}
+        isSaving={isSavingEdit}
       />
 
       <ConfirmDialog

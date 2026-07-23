@@ -10,6 +10,7 @@ import {CreditCard, Edit2, Trash, Package, User} from "lucide-react";
 
 interface KanbanCardProps {
   order: Order;
+  onView?: () => void;
   onEdit: () => void;
   onDelete: () => void;
   isManager: boolean;
@@ -21,6 +22,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
   function KanbanCard(
     {
       order,
+      onView,
       onEdit,
       onDelete,
       isManager,
@@ -62,6 +64,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         style={style}
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
+        onClick={isOverlay || isPlaceholder ? undefined : onView}
         suppressHydrationWarning={true}
         className={`k3d-kanban-card relative overflow-hidden rounded-md text-sm transition-colors ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"

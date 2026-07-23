@@ -27,6 +27,20 @@ export interface OrderFormData extends Omit<CreateOrderDTO, 'clientId'> {
   file: FileList | null;
 }
 
+// Campos aceitos pelo PUT /orders/:id. Todos opcionais (update parcial);
+// o cliente não é atualizável por este endpoint no backend.
+export interface UpdateOrderPayload {
+  title?: string;
+  tagType?: string;
+  price?: number;
+  amount_paid?: number;
+  cost?: number;
+  quantity?: number;
+  payment_method?: string;
+  section?: "PENDENTE" | "FAZENDO" | "FINALIZADO";
+  archive?: string;
+}
+
 export interface Client {
   id: string;
   name: string;
