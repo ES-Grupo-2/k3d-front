@@ -49,8 +49,11 @@
   /* Focus */
   --ring: #ffc94d;
 
-  /* Radius */
-  --radius: 1rem;
+  /* Backdrop — tom quente mais fundo atrás dos painéis flutuantes do shell. */
+  --backdrop: #e1d3aa;
+
+  /* Radius — base do arredondamento do sistema (propaga p/ rounded-sm/md/lg/xl). */
+  --radius: 1.25rem;
 }
 
 /* Tema escuro — paleta original do app, preservada sem alteração. */
@@ -91,6 +94,9 @@
 
   /* Focus */
   --ring: #ffc94d;
+
+  /* Backdrop — quase-preto atrás dos painéis flutuantes do shell. */
+  --backdrop: #0f1011;
 }
 
 /* Cards do Kanban: superfície clara (off-white) mesmo no modo escuro, com texto
@@ -114,6 +120,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-backdrop: var(--backdrop);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
