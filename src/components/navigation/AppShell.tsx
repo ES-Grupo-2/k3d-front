@@ -51,11 +51,11 @@ export function AppShell({ user, children }: AppShellProps) {
   };
 
   return (
-    // Desktop: backdrop + painéis flutuantes (altura fixa, scroll interno no
-    // conteúdo). Mobile: comportamento anterior (fundo normal, scroll do documento).
-    <div className="bg-background md:bg-backdrop min-h-screen w-full md:flex md:h-screen md:gap-3 md:overflow-hidden md:p-3">
-      {/* Sidebar — faz parte do backdrop (sem painel próprio): itens direto sobre
-          o fundo, só o conteúdo é o painel flutuante. */}
+    // Painéis flutuantes sobre o backdrop (mobile e desktop): altura fixa da
+    // viewport, scroll interno no conteúdo. No desktop a sidebar é fixa (parte
+    // do backdrop); no mobile é um Sheet, aberto pelo botão da barra superior.
+    <div className="bg-backdrop flex h-svh w-full gap-2 overflow-hidden p-2 md:gap-3 md:p-3">
+      {/* Sidebar desktop — faz parte do backdrop (sem painel próprio). */}
       <aside
         className={cn(
           "hidden shrink-0 transition-[width] duration-200 md:block",
@@ -79,16 +79,10 @@ export function AppShell({ user, children }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Conteúdo — único painel flutuante, sobre o backdrop. */}
-      <div
-        className={cn(
-          "flex min-h-screen flex-col",
-          "md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:bg-background md:shadow-2xl",
-        )}
-      >
-        {/* Barra mobile: só o botão de menu (abre a sidebar em Sheet). No desktop
-            não há header — cada tela traz seu próprio título. */}
-        <div className="flex h-14 shrink-0 items-center px-4 md:hidden">
+      {/* Conteúdo — painel flutuante arredondado. */}
+      <div className="bg-background flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl shadow-2xl">
+        {/* Barra mobile: botão de menu (abre a sidebar em Sheet). */}
+        <div className="flex h-14 shrink-0 items-center px-2 md:hidden">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -98,7 +92,7 @@ export function AppShell({ user, children }: AppShellProps) {
             <Menu className="size-6" />
           </button>
         </div>
-        <main className="flex-1 px-4 pb-28 md:overflow-y-auto md:p-8 md:pb-8">
+        <main className="flex-1 overflow-y-auto px-4 pb-28 md:p-8 md:pb-8">
           {children}
         </main>
       </div>
