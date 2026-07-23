@@ -15,6 +15,7 @@ import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrde
 import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
 import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -195,8 +196,11 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
 
 return (
   <div className="flex h-full w-full select-none flex-col overflow-hidden overscroll-none">
-    <div className="flex shrink-0 items-center justify-between gap-4 px-4 pb-3 md:px-8 md:pb-4">
-      <h1 className="text-2xl font-semibold">Kanban</h1>
+    <div className="flex shrink-0 items-center justify-between gap-4 pb-3 md:pb-4">
+      <div className="flex items-center gap-2">
+        <MobileMenuButton />
+        <h1 className="text-2xl font-semibold">Kanban</h1>
+      </div>
       {isManager && (
         <Button
           variant="default"

@@ -34,7 +34,7 @@ export function KanbanColumn({
         isOver ? "border-primary bg-primary/5" : "bg-muted border-border"
       }`}
   >
-    <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
+    <header className="hidden shrink-0 items-center justify-between border-b border-border px-4 py-3 md:flex">
       <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
         {title}
       </h2>

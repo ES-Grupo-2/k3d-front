@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 import type { AuthUser } from "@/schemas/auth";
 
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { getVisibleShortcuts } from "./home-config";
 
 interface HomeViewProps {
@@ -25,11 +26,14 @@ export function HomeView({ user }: HomeViewProps) {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-semibold">Olá, {firstName}</h2>
-        <p className="text-muted-foreground text-sm">
-          O que você quer fazer? Acesse rapidamente os módulos do sistema.
-        </p>
+      <div className="flex items-center gap-2">
+        <MobileMenuButton />
+        <div>
+          <h2 className="text-2xl font-semibold">Olá, {firstName}</h2>
+          <p className="text-muted-foreground text-sm">
+            O que você quer fazer? Acesse rapidamente os módulos do sistema.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

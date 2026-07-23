@@ -18,6 +18,7 @@ import type {
   OperationalDashboardData,
   Period,
 } from "@/schemas/dashboard/dashboard";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryTable } from "./CategoryTable";
 import { MetricCard } from "./MetricCard";
 import { OperationalChart } from "./OperationalChart";
@@ -43,11 +44,14 @@ export function OperationalDashboardView({
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Operacional</h1>
-          <p className="text-muted-foreground text-sm">
-            Pedidos e métricas por categoria
-          </p>
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard Operacional</h1>
+            <p className="text-muted-foreground text-sm">
+              Pedidos e métricas por categoria
+            </p>
+          </div>
         </div>
         <PeriodFilter basePath="/dashboard" period={period} />
       </header>

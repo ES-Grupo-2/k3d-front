@@ -4,7 +4,8 @@
  */
 import { PackageSearch } from "lucide-react";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
-import { queryOrders } from "@/services/orders"; 
+import { queryOrders } from "@/services/orders";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
 
@@ -52,8 +53,11 @@ export default async function PedidosPage({
   
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Pedidos</h1>
+      <header className="space-y-1">
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <h1 className="text-2xl font-semibold">Pedidos</h1>
+        </div>
         <p className="text-muted-foreground text-sm">
           Histórico completo de pedidos — busque, filtre e audite a operação.
         </p>

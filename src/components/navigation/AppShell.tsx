@@ -5,20 +5,14 @@
  * @author jvs-neves
  */
 
-import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from "@/components/ui";
 
 import { MobileTabBar } from "./MobileTabBar";
 import { SidebarContent } from "./Sidebar";
+import { MobileNavProvider } from "./mobile-nav";
 
 interface AppShellProps {
   user: AuthUser;
@@ -51,53 +45,58 @@ export function AppShell({ user, children }: AppShellProps) {
   };
 
   return (
-    // Painéis flutuantes sobre o backdrop (mobile e desktop): altura fixa da
+    // Painéis flutuantes sobre o backdrop, mobile e desktop: altura fixa da
     // viewport, scroll interno no conteúdo. No desktop a sidebar é fixa (parte
-    // do backdrop); no mobile é um Sheet, aberto pelo botão da barra superior.
-    <div className="bg-backdrop flex h-svh w-full gap-2 overflow-hidden p-2 md:gap-3 md:p-3">
-      {/* Sidebar desktop — faz parte do backdrop (sem painel próprio). */}
-      <aside
-        className={cn(
-          "hidden shrink-0 transition-[width] duration-200 md:block",
-          collapsed ? "md:w-16" : "md:w-64",
-        )}
-      >
-        <SidebarContent
-          user={user}
-          collapsed={collapsed}
-          onToggleCollapse={toggleCollapse}
-        />
-      </aside>
+    // do backdrop); no mobile ela é um drawer que EMPURRA o conteúdo ao abrir.
+    <MobileNavProvider value={{ openMenu: () => setMobileOpen(true) }}>
+      <div className="bg-backdrop relative flex h-svh w-full overflow-hidden p-2 pb-20 md:gap-3 md:p-3">
+        {/* Sidebar desktop — faz parte do backdrop (sem painel próprio). */}
+        <aside
+          className={cn(
+            "hidden shrink-0 transition-[width] duration-200 md:block",
+            collapsed ? "md:w-16" : "md:w-64",
+          )}
+        >
+          <SidebarContent
+            user={user}
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapse}
+          />
+        </aside>
 
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0">
-          <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
-          <SheetDescription className="sr-only">
-            Navegue entre os módulos da aplicação.
-          </SheetDescription>
+        {/* Sidebar mobile — drawer com o mesmo design; desliza da esquerda e
+            empurra o conteúdo para a direita. */}
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-40 w-64 p-2 pb-20 transition-transform duration-200 ease-out md:hidden",
+            mobileOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
           <SidebarContent user={user} onNavigate={() => setMobileOpen(false)} />
-        </SheetContent>
-      </Sheet>
+        </aside>
 
-      {/* Conteúdo — painel flutuante arredondado. */}
-      <div className="bg-background flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl shadow-2xl">
-        {/* Barra mobile: botão de menu (abre a sidebar em Sheet). */}
-        <div className="flex h-14 shrink-0 items-center px-2 md:hidden">
+        {/* Scrim (mobile) — escurece o conteúdo e fecha ao tocar. */}
+        {mobileOpen ? (
           <button
             type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Abrir menu"
-            className="text-foreground/80 hover:bg-primary/10 inline-flex size-10 items-center justify-center rounded-lg transition-colors"
-          >
-            <Menu className="size-6" />
-          </button>
-        </div>
-        <main className="flex-1 overflow-y-auto px-4 pb-28 md:p-8 md:pb-8">
-          {children}
-        </main>
-      </div>
+            aria-label="Fechar menu"
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 z-30 bg-black/25 md:hidden"
+          />
+        ) : null}
 
-      <MobileTabBar user={user} />
-    </div>
+        {/* Conteúdo — painel flutuante arredondado. */}
+        <div
+          className={cn(
+            "bg-background relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl shadow-2xl transition-transform duration-200 ease-out",
+            mobileOpen ? "translate-x-64 md:translate-x-0" : "translate-x-0",
+          )}
+        >
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+        </div>
+
+        <MobileTabBar user={user} />
+      </div>
+    </MobileNavProvider>
   );
 }

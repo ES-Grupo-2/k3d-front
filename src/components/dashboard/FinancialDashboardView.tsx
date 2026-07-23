@@ -17,6 +17,7 @@ import type {
   Period,
   ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryRevenueChart } from "./CategoryRevenueChart";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
@@ -43,11 +44,14 @@ export function FinancialDashboardView({
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Financeiro</h1>
-          <p className="text-muted-foreground text-sm">
-            Receita, custo, lucro, ticket médio e margem
-          </p>
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard Financeiro</h1>
+            <p className="text-muted-foreground text-sm">
+              Receita, custo, lucro, ticket médio e margem
+            </p>
+          </div>
         </div>
         <PeriodFilter basePath="/relatorios" period={period} />
       </header>
