@@ -5,12 +5,19 @@
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { Order } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus } from "@/lib/utils";
-import { forwardRef } from "react";
-import {CreditCard, Edit2, Trash, Package, User} from "lucide-react";
+import { forwardRef, useState } from "react";
+import {
+  ChevronDown,
+  CreditCard,
+  Edit2,
+  Paperclip,
+  Trash,
+  Package,
+  User,
+} from "lucide-react";
 
 interface KanbanCardProps {
   order: Order;
-  onView?: () => void;
   onEdit: () => void;
   onDelete: () => void;
   isManager: boolean;
@@ -22,7 +29,6 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
   function KanbanCard(
     {
       order,
-      onView,
       onEdit,
       onDelete,
       isManager,
@@ -31,6 +37,9 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     }: KanbanCardProps,
     ref,
   ) {
+    // Detalhes exibidos ao clicar/tocar no card — ele se estende para baixo.
+    const [expanded, setExpanded] = useState(false);
+
     const draggableId = isDestinationPlaceHolder
       ? `ghost-${order.id}`
       : order.id;
@@ -58,13 +67,20 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
 
     const formattedTitle = order.title[0].toUpperCase() + order.title.slice(1);
 
+    const file = order.archive?.trim();
+    const isFileLink = !!file && /^https?:\/\//i.test(file);
+
     return (
       <div
         ref={isOverlay ? ref : setNodeRef}
         style={style}
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
-        onClick={isOverlay || isPlaceholder ? undefined : onView}
+        onClick={
+          isOverlay || isPlaceholder
+            ? undefined
+            : () => setExpanded((prev) => !prev)
+        }
         suppressHydrationWarning={true}
         className={`k3d-kanban-card relative overflow-hidden rounded-md text-sm transition-colors ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
@@ -76,9 +92,9 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
               : "bg-card border border-border cursor-grab hover:border-primary/50 shadow-sm active:cursor-grabbing"
         }`}
       >
-        <div 
-          className="absolute left-0 top-0 h-full w-1" 
-          style={{ backgroundColor: order.tag?.color || '#777' }} 
+        <div
+          className="absolute left-0 top-0 h-full w-1"
+          style={{ backgroundColor: order.tag?.color || '#777' }}
         />
 
         <div className={`flex flex-col gap-3 p-4 pl-5 ${isPlaceholder ? "invisible" : "visible"}`}>
@@ -86,30 +102,38 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             <span className="text-xs font-semibold tracking-wider text-foreground/80 uppercase">
               {order.tag?.type}
             </span>
-            
-            {isManager && (
-              <div className="flex items-center gap-1 opacity-60 transition-opacity hover:opacity-100">
-                <button
-                  className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-foreground/10 hover:text-foreground transition-all"
-                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                >
-                  <Edit2 size={16} /> 
-                </button>
-                <button
-                  className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-red-500/10 hover:text-red-400 transition-all"
-                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                >
-                  <Trash size={16} />
-                </button>
-              </div>
-            )}
+
+            <div className="flex items-center gap-1">
+              {isManager && (
+                <div className="flex items-center gap-1 opacity-60 transition-opacity hover:opacity-100">
+                  <button
+                    className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-foreground/10 hover:text-foreground transition-all"
+                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-red-500/10 hover:text-red-400 transition-all"
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+              )}
+              <ChevronDown
+                size={16}
+                className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                  expanded ? "rotate-180" : ""
+                }`}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <h3 className="text-sm font-medium leading-tight text-foreground">
               {formattedTitle}
             </h3>
-            
+
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User size={14} className="shrink-0" />
               <span className="truncate">{order.client?.name}</span>
@@ -131,14 +155,80 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
               <CreditCard size={14} />
               <span>{humanizePayMethod(order.payment_method || "None")}</span>
             </div>
-            
+
             <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${
-              order.amount_paid >= order.price 
+              order.amount_paid >= order.price
                 ? "bg-green-100 text-green-700"
                 : "bg-yellow-100 text-yellow-700"
             }`}>
               {humanizePayStatus(order.amount_paid || 0, order.price)}
             </span>
+          </div>
+
+          {/* Detalhes que aparecem ao expandir o card (mesmas infos do modal). */}
+          <div
+            className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+              expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="space-y-2 border-t border-border/50 pt-3 text-xs">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Telefone</span>
+                  <span className="text-foreground/90 truncate">
+                    {order.client?.phone || "—"}
+                  </span>
+                </div>
+
+                {order.client?.email ? (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">E-mail</span>
+                    <span className="text-foreground/90 truncate">
+                      {order.client.email}
+                    </span>
+                  </div>
+                ) : null}
+
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Custo</span>
+                  <span className="text-foreground/90">
+                    {order.cost != null ? currency(order.cost) : "—"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Valor pago</span>
+                  <span className="text-foreground/90">
+                    {currency(order.amount_paid)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Arquivo</span>
+                  {file ? (
+                    isFileLink ? (
+                      <a
+                        href={file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-primary inline-flex items-center gap-1 truncate underline underline-offset-2"
+                      >
+                        <Paperclip size={12} className="shrink-0" />
+                        Abrir
+                      </a>
+                    ) : (
+                      <span className="text-foreground/90 inline-flex max-w-[60%] items-center gap-1 truncate">
+                        <Paperclip size={12} className="shrink-0" />
+                        {file}
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

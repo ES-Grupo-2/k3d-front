@@ -10,7 +10,6 @@ import { createPortal } from "react-dom";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
-import { CardDetailDialog } from "@/components/kanban/popUp/CardDetailDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
 import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
@@ -25,7 +24,6 @@ type KanbanClientProps = {
 
 export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
-  const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -50,11 +48,6 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       console.error(error);
       setOrders(previousOrders);
     }
-  };
-
-  // Clicar no card abre os detalhes (qualquer perfil).
-  const handleViewOrder = (order: Order) => {
-    setViewingOrder(order);
   };
 
   const handleEditOrder = (order: Order) => {
@@ -230,7 +223,6 @@ return (
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
@@ -242,17 +234,6 @@ return (
         onClose={() => setCreateModalOpen(false)}
         onSave={handleCreateOrder}
         isLoading={isCreating}
-      />
-
-      <CardDetailDialog
-        open={viewingOrder !== null}
-        onClose={() => setViewingOrder(null)}
-        order={viewingOrder}
-        isManager={isManager}
-        onEdit={() => {
-          setEditingOrder(viewingOrder);
-          setViewingOrder(null);
-        }}
       />
 
       <CardEditDialog

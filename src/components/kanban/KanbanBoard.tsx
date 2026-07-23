@@ -31,7 +31,6 @@ const COLUMNS = Object.entries(COLUMN_LABELS).map(([id, title]) => ({
 interface KanbanBoardProps {
   orders: Order[];
   onMoveOrder: (orderId: number, targetColumn: ColumnType) => void;
-  onViewOrder: (order: Order) => void;
   onEditOrder: (order: Order) => void;
   onDeleteOrder: (orderId: number) => void;
   isManager: boolean;
@@ -40,7 +39,6 @@ interface KanbanBoardProps {
 export function KanbanBoard({
   orders,
   onMoveOrder,
-  onViewOrder,
   onEditOrder,
   onDeleteOrder,
   isManager,
@@ -179,7 +177,6 @@ return (
                 id={column.id}
                 title={column.title}
                 orders={byColumn[column.id]}
-                onView={onViewOrder}
                 onEdit={onEditOrder}
                 onDelete={onDeleteOrder}
                 isManager={isManager}

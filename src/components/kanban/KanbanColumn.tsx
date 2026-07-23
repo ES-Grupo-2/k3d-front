@@ -10,7 +10,6 @@ interface KanbanColumnProps {
   id: ColumnType;
   title: string;
   orders: Order[];
-  onView: (o: Order) => void;
   onEdit: (o: Order) => void;
   onDelete: (id: number) => void;
   isManager: boolean;
@@ -20,7 +19,6 @@ export function KanbanColumn({
   id,
   title,
   orders,
-  onView,
   onEdit,
   onDelete,
   isManager,
@@ -52,7 +50,6 @@ export function KanbanColumn({
           <KanbanCard
             key={Number(o.id)}
             order={o}
-            onView={() => onView(o)}
             onEdit={() => onEdit(o)}
             onDelete={() => onDelete(Number(o.id))}
             isManager={isManager}
