@@ -90,9 +90,10 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             : "cursor-grab active:cursor-grabbing"
         }`}
       >
-        {/* Card principal — estático (não cresce ao expandir). */}
+        {/* Card principal — estático (não cresce ao expandir). Fica na frente
+            (z-10) para cobrir o topo do card de detalhes que surge por trás. */}
         <div
-          className={`relative overflow-hidden rounded-md transition-colors ${
+          className={`relative z-10 overflow-hidden rounded-md transition-colors ${
             isOverlay
               ? "bg-card border border-border ring-primary scale-105 rotate-3 opacity-90 shadow-2xl ring-2"
               : isPlaceholder
@@ -175,15 +176,17 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
           </div>
         </div>
 
-        {/* Card de detalhes — "novo card" por baixo, mais escuro (só em cards reais). */}
+        {/* Card de detalhes — "novo card" que surge por trás do principal, mais
+            escuro. O recuo negativo (-mt-2) + z-0 fazem o topo ficar tucado atrás
+            do card principal, sem gap. Só em cards reais. */}
         {!isOverlay && !isPlaceholder && (
           <div
-            className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+            className={`relative z-0 -mt-2 grid transition-[grid-template-rows] duration-300 ease-out ${
               expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
             }`}
           >
             <div className="overflow-hidden">
-              <div className="k3d-kanban-card-details mt-2 space-y-2 rounded-md border border-border p-3 text-xs shadow-sm">
+              <div className="k3d-kanban-card-details space-y-2 rounded-b-md border border-t-0 border-border px-3 pb-3 pt-4 text-xs">
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Telefone</span>
                   <span className="text-foreground/90 truncate">
