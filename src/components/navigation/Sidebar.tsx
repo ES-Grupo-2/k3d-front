@@ -7,6 +7,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PanelLeftClose } from "lucide-react";
+
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme";
@@ -23,10 +25,11 @@ interface SidebarContentProps {
   user: AuthUser;
   onNavigate?: () => void;
   // Modo compacto (só ícones) — usado apenas na sidebar fixa do desktop.
-  // O toggle recolher/expandir fica no header (Navbar); aqui, a logo e o avatar
-  // de perfil expandem a sidebar via onExpand.
+  // Recolher: botão ao lado da logo (expandido). Expandir: clicar na logo ou
+  // no avatar de perfil (compacto) via onExpand.
   collapsed?: boolean;
   onExpand?: () => void;
+  onToggleCollapse?: () => void;
 }
 
 export function SidebarContent({
@@ -34,6 +37,7 @@ export function SidebarContent({
   onNavigate,
   collapsed = false,
   onExpand,
+  onToggleCollapse,
 }: SidebarContentProps) {
   const pathname = usePathname();
   const sections = getVisibleSections(user.role);
@@ -53,16 +57,27 @@ export function SidebarContent({
             onClick={onExpand}
             title="Expandir menu"
             aria-label="Expandir menu"
-            className="text-primary text-lg font-bold tracking-tight hover:cursor-pointer"
+            className="text-foreground text-lg font-bold tracking-tight hover:cursor-pointer dark:text-primary"
           >
             K3D
           </button>
         ) : (
           <>
-            <span className="text-primary text-xl font-bold tracking-tight">
+            <span className="text-foreground text-xl font-bold tracking-tight dark:text-primary">
               K3D
             </span>
             <span className="text-muted-foreground text-xs">Gestão</span>
+            {onToggleCollapse && (
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                title="Recolher menu"
+                aria-label="Recolher menu"
+                className="text-foreground/70 hover:bg-foreground/10 hover:text-foreground ml-auto inline-flex size-9 items-center justify-center rounded-lg transition-colors hover:cursor-pointer"
+              >
+                <PanelLeftClose className="size-5" />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -100,7 +115,7 @@ export function SidebarContent({
                       : "text-foreground/80 hover:bg-primary/10 hover:text-foreground",
                   )}
                 >
-                  <Icon className="size-5 shrink-0" />
+                  <Icon className="size-6 shrink-0" />
                   {!collapsed && item.label}
                 </Link>
               );
@@ -124,14 +139,14 @@ export function SidebarContent({
             aria-label="Expandir menu"
             className="hover:cursor-pointer"
           >
-            <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-full text-sm font-semibold">
+            <span className="bg-primary text-primary-foreground ring-foreground/15 flex size-9 items-center justify-center rounded-full text-sm font-semibold ring-1">
               {getInitials(user.name, user.email)}
             </span>
           </button>
         ) : (
           <>
             <div className="mb-3 flex items-center gap-3">
-              <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+              <span className="bg-primary text-primary-foreground ring-foreground/15 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ring-1">
                 {getInitials(user.name, user.email)}
               </span>
               <div className="min-w-0 flex-1">
@@ -147,7 +162,7 @@ export function SidebarContent({
 
             <LogoutButton
               variant="full"
-              className="w-full hover:cursor-pointer"
+              className="bg-card w-full hover:cursor-pointer"
               onLoggedOut={onNavigate}
             />
           </>

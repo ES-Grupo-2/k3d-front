@@ -71,6 +71,7 @@ export function AppShell({ user, children }: AppShellProps) {
           user={user}
           collapsed={collapsed}
           onExpand={expandSidebar}
+          onToggleCollapse={toggleCollapse}
         />
       </aside>
 
@@ -91,11 +92,7 @@ export function AppShell({ user, children }: AppShellProps) {
           "md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:bg-background md:shadow-2xl",
         )}
       >
-        <Navbar
-          onMenuClick={() => setMobileOpen(true)}
-          collapsed={collapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+        <Navbar onMenuClick={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 pb-28 md:overflow-y-auto md:p-8 md:pb-8">
           {children}
         </main>
