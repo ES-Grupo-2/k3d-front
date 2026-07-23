@@ -58,11 +58,7 @@ export function AppShell({ user, children }: AppShellProps) {
           collapsed ? "w-16" : "w-64",
         )}
       >
-        <SidebarContent
-          user={user}
-          collapsed={collapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+        <SidebarContent user={user} collapsed={collapsed} />
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -81,7 +77,11 @@ export function AppShell({ user, children }: AppShellProps) {
           collapsed ? "md:pl-16" : "md:pl-64",
         )}
       >
-        <Navbar onMenuClick={() => setMobileOpen(true)} />
+        <Navbar
+          onMenuClick={() => setMobileOpen(true)}
+          collapsed={collapsed}
+          onToggleCollapse={toggleCollapse}
+        />
         <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
       </div>
 

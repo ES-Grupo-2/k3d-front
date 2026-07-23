@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Box } from "lucide-react";
 
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
@@ -25,15 +25,14 @@ interface SidebarContentProps {
   user: AuthUser;
   onNavigate?: () => void;
   // Modo compacto (só ícones) — usado apenas na sidebar fixa do desktop.
+  // O botão de recolher/expandir fica no header (Navbar), não aqui.
   collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 export function SidebarContent({
   user,
   onNavigate,
   collapsed = false,
-  onToggleCollapse,
 }: SidebarContentProps) {
   const pathname = usePathname();
   const sections = getVisibleSections(user.role);
@@ -111,20 +110,7 @@ export function SidebarContent({
         )}
       >
         {collapsed ? (
-          <>
-            {onToggleCollapse && (
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                title="Expandir menu"
-                aria-label="Expandir menu"
-                className="text-foreground/80 hover:bg-primary/10 hover:text-foreground inline-flex size-10 items-center justify-center rounded-lg transition-colors hover:cursor-pointer"
-              >
-                <PanelLeftOpen className="size-5" />
-              </button>
-            )}
-            <LogoutButton variant="icon" onLoggedOut={onNavigate} />
-          </>
+          <LogoutButton variant="icon" onLoggedOut={onNavigate} />
         ) : (
           <>
             <div className="mb-3 flex items-center gap-3">
@@ -147,17 +133,6 @@ export function SidebarContent({
               className="w-full hover:cursor-pointer"
               onLoggedOut={onNavigate}
             />
-
-            {onToggleCollapse && (
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                className="text-muted-foreground hover:bg-primary/10 hover:text-foreground mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm transition-colors hover:cursor-pointer"
-              >
-                <PanelLeftClose className="size-4" />
-                Recolher
-              </button>
-            )}
           </>
         )}
       </div>

@@ -5,16 +5,19 @@
  * @author jvs-neves
  */
 
-import { Menu } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { getPageTitle } from "./nav-config";
 
 interface NavbarProps {
   onMenuClick: () => void;
+  // Controle do modo compacto da sidebar (só desktop).
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Navbar({ onMenuClick }: NavbarProps) {
+export function Navbar({ onMenuClick, collapsed, onToggleCollapse }: NavbarProps) {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
 
@@ -28,6 +31,22 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       >
         <Menu className="size-6" />
       </button>
+
+      {onToggleCollapse && (
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+          title={collapsed ? "Expandir menu" : "Recolher menu"}
+          className="text-foreground/80 hover:bg-primary/10 hover:text-foreground hidden size-10 items-center justify-center rounded-lg transition-colors hover:cursor-pointer md:inline-flex"
+        >
+          {collapsed ? (
+            <PanelLeftOpen className="size-5" />
+          ) : (
+            <PanelLeftClose className="size-5" />
+          )}
+        </button>
+      )}
 
       <h1 className="flex-1 truncate text-lg font-semibold">{title}</h1>
 
