@@ -17,10 +17,10 @@ import type {
   Period,
   ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
+import { CategoryRevenueChart } from "./CategoryRevenueChart";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
 import { PeriodFilter } from "./PeriodFilter";
-import { ProductsBarChart } from "./ProductsBarChart";
 import { ProductsTable } from "./ProductsTable";
 
 interface FinancialDashboardViewProps {
@@ -89,16 +89,11 @@ export function FinancialDashboardView({
 
         <Card>
           <CardHeader>
-            <CardTitle>Receita por produto</CardTitle>
+            <CardTitle>Receita por categoria</CardTitle>
           </CardHeader>
           <CardContent>
             {productList.length > 0 ? (
-              <ProductsBarChart
-                products={productList}
-                dataKey="revenue"
-                kind="currency"
-                label="Receita"
-              />
+              <CategoryRevenueChart products={productList} />
             ) : (
               <p className="text-muted-foreground py-12 text-center text-sm">
                 Sem produtos no período selecionado.
