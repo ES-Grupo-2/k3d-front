@@ -58,21 +58,20 @@ export function AppShell({ user, children }: AppShellProps) {
   return (
     // Desktop: backdrop + painéis flutuantes (altura fixa, scroll interno no
     // conteúdo). Mobile: comportamento anterior (fundo normal, scroll do documento).
-    <div className="bg-background md:bg-backdrop min-h-screen w-full md:flex md:h-screen md:overflow-hidden md:p-3">
-      {/* Sidebar — painel flutuante arredondado. */}
+    <div className="bg-background md:bg-backdrop min-h-screen w-full md:flex md:h-screen md:gap-3 md:overflow-hidden md:p-3">
+      {/* Sidebar — faz parte do backdrop (sem painel próprio): itens direto sobre
+          o fundo, só o conteúdo é o painel flutuante. */}
       <aside
         className={cn(
           "hidden shrink-0 transition-[width] duration-200 md:block",
           collapsed ? "md:w-16" : "md:w-64",
         )}
       >
-        <div className="border-border bg-card h-full overflow-hidden rounded-3xl border shadow-lg">
-          <SidebarContent
-            user={user}
-            collapsed={collapsed}
-            onExpand={expandSidebar}
-          />
-        </div>
+        <SidebarContent
+          user={user}
+          collapsed={collapsed}
+          onExpand={expandSidebar}
+        />
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -85,11 +84,11 @@ export function AppShell({ user, children }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Conteúdo — painel na frente que "tuca" a borda direita da sidebar. */}
+      {/* Conteúdo — único painel flutuante, sobre o backdrop. */}
       <div
         className={cn(
           "flex min-h-screen flex-col",
-          "md:border-border md:relative md:z-10 md:-ml-4 md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:border md:bg-background md:shadow-2xl",
+          "md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:bg-background md:shadow-2xl",
         )}
       >
         <Navbar

@@ -43,7 +43,7 @@ export function SidebarContent({
       {/* Marca */}
       <div
         className={cn(
-          "border-border flex h-16 shrink-0 items-center border-b",
+          "flex h-16 shrink-0 items-center",
           collapsed ? "justify-center px-2" : "gap-2 px-6",
         )}
       >
@@ -112,7 +112,7 @@ export function SidebarContent({
       {/* Rodapé */}
       <div
         className={cn(
-          "border-border shrink-0 border-t",
+          "shrink-0",
           collapsed ? "flex flex-col items-center gap-2 p-2" : "p-4",
         )}
       >
