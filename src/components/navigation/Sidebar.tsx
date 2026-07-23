@@ -46,7 +46,7 @@ export function SidebarContent({
       <div
         className={cn(
           "flex h-16 shrink-0 items-center",
-          collapsed ? "justify-center px-1" : "gap-2 px-6",
+          collapsed ? "justify-center px-0.5" : "gap-2 px-6",
         )}
       >
         {collapsed ? (
@@ -57,7 +57,7 @@ export function SidebarContent({
             aria-label="Expandir menu"
             className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 rounded-md transition-colors hover:cursor-pointer"
           >
-            <span className="text-foreground text-sm font-bold tracking-tight dark:text-primary">
+            <span className="text-foreground text-lg font-bold tracking-tight dark:text-primary">
               K3D
             </span>
             <ChevronRight className="size-5 shrink-0" strokeWidth={1.5} />
