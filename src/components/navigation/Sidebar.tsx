@@ -116,7 +116,7 @@ export function SidebarContent({
                       : "text-foreground/80 hover:bg-primary/10 hover:text-foreground",
                   )}
                 >
-                  <Icon className="size-6 shrink-0" />
+                  <Icon className="size-[26px] shrink-0" />
                   {!collapsed && item.label}
                 </Link>
               );
@@ -146,7 +146,14 @@ export function SidebarContent({
           </button>
         ) : (
           <>
-            <div className="mb-3 flex items-center gap-3">
+            {/* Trocar tema: rótulo discreto à esquerda + toggle à direita. */}
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="text-muted-foreground text-xs">Mudar tema</span>
+              <ThemeToggle className="shrink-0" />
+            </div>
+
+            {/* Perfil, com o botão Sair à direita. */}
+            <div className="flex items-center gap-3">
               <span className="bg-primary text-primary-foreground ring-foreground/15 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ring-1">
                 {getInitials(user.name, user.email)}
               </span>
@@ -158,14 +165,8 @@ export function SidebarContent({
                   {ROLE_LABELS[user.role]}
                 </p>
               </div>
-              <ThemeToggle className="shrink-0" />
+              <LogoutButton variant="icon" onLoggedOut={onNavigate} />
             </div>
-
-            <LogoutButton
-              variant="full"
-              className="bg-card w-full hover:cursor-pointer"
-              onLoggedOut={onNavigate}
-            />
           </>
         )}
       </div>

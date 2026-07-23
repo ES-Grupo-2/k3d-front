@@ -104,7 +104,7 @@ export function LogoutButton({
         <div
           role="dialog"
           className={cn(
-            "border-border bg-card absolute bottom-full left-0 z-50 mb-2 w-56 rounded-lg border p-3 shadow-lg",
+            "border-border bg-card absolute bottom-full right-0 z-50 mb-2 w-56 rounded-lg border p-3 shadow-lg",
             "animate-in fade-in slide-in-from-bottom-1",
           )}
         >
