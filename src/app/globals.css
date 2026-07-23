@@ -176,6 +176,44 @@
   }
 }
 
+/* Efeito "gênio saindo da lâmpada" para o modal de edição de pedidos.
+   O conteúdo emerge do centro-inferior como uma coluna fina que sobe e depois
+   se expande até o tamanho final, com um leve overshoot. A regra sobrescreve o
+   dialog-pop padrão graças à especificidade extra (classe + data-slot +
+   data-state); o transform-origin ancora a "lâmpada" na base. */
+@keyframes k3d-genie-in {
+  0% {
+    opacity: 0;
+    transform: translateY(45%) scaleX(0.05) scaleY(0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(14%) scaleX(0.08) scaleY(1.06);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0) scaleX(0.5) scaleY(1);
+  }
+  85% {
+    transform: translateY(0) scaleX(1.03) scaleY(0.99);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.k3d-genie-dialog[data-slot="dialog-content"][data-state="open"] {
+  transform-origin: bottom center;
+  animation: k3d-genie-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k3d-genie-dialog[data-slot="dialog-content"][data-state="open"] {
+    transform: none;
+    animation: fade-in 0.2s ease-out both;
+  }
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
    Theme switch — recriação do "CopyCase Dark Mode Switch", portado do
    EyePleasure. Markup em src/components/theme/ThemeToggle.tsx.
