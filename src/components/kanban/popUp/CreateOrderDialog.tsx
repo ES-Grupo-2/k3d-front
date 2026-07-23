@@ -95,7 +95,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
       return setAlert("Por favor, selecione um método de pagamento obrigatório.");
     }
 
-    if (!data.file || data.archive === ""){
+    if (data.archive === ""){
       return setAlert("Por favor, selecione um arquivo ou insira um link externo.");
     }
     await onSave(data);
