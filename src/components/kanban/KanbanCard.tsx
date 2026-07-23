@@ -82,7 +82,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             : () => setExpanded((prev) => !prev)
         }
         suppressHydrationWarning={true}
-        className={`k3d-kanban-card relative text-sm ${
+        className={`k3d-kanban-card text-sm ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
         } ${
           isOverlay || isPlaceholder
@@ -177,12 +177,13 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         </div>
 
         {/* Card de detalhes — "novo card" que surge por trás do principal, mais
-            escuro. O recuo negativo (-mt-2) + z-0 fazem o topo ficar tucado atrás
-            do card principal, sem gap. Só em cards reais. */}
+            escuro. A margem negativa (aplicada só quando expandido, para não
+            afetar o espaçamento entre cards) esconde o topo atrás do card
+            principal, sem gap. Só em cards reais. */}
         {!isOverlay && !isPlaceholder && (
           <div
-            className={`relative z-0 -mt-8 grid transition-[grid-template-rows] duration-300 ease-out ${
-              expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            className={`grid transition-[grid-template-rows,margin-top] duration-300 ease-out ${
+              expanded ? "-mt-8 grid-rows-[1fr]" : "grid-rows-[0fr]"
             }`}
           >
             <div className="overflow-hidden">
