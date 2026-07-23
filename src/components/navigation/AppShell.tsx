@@ -56,18 +56,23 @@ export function AppShell({ user, children }: AppShellProps) {
   };
 
   return (
-    <div className="min-h-screen w-full">
+    // Desktop: backdrop + painéis flutuantes (altura fixa, scroll interno no
+    // conteúdo). Mobile: comportamento anterior (fundo normal, scroll do documento).
+    <div className="bg-background md:bg-backdrop min-h-screen w-full md:flex md:h-screen md:overflow-hidden md:p-3">
+      {/* Sidebar — painel flutuante arredondado. */}
       <aside
         className={cn(
-          "border-border bg-card fixed inset-y-0 left-0 z-40 hidden border-r transition-[width] duration-200 md:block",
-          collapsed ? "w-16" : "w-64",
+          "hidden shrink-0 transition-[width] duration-200 md:block",
+          collapsed ? "md:w-16" : "md:w-64",
         )}
       >
-        <SidebarContent
-          user={user}
-          collapsed={collapsed}
-          onExpand={expandSidebar}
-        />
+        <div className="border-border bg-card h-full overflow-hidden rounded-3xl border shadow-lg">
+          <SidebarContent
+            user={user}
+            collapsed={collapsed}
+            onExpand={expandSidebar}
+          />
+        </div>
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -80,10 +85,11 @@ export function AppShell({ user, children }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
+      {/* Conteúdo — painel na frente que "tuca" a borda direita da sidebar. */}
       <div
         className={cn(
-          "flex min-h-screen flex-col transition-[padding] duration-200",
-          collapsed ? "md:pl-16" : "md:pl-64",
+          "flex min-h-screen flex-col",
+          "md:border-border md:relative md:z-10 md:-ml-4 md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:border md:bg-background md:shadow-2xl",
         )}
       >
         <Navbar
@@ -91,7 +97,9 @@ export function AppShell({ user, children }: AppShellProps) {
           collapsed={collapsed}
           onToggleCollapse={toggleCollapse}
         />
-        <main className="flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</main>
+        <main className="flex-1 p-4 pb-28 md:overflow-y-auto md:p-8 md:pb-8">
+          {children}
+        </main>
       </div>
 
       <MobileTabBar user={user} />
