@@ -15,16 +15,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
 
 interface LogoutButtonProps {
-  variant?: "full" | "icon";
   className?: string;
   onLoggedOut?: () => void;
 }
 
-export function LogoutButton({
-  variant = "full",
-  className,
-  onLoggedOut,
-}: LogoutButtonProps) {
+export function LogoutButton({ className, onLoggedOut }: LogoutButtonProps) {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -68,8 +63,8 @@ export function LogoutButton({
     };
   }, [confirmOpen]);
 
-  const trigger =
-    variant === "icon" ? (
+  return (
+    <div ref={containerRef} className="relative">
       <button
         type="button"
         onClick={() => setConfirmOpen((prev) => !prev)}
@@ -82,23 +77,6 @@ export function LogoutButton({
       >
         <LogOut className="size-5" />
       </button>
-    ) : (
-      <button
-        type="button"
-        onClick={() => setConfirmOpen((prev) => !prev)}
-        className={cn(
-          "border-border text-foreground/90 hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-          className,
-        )}
-      >
-        <LogOut className="size-4" />
-        Sair
-      </button>
-    );
-
-  return (
-    <div ref={containerRef} className="relative">
-      {trigger}
 
       {confirmOpen && (
         <div

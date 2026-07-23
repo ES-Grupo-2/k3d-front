@@ -165,7 +165,7 @@ export function SidebarContent({
                   {ROLE_LABELS[user.role]}
                 </p>
               </div>
-              <LogoutButton variant="icon" onLoggedOut={onNavigate} />
+              <LogoutButton onLoggedOut={onNavigate} />
             </div>
           </>
         )}
