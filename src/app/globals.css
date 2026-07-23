@@ -98,10 +98,10 @@
    do card, então título, cliente, bordas e badges acompanham automaticamente. */
 .dark .k3d-kanban-card {
   --card: #e5e3dc;
-  --card-foreground: #23262b;
-  --foreground: #23262b;
-  --muted-foreground: #5c6167;
-  --border: rgba(35, 38, 43, 0.18);
+  --card-foreground: #26221c;
+  --foreground: #26221c;
+  --muted-foreground: #6b6357;
+  --border: rgba(60, 52, 38, 0.18);
 }
 
 @theme inline {
