@@ -37,7 +37,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     }: KanbanCardProps,
     ref,
   ) {
-    // Detalhes exibidos ao clicar/tocar no card — ele se estende para baixo.
+    // Ao clicar/tocar, um segundo card (mais escuro) surge por baixo do principal.
     const [expanded, setExpanded] = useState(false);
 
     const draggableId = isDestinationPlaceHolder
@@ -82,97 +82,108 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             : () => setExpanded((prev) => !prev)
         }
         suppressHydrationWarning={true}
-        className={`k3d-kanban-card relative overflow-hidden rounded-md text-sm transition-colors ${
+        className={`k3d-kanban-card relative text-sm ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
         } ${
-          isOverlay
-            ? "bg-card border border-border ring-primary scale-105 rotate-3 cursor-grabbing opacity-90 shadow-2xl ring-2"
-            : isPlaceholder
-              ? "bg-border/20 border-border border-2 border-dashed opacity-50 cursor-grabbing"
-              : "bg-card border border-border cursor-grab hover:border-primary/50 shadow-sm active:cursor-grabbing"
+          isOverlay || isPlaceholder
+            ? "cursor-grabbing"
+            : "cursor-grab active:cursor-grabbing"
         }`}
       >
+        {/* Card principal — estático (não cresce ao expandir). */}
         <div
-          className="absolute left-0 top-0 h-full w-1"
-          style={{ backgroundColor: order.tag?.color || '#777' }}
-        />
+          className={`relative overflow-hidden rounded-md transition-colors ${
+            isOverlay
+              ? "bg-card border border-border ring-primary scale-105 rotate-3 opacity-90 shadow-2xl ring-2"
+              : isPlaceholder
+                ? "bg-border/20 border-border border-2 border-dashed opacity-50"
+                : "bg-card border border-border hover:border-primary/50 shadow-sm"
+          }`}
+        >
+          <div
+            className="absolute left-0 top-0 h-full w-1"
+            style={{ backgroundColor: order.tag?.color || '#777' }}
+          />
 
-        <div className={`flex flex-col gap-3 p-4 pl-5 ${isPlaceholder ? "invisible" : "visible"}`}>
-          <div className="flex items-start justify-between">
-            <span className="text-xs font-semibold tracking-wider text-foreground/80 uppercase">
-              {order.tag?.type}
-            </span>
+          <div className={`flex flex-col gap-3 p-4 pl-5 ${isPlaceholder ? "invisible" : "visible"}`}>
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-semibold tracking-wider text-foreground/80 uppercase">
+                {order.tag?.type}
+              </span>
 
-            <div className="flex items-center gap-1">
-              {isManager && (
-                <div className="flex items-center gap-1 opacity-60 transition-opacity hover:opacity-100">
-                  <button
-                    className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-foreground/10 hover:text-foreground transition-all"
-                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-red-500/10 hover:text-red-400 transition-all"
-                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              )}
-              <ChevronDown
-                size={16}
-                className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
-                  expanded ? "rotate-180" : ""
-                }`}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <h3 className="text-sm font-medium leading-tight text-foreground">
-              {formattedTitle}
-            </h3>
-
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <User size={14} className="shrink-0" />
-              <span className="truncate">{order.client?.name}</span>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
               <div className="flex items-center gap-1">
-                <Package size={14} />
-                <span>{order.quantity || 1} un</span>
-              </div>
-              <div className="font-medium text-foreground/90">
-                {currency(order.price)}
+                {isManager && (
+                  <div className="flex items-center gap-1 opacity-60 transition-opacity hover:opacity-100">
+                    <button
+                      className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-foreground/10 hover:text-foreground transition-all"
+                      onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-red-500/10 hover:text-red-400 transition-all"
+                      onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    >
+                      <Trash size={16} />
+                    </button>
+                  </div>
+                )}
+                <ChevronDown
+                  size={16}
+                  className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                    expanded ? "rotate-180" : ""
+                  }`}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="mt-1 flex items-center justify-between border-t border-border/50 pt-3 text-xs font-medium">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <CreditCard size={14} />
-              <span>{humanizePayMethod(order.payment_method || "None")}</span>
+            <div className="flex flex-col gap-1.5">
+              <h3 className="text-sm font-medium leading-tight text-foreground">
+                {formattedTitle}
+              </h3>
+
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <User size={14} className="shrink-0" />
+                <span className="truncate">{order.client?.name}</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                <div className="flex items-center gap-1">
+                  <Package size={14} />
+                  <span>{order.quantity || 1} un</span>
+                </div>
+                <div className="font-medium text-foreground/90">
+                  {currency(order.price)}
+                </div>
+              </div>
             </div>
 
-            <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${
-              order.amount_paid >= order.price
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}>
-              {humanizePayStatus(order.amount_paid || 0, order.price)}
-            </span>
-          </div>
+            <div className="mt-1 flex items-center justify-between border-t border-border/50 pt-3 text-xs font-medium">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CreditCard size={14} />
+                <span>{humanizePayMethod(order.payment_method || "None")}</span>
+              </div>
 
-          {/* Detalhes que aparecem ao expandir o card (mesmas infos do modal). */}
+              <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${
+                order.amount_paid >= order.price
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}>
+                {humanizePayStatus(order.amount_paid || 0, order.price)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card de detalhes — "novo card" por baixo, mais escuro (só em cards reais). */}
+        {!isOverlay && !isPlaceholder && (
           <div
             className={`grid transition-[grid-template-rows] duration-300 ease-out ${
               expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
             }`}
           >
             <div className="overflow-hidden">
-              <div className="mt-3 space-y-2 rounded-md bg-foreground/15 p-3 text-xs">
+              <div className="k3d-kanban-card-details mt-2 space-y-2 rounded-md border border-border p-3 text-xs shadow-sm">
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Telefone</span>
                   <span className="text-foreground/90 truncate">
@@ -230,7 +241,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     );
   },
