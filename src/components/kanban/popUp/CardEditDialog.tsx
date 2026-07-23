@@ -155,7 +155,7 @@ export function CardEditDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={guard.handleOpenChange}>
-        <DialogContent size="xl" className="k3d-genie-dialog">
+        <DialogContent size="xl">
           <DialogHeader>
             <DialogTitle>Editar pedido</DialogTitle>
             <DialogDescription>
