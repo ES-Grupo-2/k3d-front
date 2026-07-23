@@ -205,7 +205,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   }, []);
 
 return (
-  <div className="flex h-[calc(100svh-12rem)] w-full select-none flex-col overflow-hidden overscroll-none md:h-[calc(100svh-8rem)]">
+  <div className="flex h-[calc(100svh_-_12rem)] w-full select-none flex-col overflow-hidden overscroll-none md:h-[calc(100svh_-_8rem)]">
     {isManager &&
       headerSlot &&
       createPortal(
