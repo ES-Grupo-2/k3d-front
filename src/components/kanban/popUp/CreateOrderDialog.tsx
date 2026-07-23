@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { UploadCloud, UserPlus, Users, Search } from "lucide-react";
 import { Client, OrderFormData } from "@/types/order";
 import { enumPayingMethodMap } from "@/lib/utils";
@@ -29,7 +29,7 @@ interface CreateOrderDialogProps {
 }
 
 export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOrderDialogProps) {
-  const { register, handleSubmit, setValue, watch } = useForm<OrderFormData>({
+  const { register, handleSubmit, setValue, control } = useForm<OrderFormData>({
     defaultValues: {
       newClientName: "",
       newClientPhone: "",
@@ -50,7 +50,10 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
 
-  const selectedClientId = watch("clientId");
+  const selectedClientId = useWatch({
+    control,
+    name: "clientId",
+  });
 
   const [alert, setAlert] = useState<string | null>(null);
 
@@ -114,7 +117,9 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
 
     if (open) {
       carregarDadosAuxiliares();
-      setClientSearchTerm(""); 
+      setTimeout(() => {
+        setClientSearchTerm(""); 
+      }, 0);
     }
   }, [open]);
 
