@@ -7,8 +7,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box } from "lucide-react";
-
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme";
@@ -47,8 +45,8 @@ export function SidebarContent({
         )}
       >
         {collapsed ? (
-          <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg">
-            <Box className="size-5" />
+          <span className="text-primary text-lg font-bold tracking-tight">
+            K3D
           </span>
         ) : (
           <>
