@@ -195,8 +195,9 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
 
 return (
   <div className="flex h-[calc(100svh_-_10.5rem)] w-full select-none flex-col overflow-hidden overscroll-none md:h-full">
-    {isManager && (
-      <div className="flex shrink-0 justify-end px-4 pb-3 md:px-8 md:pb-4">
+    <div className="flex shrink-0 items-center justify-between gap-4 px-4 pb-3 md:px-8 md:pb-4">
+      <h1 className="text-2xl font-semibold">Kanban</h1>
+      {isManager && (
         <Button
           variant="default"
           className="transition-colors hover:cursor-pointer hover:bg-primary/90"
@@ -204,8 +205,8 @@ return (
         >
           + Novo pedido
         </Button>
-      </div>
-    )}
+      )}
+    </div>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
         <KanbanBoard
