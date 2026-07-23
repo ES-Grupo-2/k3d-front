@@ -42,7 +42,7 @@ export function FinancialDashboardView({
   const productList = products?.products ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <MobileMenuButton />

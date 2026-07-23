@@ -52,7 +52,7 @@ export default async function PedidosPage({
   const totalItems = response.meta.totalItems;
   
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-24 md:pb-0">
       <header className="space-y-1">
         <div className="flex items-center gap-2">
           <MobileMenuButton />

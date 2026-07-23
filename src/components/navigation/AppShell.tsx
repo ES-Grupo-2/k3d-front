@@ -49,7 +49,7 @@ export function AppShell({ user, children }: AppShellProps) {
     // viewport, scroll interno no conteúdo. No desktop a sidebar é fixa (parte
     // do backdrop); no mobile ela é um drawer que EMPURRA o conteúdo ao abrir.
     <MobileNavProvider value={{ openMenu: () => setMobileOpen(true) }}>
-      <div className="bg-backdrop relative flex h-svh w-full overflow-hidden p-2 pb-20 md:gap-3 md:p-3">
+      <div className="bg-backdrop relative flex h-svh w-full overflow-hidden p-2 md:gap-3 md:p-3">
         {/* Sidebar desktop — faz parte do backdrop (sem painel próprio). */}
         <aside
           className={cn(

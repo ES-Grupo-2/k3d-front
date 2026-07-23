@@ -25,7 +25,7 @@ export function HomeView({ user }: HomeViewProps) {
   const firstName = (user.name || user.email).split(" ")[0];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24 md:pb-0">
       <div className="flex items-center gap-2">
         <MobileMenuButton />
         <div>
