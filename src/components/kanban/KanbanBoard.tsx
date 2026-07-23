@@ -16,6 +16,7 @@ import {
 import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+import { COLUMN_ICONS } from "./kanban-columns";
 
 const COLUMN_LABELS: Record<ColumnType, string> = {
   PENDENTE: "A Fazer",
@@ -141,23 +142,27 @@ return (
     <div className="flex flex-1 flex-col gap-2 overflow-hidden h-full w-full">
         {/* Fixed because we're considering that will only be three main columns */}
         <div className={`flex md:hidden shrink-0 justify-center overflow-x-hidden border-b border-border px-4 bg-background`}>
-          {COLUMNS.map((column, index) => (
-            <button
-              key={column.id}
-              type="button"
-              onClick={() => scrollToColumn(column.id, index)}
-              className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === column.id
-                  ? "border-primary bg-muted text-foreground"
-                  : "border-transparent bg-background text-muted-foreground"
-              }`}
-            >
-              {column.title}
-              <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
-                {byColumn[column.id].length}
-              </span>
-            </button>
-          ))}
+          {COLUMNS.map((column, index) => {
+            const Icon = COLUMN_ICONS[column.id];
+            return (
+              <button
+                key={column.id}
+                type="button"
+                onClick={() => scrollToColumn(column.id, index)}
+                className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                  activeTab === column.id
+                    ? "border-primary bg-muted text-foreground"
+                    : "border-transparent bg-background text-muted-foreground"
+                }`}
+              >
+                <Icon className="size-4 shrink-0" />
+                {column.title}
+                <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+                  {byColumn[column.id].length}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div

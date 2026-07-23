@@ -5,6 +5,7 @@
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+import { COLUMN_ICONS } from "./kanban-columns";
 
 interface KanbanColumnProps {
   id: ColumnType;
@@ -27,6 +28,7 @@ export function KanbanColumn({
   const { active } = useDndContext();
   const draggedOrder = active?.data.current?.order as Order | undefined;
   const isCardFromOtherColumn = active?.data.current?.originColumn !== id;
+  const Icon = COLUMN_ICONS[id];
   return (
   <div
     ref={setNodeRef}
@@ -35,9 +37,12 @@ export function KanbanColumn({
       }`}
   >
     <header className="hidden shrink-0 items-center justify-between border-b border-border px-4 py-3 md:flex">
-      <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
-        {title}
-      </h2>
+      <div className="flex items-center gap-2">
+        <Icon className="text-muted-foreground size-4 shrink-0" />
+        <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
+          {title}
+        </h2>
+      </div>
       <span className="text-subtle rounded-full bg-foreground/10 px-3 py-1 text-xs">
         {orders.length}
       </span>
