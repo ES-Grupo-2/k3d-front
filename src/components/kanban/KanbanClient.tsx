@@ -13,7 +13,7 @@ import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
+import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
 import { OrderFormData } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
 import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
@@ -27,6 +27,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -61,6 +62,31 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    // 1. Guardamos o estado antigo caso a API falhe
+    const previousOrders = [...orders];
+    const idToDelete = deletingId; // Salva a referência
+
+    // 2. Optimistic UI: Tira da tela na mesma hora para parecer rápido
+    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(idToDelete)));
+    setDeletingId(null);
+    setIsDeleting(true);
+
+    try {
+      // 3. Efetiva a deleção no backend
+      await deleteKanbanOrder(idToDelete);
+    } catch (error) {
+      // 4. Se falhar, avisa o usuário e devolve o card pra tela
+      console.error("Falha ao deletar pedido:", error);
+      alert("Ocorreu um erro ao excluir o pedido. Tente novamente.");
+      setOrders(previousOrders);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSaveEdit = (data: CardFormData) => {
     if (!editingOrder) return;
     
@@ -70,11 +96,6 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       ),
     );
     setEditingOrder(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(deletingId)));
-    setDeletingId(null);
   };
 
   /**
@@ -105,6 +126,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     setIsCreating(true);
     try {
       let finalClientId = formData.clientId;
+      let finalClientName = ""; // Variável auxiliar para capturar o nome do cliente
 
       if (!finalClientId && formData.newClientName) {
         const clientResponse = await createClient({ 
@@ -112,12 +134,14 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
           phone: formData.newClientPhone || "" 
         });
 
-        // Garante que a API de clientes retornou um ID válido
         if (!clientResponse || !clientResponse.id) {
             throw new Error("Falha ao criar o novo cliente. ID não retornado.");
         }
         finalClientId = clientResponse.id;
-        }
+        finalClientName = formData.newClientName; // Guardamos o nome do cliente novo
+      } else {
+        finalClientName = (formData as any).clientNameForUI || "Cliente"; 
+      }
 
       if (!finalClientId) throw new Error("Cliente é obrigatório!");
 
@@ -144,18 +168,18 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
         );
         
         await uploadFileToMinIO(presignedUrl, fileToUpload);
-
-        // Patch to update the order with the file URL (filename) in the database
-        // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
-        
-        newOrder.archive = fileToUpload.name; // Locally updates the UI
+        newOrder.archive = fileToUpload.name; 
       }
+      
+      newOrder.tag = { type: formData.tagType }; 
+      newOrder.client = { name: finalClientName };
       
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
     } catch (error) {
       console.error(error);
+      alert("Erro ao criar o pedido. Verifique os dados e tente novamente.");
     } finally {
       setIsCreating(false);
     }
