@@ -25,6 +25,16 @@ interface KanbanCardProps {
   isDestinationPlaceHolder?: boolean;
 }
 
+const getPayStatusBadgeColor = (amountPaid: number, fullPrice: number): string => {
+  if (amountPaid === 0) {
+    return "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-700";
+  } else if (amountPaid === fullPrice) {
+    return "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-700";
+  } else {
+    return "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-700";
+  }
+};
+
 export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
   function KanbanCard(
     {
@@ -97,7 +107,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             isOverlay
               ? "bg-card border border-border ring-primary scale-105 rotate-3 opacity-90 shadow-2xl ring-2"
               : isPlaceholder
-                ? "bg-border/20 border-border border-2 border-dashed opacity-50"
+                ? "bg-card/20 border-border border-2 border-dashed opacity-50"
                 : "bg-card border border-border hover:border-primary/50 shadow-sm"
           }`}
         >
@@ -165,11 +175,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
                 <span>{humanizePayMethod(order.payment_method || "None")}</span>
               </div>
 
-              <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${
-                order.amount_paid >= order.price
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${getPayStatusBadgeColor(order.amount_paid || 0, order.price)}`}>
                 {humanizePayStatus(order.amount_paid || 0, order.price)}
               </span>
             </div>
