@@ -181,12 +181,12 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             do card principal, sem gap. Só em cards reais. */}
         {!isOverlay && !isPlaceholder && (
           <div
-            className={`relative z-0 -mt-2 grid transition-[grid-template-rows] duration-300 ease-out ${
+            className={`relative z-0 -mt-4 grid transition-[grid-template-rows] duration-300 ease-out ${
               expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
             }`}
           >
             <div className="overflow-hidden">
-              <div className="k3d-kanban-card-details space-y-2 rounded-b-md border border-t-0 border-border px-3 pb-3 pt-4 text-xs">
+              <div className="k3d-kanban-card-details space-y-2 rounded-b-md border border-t-0 border-border px-3 pb-3 pt-6 text-xs">
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Telefone</span>
                   <span className="text-foreground/90 truncate">
