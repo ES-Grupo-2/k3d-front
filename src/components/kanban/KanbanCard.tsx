@@ -172,7 +172,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
             }`}
           >
             <div className="overflow-hidden">
-              <div className="space-y-2 border-t border-border/50 pt-3 text-xs">
+              <div className="mt-3 space-y-2 rounded-md bg-foreground/[0.07] p-3 text-xs">
                 <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Telefone</span>
                   <span className="text-foreground/90 truncate">
