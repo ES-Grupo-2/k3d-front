@@ -5,6 +5,7 @@
  * @author jvs-neves
  */
 
+import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { AuthUser } from "@/schemas/auth";
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui";
 
 import { MobileTabBar } from "./MobileTabBar";
-import { Navbar } from "./Navbar";
 import { SidebarContent } from "./Sidebar";
 
 interface AppShellProps {
@@ -50,11 +50,6 @@ export function AppShell({ user, children }: AppShellProps) {
     });
   };
 
-  const expandSidebar = () => {
-    setCollapsed(false);
-    localStorage.setItem(SIDEBAR_STORAGE_KEY, "false");
-  };
-
   return (
     // Desktop: backdrop + painéis flutuantes (altura fixa, scroll interno no
     // conteúdo). Mobile: comportamento anterior (fundo normal, scroll do documento).
@@ -70,7 +65,6 @@ export function AppShell({ user, children }: AppShellProps) {
         <SidebarContent
           user={user}
           collapsed={collapsed}
-          onExpand={expandSidebar}
           onToggleCollapse={toggleCollapse}
         />
       </aside>
@@ -92,8 +86,19 @@ export function AppShell({ user, children }: AppShellProps) {
           "md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden md:rounded-3xl md:bg-background md:shadow-2xl",
         )}
       >
-        <Navbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 pb-28 md:overflow-y-auto md:p-8 md:pb-8">
+        {/* Barra mobile: só o botão de menu (abre a sidebar em Sheet). No desktop
+            não há header — cada tela traz seu próprio título. */}
+        <div className="flex h-14 shrink-0 items-center px-4 md:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Abrir menu"
+            className="text-foreground/80 hover:bg-primary/10 inline-flex size-10 items-center justify-center rounded-lg transition-colors"
+          >
+            <Menu className="size-6" />
+          </button>
+        </div>
+        <main className="flex-1 px-4 pb-28 md:overflow-y-auto md:p-8 md:pb-8">
           {children}
         </main>
       </div>

@@ -5,8 +5,7 @@
  * @author jvs-neves
  */
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
@@ -194,30 +193,19 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  // Injeta o botão "Novo pedido" no slot do header compartilhado (Navbar),
-  // liberando o espaço que ele ocupava no topo da área principal.
-  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHeaderSlot(document.getElementById("header-slot"));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
 return (
-  <div className="flex h-[calc(100svh_-_12rem)] w-full select-none flex-col overflow-hidden overscroll-none md:h-full">
-    {isManager &&
-      headerSlot &&
-      createPortal(
+  <div className="flex h-[calc(100svh_-_10.5rem)] w-full select-none flex-col overflow-hidden overscroll-none md:h-full">
+    {isManager && (
+      <div className="flex shrink-0 justify-end px-4 pb-3 md:px-8 md:pb-4">
         <Button
           variant="default"
           className="transition-colors hover:cursor-pointer hover:bg-primary/90"
           onClick={() => setCreateModalOpen(true)}
         >
           + Novo pedido
-        </Button>,
-        headerSlot,
-      )}
+        </Button>
+      </div>
+    )}
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
         <KanbanBoard

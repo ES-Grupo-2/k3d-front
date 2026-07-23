@@ -92,15 +92,6 @@ export function isItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function getPageTitle(pathname: string): string {
-  for (const section of NAV_SECTIONS) {
-    for (const item of section.items) {
-      if (isItemActive(pathname, item.href)) return item.label;
-    }
-  }
-  return "K3D";
-}
-
 export function getInitials(name?: string, email?: string): string {
   const source = name?.trim() || email?.trim() || "";
   if (!source) return "?";

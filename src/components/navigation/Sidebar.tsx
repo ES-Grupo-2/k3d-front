@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PanelLeftClose } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,9 @@ interface SidebarContentProps {
   user: AuthUser;
   onNavigate?: () => void;
   // Modo compacto (só ícones) — usado apenas na sidebar fixa do desktop.
-  // Recolher: botão ao lado da logo (expandido). Expandir: clicar na logo ou
-  // no avatar de perfil (compacto) via onExpand.
+  // Toggle: chevron "<" ao lado da logo (expandido) e ">" (compacto); o avatar
+  // de perfil também expande. Tudo via onToggleCollapse.
   collapsed?: boolean;
-  onExpand?: () => void;
   onToggleCollapse?: () => void;
 }
 
@@ -36,7 +35,6 @@ export function SidebarContent({
   user,
   onNavigate,
   collapsed = false,
-  onExpand,
   onToggleCollapse,
 }: SidebarContentProps) {
   const pathname = usePathname();
@@ -54,12 +52,12 @@ export function SidebarContent({
         {collapsed ? (
           <button
             type="button"
-            onClick={onExpand}
+            onClick={onToggleCollapse}
             title="Expandir menu"
             aria-label="Expandir menu"
-            className="text-foreground text-lg font-bold tracking-tight hover:cursor-pointer dark:text-primary"
+            className="text-muted-foreground hover:text-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors hover:cursor-pointer"
           >
-            K3D
+            <ChevronRight className="size-6" strokeWidth={1.5} />
           </button>
         ) : (
           <>
@@ -73,9 +71,9 @@ export function SidebarContent({
                 onClick={onToggleCollapse}
                 title="Recolher menu"
                 aria-label="Recolher menu"
-                className="text-foreground/70 hover:bg-foreground/10 hover:text-foreground ml-auto inline-flex size-9 items-center justify-center rounded-lg transition-colors hover:cursor-pointer"
+                className="text-muted-foreground hover:text-foreground ml-auto inline-flex size-8 items-center justify-center rounded-md transition-colors hover:cursor-pointer"
               >
-                <PanelLeftClose className="size-5" />
+                <ChevronLeft className="size-6" strokeWidth={1.5} />
               </button>
             )}
           </>
@@ -134,7 +132,7 @@ export function SidebarContent({
         {collapsed ? (
           <button
             type="button"
-            onClick={onExpand}
+            onClick={onToggleCollapse}
             title="Perfil — expandir menu"
             aria-label="Expandir menu"
             className="hover:cursor-pointer"
