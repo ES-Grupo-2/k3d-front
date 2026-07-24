@@ -5,6 +5,8 @@
 import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
 import type { ApiOrder } from "@/types/order";
+import { getTags } from "@/services/tags";
+import { Tag } from "@/types/tags";
 // Orders listing for the history screen.
 // Purely visual component (server-rendered): receives the already-filtered list
 // and presents it as a table on desktop and as cards on mobile.
@@ -35,6 +37,11 @@ function getStatusByAmountPaid(amountPaid: number, fullPrice: number): PaymentSt
   }
 }
 
+function getTagColor(tagId: number, tags: Tag[]): string {
+  const tag = tags.find((t:Tag) => Number(t.id) === (tagId));
+  return tag ? tag.color : "#777"; // Default color if tag not found
+}
+
 function Badge({ className, label }: { className: string; label: string }) {
   return (
     <span
@@ -57,7 +64,9 @@ function TagPill({ name, color }: { name: string; color: string }) {
   );
 }
 
-export function PedidosList({ orders }: { orders: ApiOrder[] }) {
+export async function PedidosList({ orders }: { orders: ApiOrder[] }) {
+  const tags = await getTags();
+
   return (
     <>
       {/* Desktop: table */}
@@ -87,7 +96,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                   <div className="text-foreground font-medium">
                     {order.title}
                   </div>
-                  <TagPill name={order.tag.type} color={"#777"} />
+                  <TagPill name={order.tag.type} color={getTagColor(order.tag.id, tags)} />
                 </td>
                 <td className="text-muted-foreground px-4 py-3">
                   {order.client.name}

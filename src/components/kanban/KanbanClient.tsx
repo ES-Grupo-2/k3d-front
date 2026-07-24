@@ -150,7 +150,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
         finalClientId = clientResponse.id;
         finalClientName = formData.newClientName; 
       } else {
-        finalClientName = (formData as any).clientNameForUI || "Cliente"; 
+        finalClientName = (formData as OrderFormData).newClientName || "Cliente"; 
       }
 
       if (!finalClientId) throw new Error("Cliente é obrigatório!");
