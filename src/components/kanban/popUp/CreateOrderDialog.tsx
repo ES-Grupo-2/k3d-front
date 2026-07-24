@@ -17,9 +17,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button, ConfirmDialog, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"; 
 import { getClients } from "@/services/order/order";
 import { getTags, TagResponse } from "@/services/tags";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -83,7 +84,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
       });
 
       if (clientExists) {
-        return setAlert("Um cliente com este exato nome ou telefone já existe na aba 'Cadastrado'.");
+        return setAlert("Um cliente com este exato nome ou telefone já existe na aba 'Cadastrado'\nBusque-o ou crie um novo.");
       }
     } else {
       if (!data.clientId) {
@@ -91,16 +92,28 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
       }
     }
 
+    if (data.amount_paid < 0) {
+      return setAlert("O valor pago não pode ser negativo.");
+    }
+
+    if(data.price !== undefined && data.price < 0) {
+      return setAlert("Insira um preço válido.");
+    }
+
+    if (data.price !== undefined && data.amount_paid > data.price) {
+      return setAlert("O valor pago não pode ser maior que o preço do produto.");
+    }
+
     if (!data.payment_method || data.payment_method === "None") {
       return setAlert("Por favor, selecione um método de pagamento obrigatório.");
     }
 
-    if (data.archive === ""){
+    if (data.archive === "" || !data.file){
       return setAlert("Por favor, selecione um arquivo ou insira um link externo.");
     }
     await onSave(data);
   };
-
+  
   useEffect(() => {
     const carregarDadosAuxiliares = async () => {
       setIsLoadingData(true);
@@ -133,18 +146,14 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
   return (
     alert ? (
       <div>
-        <ConfirmDialog
+        <AlertDialog
           open={alert !== null}
           onOpenChange={(open) => {
             if (!open) setAlert(null);
           }}
           tone="destructive"
           title="Atenção!"
-          description={
-            alert
-              ? `${alert}`
-              : ""
-          }
+          message={alert}
           confirmLabel="Fechar"
           onConfirm={() => setAlert(null)}
         />
