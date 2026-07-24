@@ -54,43 +54,65 @@ export async function getClientById(id: string) {
  * @param filename The file for which to generate a pre-signed URL
  * @returns {url: string, expiresIn: number}
  */
-export async function getPresignedUrl(taskId: string, filename: string) {
-    const sessionToken = (await requireAuth().then(session => session.token));
-    if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
+// export async function getPresignedUrl(taskId: string, filename: string) {
+//     const sessionToken = (await requireAuth().then(session => session.token));
+//     if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
 
-  const params = new URLSearchParams({
-    taskId,
-    filename,
-  });
+//   const params = new URLSearchParams({
+//     taskId,
+//     filename,
+//   });
 
-  const response = await fetch(`${API_URL}/upload/presigned-url?${params.toString()}`, {
-    method: "GET",
+//   const response = await fetch(`${API_URL}/upload/presigned-url?${params.toString()}`, {
+//     method: "GET",
+//     headers: {
+//       Authorization: `Bearer ${sessionToken}`,
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new Error("Falha ao gerar URL de upload.");
+//   }
+
+//   return response.json();
+// }
+
+// export async function uploadFileToMinIO(presignedUrl: string, file: File) {
+//   const response = await fetch(presignedUrl, {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": file.type || "application/octet-stream", 
+//     },
+//     body: file, 
+//   });
+
+//   if (!response.ok) {
+//     throw new Error("Falha ao enviar arquivo para o storage.");
+//   }
+
+//   return true;
+// }
+
+export async function uploadOrderFile(file: File) {
+  const session = await requireAuth();
+  if (!session?.token) throw new Error("Acesso não autorizado");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/files`, {
+    method: "POST",
     headers: {
-      Authorization: `Bearer ${sessionToken}`,
+      Authorization: `Bearer ${session.token}`,
     },
+    body: formData,
   });
 
   if (!response.ok) {
-    throw new Error("Falha ao gerar URL de upload.");
+    throw new Error("Falha ao fazer o upload do arquivo.");
   }
 
-  return response.json();
-}
-
-export async function uploadFileToMinIO(presignedUrl: string, file: File) {
-  const response = await fetch(presignedUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream", 
-    },
-    body: file, 
-  });
-
-  if (!response.ok) {
-    throw new Error("Falha ao enviar arquivo para o storage.");
-  }
-
-  return true;
+  return response.json() as Promise<{ url: string; fileName: string; mimeType: string }>;
 }
 
 export async function getClients(): Promise<ClientApi> {
