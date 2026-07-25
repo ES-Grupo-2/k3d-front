@@ -1,23 +1,46 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
 import type { ApiOrder } from "@/types/order";
+import { getTags } from "@/services/tags";
+import { Tag } from "@/types/tags";
 // Orders listing for the history screen.
 // Purely visual component (server-rendered): receives the already-filtered list
 // and presents it as a table on desktop and as cards on mobile.
 
 // Badge colors by flow status (Kanban column).
 const COLUMN_BADGE: Record<KanbanTaskStatus, string> = {
-  PENDENTE: "bg-zinc-500/15 text-zinc-300",
-  FAZENDO: "bg-amber-500/15 text-amber-300",
-  FINALIZADO: "bg-emerald-500/15 text-emerald-300",
+  PENDENTE: "bg-zinc-200 text-zinc-700 dark:bg-zinc-500/15 dark:text-zinc-300",
+  FAZENDO: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+  FINALIZADO:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
 
 // Badge colors by payment status.
 const PAYMENT_STATUS_BADGE: Record<PaymentStatus, string> = {
-  NAO_PAGO: "bg-red-500/15 text-red-300",
-  PAGO_PARCIAL: "bg-amber-500/15 text-amber-300",
-  PAGO: "bg-emerald-500/15 text-emerald-300",
+  NAO_PAGO: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
+  PAGO_PARCIAL:
+    "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+  PAGO: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
 };
+
+function getStatusByAmountPaid(amountPaid: number, fullPrice: number): PaymentStatus {
+  if (amountPaid === 0) {
+    return "NAO_PAGO";
+  } else if (amountPaid === fullPrice) {
+    return "PAGO";
+  } else {
+    return "PAGO_PARCIAL";
+  }
+}
+
+function getTagColor(tagId: number, tags: Tag[]): string {
+  const tag = tags.find((t:Tag) => Number(t.id) === (tagId));
+  return tag ? tag.color : "#777"; // Default color if tag not found
+}
 
 function Badge({ className, label }: { className: string; label: string }) {
   return (
@@ -41,7 +64,9 @@ function TagPill({ name, color }: { name: string; color: string }) {
   );
 }
 
-export function PedidosList({ orders }: { orders: ApiOrder[] }) {
+export async function PedidosList({ orders }: { orders: ApiOrder[] }) {
+  const tags = await getTags();
+
   return (
     <>
       {/* Desktop: table */}
@@ -71,7 +96,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                   <div className="text-foreground font-medium">
                     {order.title}
                   </div>
-                  <TagPill name={order.tag.type} color={"#777"} />
+                  <TagPill name={order.tag.type} color={getTagColor(order.tag.id, tags)} />
                 </td>
                 <td className="text-muted-foreground px-4 py-3">
                   {order.client.name}
@@ -91,10 +116,11 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 <td className="px-4 py-3">
                   <div className="flex flex-col items-start gap-1">
                     <Badge
-                      className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                      className={PAYMENT_STATUS_BADGE[getStatusByAmountPaid(order.amount_paid, order.price)] || PAYMENT_STATUS_BADGE.NAO_PAGO}
                       label={humanizePayStatus(order.amount_paid, order.price)}
                     />
                     <span className="text-muted-foreground text-xs">
+                      {/* The None fallback just exists because the payment_method can be null. */}
                       {humanizePayMethod(order.payment_method || "None")}
                     </span>
                   </div>
@@ -133,7 +159,7 @@ export function PedidosList({ orders }: { orders: ApiOrder[] }) {
                 label={humanizeSection(order.section)}
               />
               <Badge
-                className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.NAO_PAGO}
+                className={PAYMENT_STATUS_BADGE[order.status] || PAYMENT_STATUS_BADGE.PAGO}
                 label={humanizePayStatus(order.amount_paid, order.price)}
                 />
               <TagPill name={order.tag.type} color={"#777"} />

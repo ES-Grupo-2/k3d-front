@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useMemo, useState, useRef } from "react";
 import {
   DndContext,
@@ -12,6 +16,7 @@ import {
 import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+import { COLUMN_ICONS } from "./kanban-columns";
 
 const COLUMN_LABELS: Record<ColumnType, string> = {
   PENDENTE: "A Fazer",
@@ -19,7 +24,6 @@ const COLUMN_LABELS: Record<ColumnType, string> = {
   FINALIZADO: "Concluído",
 };
 
-// const COLUMNS = Object.entries(COLUMN_LABELS) as [ColumnType, string][];
 const COLUMNS = Object.entries(COLUMN_LABELS).map(([id, title]) => ({
   id: id as ColumnType,
   title,
@@ -59,7 +63,18 @@ export function KanbanBoard({
     orders?.forEach((o) => {
       if (map[o.section]) map[o.section].push(o);
     });
-    
+
+    // Sorting the most recent orders and limiting the quantity of cards displayed in DONE column
+    if (map["FINALIZADO"]) {
+      map["FINALIZADO"] = map["FINALIZADO"]
+        .sort((a, b) => {
+          const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+          const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+          return dateB - dateA; 
+        })
+        .slice(0, 20);
+      }
+
     return map;
   }, [orders]);
 
@@ -83,29 +98,6 @@ export function KanbanBoard({
     onMoveOrder(orderId, target);
   }
 
-  // return (
-  //   <DndContext
-  //     sensors={sensors}
-  //     onDragStart={handleDragStart}
-  //     onDragEnd={handleDragEnd}
-  //   >
-  //     <div className="bg-background mx-8 flex h-full min-h-[calc(100vh-195px)] snap-x snap-mandatory items-stretch 
-  //     overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:grid-rows-1 lg:gap-3">
-  //       {COLUMNS.map(([id, title]) => (
-  //         <div
-  //           key={id}
-  //           className="h-full w-full shrink-0 snap-center px-4 lg:w-auto lg:px-0"
-  //         >
-  //           <KanbanColumn
-  //             id={id}
-  //             title={title}
-  //             orders={byColumn[id]}
-  //             onEdit={onEditOrder}
-  //             onDelete={onDeleteOrder}
-  //             isManager={isManager}
-  //           />
-  //         </div>
-  //       ))}
   /**
    * Sync the active tab with the scroll position of the board container.
    * @returns 
@@ -150,23 +142,27 @@ return (
     <div className="flex flex-1 flex-col gap-2 overflow-hidden h-full w-full">
         {/* Fixed because we're considering that will only be three main columns */}
         <div className={`flex md:hidden shrink-0 justify-center overflow-x-hidden border-b border-border px-4 bg-background`}>
-          {COLUMNS.map((column, index) => (
-            <button
-              key={column.id}
-              type="button"
-              onClick={() => scrollToColumn(column.id, index)}
-              className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === column.id
-                  ? "border-primary bg-muted text-foreground"
-                  : "border-transparent bg-background text-bg-background-foreground"
-              }`}
-            >
-              {column.title}
-              <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
-                {byColumn[column.id].length}
-              </span>
-            </button>
-          ))}
+          {COLUMNS.map((column, index) => {
+            const Icon = COLUMN_ICONS[column.id];
+            return (
+              <button
+                key={column.id}
+                type="button"
+                onClick={() => scrollToColumn(column.id, index)}
+                className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                  activeTab === column.id
+                    ? "border-primary bg-muted text-foreground"
+                    : "border-transparent bg-background text-muted-foreground"
+                }`}
+              >
+                <Icon className="size-4 shrink-0" />
+                {column.title}
+                <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+                  {byColumn[column.id].length}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div

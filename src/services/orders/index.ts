@@ -1,6 +1,17 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { API_URL } from "@/services/auth/config";
 import { GetOrdersFilters, PaginatedOrders } from "@/types/order";
 import { requireAuth } from "../auth/session";
+
+const PAYMENT_DICTIONARY: Record<string, string> = {
+  "CARTAO_CREDITO": "CREDIT_CARD",
+  "CARTAO_DEBITO": "DEBIT_CARD",
+  "DINHEIRO": "CASH",
+  "PIX": "PIX",
+};
 
 export async function queryOrders(
   filters: GetOrdersFilters,
@@ -9,10 +20,10 @@ export async function queryOrders(
   const sessionToken = await requireAuth().then(session => session.token);
   if (!sessionToken) throw new Error("Token de autenticação não encontrado.");
 
-  if (filters.queryInput) searchParams.append("search", filters.queryInput);
+  if (filters.queryInput) searchParams.append("title", filters.queryInput);
   if (filters.section) searchParams.append("section", filters.section);
   if (filters.payment) {
-    const apiPaymentValue = filters.payment === "None" ? "NULL" : filters.payment;
+    const apiPaymentValue = PAYMENT_DICTIONARY[filters.payment] || filters.payment;
     searchParams.append("payment_method", apiPaymentValue);
   }
   if (filters.page) searchParams.append("page", filters.page);

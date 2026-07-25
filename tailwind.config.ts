@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import type { Config } from "tailwindcss";
 
 const config: Config = {

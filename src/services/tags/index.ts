@@ -1,4 +1,10 @@
 'use server'
+
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { API_URL } from "@/services/auth/config";
 import { requireAuth } from "../auth/session";
 

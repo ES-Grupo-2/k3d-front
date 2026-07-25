@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

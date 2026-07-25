@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 /** K3D Service Worker (PWA).
 * Strategy designed for an app authenticated by cookie:
 *  - Navigations (HTML): network-first with fallback to /offline. Does NOT cache

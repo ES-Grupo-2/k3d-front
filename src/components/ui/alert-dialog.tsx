@@ -38,25 +38,22 @@ interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description?: React.ReactNode;
+  message: React.ReactNode;
   confirmLabel?: string;
-  cancelLabel?: string;
   tone?: ConfirmTone;
   onConfirm: () => void | Promise<void>;
 }
 
 /**
- * Confirmation Popup for initerruptive actions (e.g., destructive deletion or unsaved changes warning). 
- * The action only triggers when the confirm button is clicked; closing (Esc, outside click, or cancel) 
- * does not execute anything.
- */
-export function ConfirmDialog({
+ *  The Alert Dialog is used as a warning pop-up to guide user actions through forms and other interfaces.
+ *  @author jvs-neves 
+*/
+export function AlertDialog({
   open,
   onOpenChange,
   title,
-  description,
+  message,
   confirmLabel = "Confirmar",
-  cancelLabel = "Cancelar",
   tone = "default",
   onConfirm,
 }: ConfirmDialogProps) {
@@ -87,21 +84,13 @@ export function ConfirmDialog({
           </span>
           <DialogHeader className="pr-0">
             <DialogTitle>{title}</DialogTitle>
-            {description ? (
-              <DialogDescription>{description}</DialogDescription>
+            {message ? (
+              <DialogDescription>{message}</DialogDescription>
             ) : null}
           </DialogHeader>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() => onOpenChange(false)}
-            className="hover:cursor-pointer"
-          >
-            {cancelLabel}
-          </Button>
           <Button
             variant={config.confirm}
             disabled={pending}

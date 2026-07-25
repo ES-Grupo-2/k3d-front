@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";

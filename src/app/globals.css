@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
 
@@ -45,8 +49,11 @@
   /* Focus */
   --ring: #ffc94d;
 
-  /* Radius */
-  --radius: 1rem;
+  /* Backdrop — tom quente mais fundo atrás dos painéis flutuantes do shell. */
+  --backdrop: #e1d3aa;
+
+  /* Radius — base do arredondamento do sistema (propaga p/ rounded-sm/md/lg/xl). */
+  --radius: 1.25rem;
 }
 
 /* Tema escuro — paleta original do app, preservada sem alteração. */
@@ -87,11 +94,33 @@
 
   /* Focus */
   --ring: #ffc94d;
+
+  /* Backdrop — quase-preto atrás dos painéis flutuantes do shell. */
+  --backdrop: #0f1011;
+}
+
+/* Cards do Kanban: superfície clara (off-white) mesmo no modo escuro, com texto
+   escuro — como post-its num quadro escuro. Redefine os tokens só na subárvore
+   do card, então título, cliente, bordas e badges acompanham automaticamente. */
+.dark .k3d-kanban-card {
+  --card: #efe8d3;
+  --card-foreground: #26221c;
+  --foreground: #26221c;
+  --muted-foreground: #6b6357;
+  --border: rgba(60, 52, 38, 0.18);
+}
+
+/* "Novo card" de detalhes que surge por baixo do card principal ao expandir.
+   Fica um tom mais escuro que a superfície do card, derivado por color-mix
+   (mistura a cor do card com um pouco do texto) para funcionar nos dois temas. */
+.k3d-kanban-card-details {
+  background-color: color-mix(in srgb, var(--card), var(--foreground) 12%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-backdrop: var(--backdrop);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);

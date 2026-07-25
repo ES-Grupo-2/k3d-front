@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { AppShell } from "@/components/navigation";
 import { requireAuth } from "@/services/auth/session";
 

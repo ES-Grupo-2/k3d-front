@@ -1,6 +1,11 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
+import { COLUMN_ICONS } from "./kanban-columns";
 
 interface KanbanColumnProps {
   id: ColumnType;
@@ -23,6 +28,7 @@ export function KanbanColumn({
   const { active } = useDndContext();
   const draggedOrder = active?.data.current?.order as Order | undefined;
   const isCardFromOtherColumn = active?.data.current?.originColumn !== id;
+  const Icon = COLUMN_ICONS[id];
   return (
   <div
     ref={setNodeRef}
@@ -30,10 +36,13 @@ export function KanbanColumn({
         isOver ? "border-primary bg-primary/5" : "bg-muted border-border"
       }`}
   >
-    <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
-      <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
-        {title}
-      </h2>
+    <header className="hidden shrink-0 items-center justify-between border-b border-border px-4 py-3 md:flex">
+      <div className="flex items-center gap-2">
+        <Icon className="text-muted-foreground size-4 shrink-0" />
+        <h2 className="text-foreground text-sm font-semibold tracking-wider uppercase">
+          {title}
+        </h2>
+      </div>
       <span className="text-subtle rounded-full bg-foreground/10 px-3 py-1 text-xs">
         {orders.length}
       </span>
@@ -41,7 +50,7 @@ export function KanbanColumn({
 
    
     <div className="min-h-0 flex-1 overflow-y-auto p-3 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      <div className="space-y-3 pb-4"> 
+      <div className="space-y-3 pb-24 md:pb-4"> 
         {orders.map((o) => (
           <KanbanCard
             key={Number(o.id)}

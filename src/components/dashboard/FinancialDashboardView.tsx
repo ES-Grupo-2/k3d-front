@@ -17,10 +17,11 @@ import type {
   Period,
   ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
+import { CategoryRevenueChart } from "./CategoryRevenueChart";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
 import { PeriodFilter } from "./PeriodFilter";
-import { ProductsBarChart } from "./ProductsBarChart";
 import { ProductsTable } from "./ProductsTable";
 
 interface FinancialDashboardViewProps {
@@ -41,13 +42,16 @@ export function FinancialDashboardView({
   const productList = products?.products ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Financeiro</h1>
-          <p className="text-muted-foreground text-sm">
-            Receita, custo, lucro, ticket médio e margem
-          </p>
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard Financeiro</h1>
+            <p className="text-muted-foreground text-sm">
+              Receita, custo, lucro, ticket médio e margem
+            </p>
+          </div>
         </div>
         <PeriodFilter basePath="/relatorios" period={period} />
       </header>
@@ -89,16 +93,11 @@ export function FinancialDashboardView({
 
         <Card>
           <CardHeader>
-            <CardTitle>Receita por produto</CardTitle>
+            <CardTitle>Receita por categoria</CardTitle>
           </CardHeader>
           <CardContent>
             {productList.length > 0 ? (
-              <ProductsBarChart
-                products={productList}
-                dataKey="revenue"
-                kind="currency"
-                label="Receita"
-              />
+              <CategoryRevenueChart products={productList} />
             ) : (
               <p className="text-muted-foreground py-12 text-center text-sm">
                 Sem produtos no período selecionado.

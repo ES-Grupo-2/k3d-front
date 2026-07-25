@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 // Tela do Dashboard Operacional: volume de pedidos por categoria
 // no período selecionado. Acessível a Gerente e Operacional. Reúne cards de
 // totais, gráfico (por categoria) e tabela de detalhamento.
@@ -14,6 +18,7 @@ import type {
   OperationalDashboardData,
   Period,
 } from "@/schemas/dashboard/dashboard";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryTable } from "./CategoryTable";
 import { MetricCard } from "./MetricCard";
 import { OperationalChart } from "./OperationalChart";
@@ -37,13 +42,16 @@ export function OperationalDashboardView({
       : "0";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Operacional</h1>
-          <p className="text-muted-foreground text-sm">
-            Pedidos e métricas por categoria
-          </p>
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard Operacional</h1>
+            <p className="text-muted-foreground text-sm">
+              Pedidos e métricas por categoria
+            </p>
+          </div>
         </div>
         <PeriodFilter basePath="/dashboard" period={period} />
       </header>

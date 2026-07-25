@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 

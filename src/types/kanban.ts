@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 export type UniqueIdentifier = string | number;
 export type KanbanTaskStatus = 'PENDENTE' | 'FAZENDO' | 'FINALIZADO'; 
 export type PaymentStatus = "NAO_PAGO" | "PAGO_PARCIAL" | "PAGO";
@@ -25,6 +29,8 @@ export interface Order {
     type: string;
     color?: string; 
   };
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface KanbanResponse {

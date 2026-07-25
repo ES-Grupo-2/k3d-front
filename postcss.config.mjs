@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 const config = {
   plugins: {
     "@tailwindcss/postcss": {},

@@ -1,5 +1,10 @@
 'use client'
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { WifiOff, RefreshCcw } from "lucide-react";
 
 /** Fallback page for offline mode. 

@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { requireAuth } from "@/services/auth/session";
 import { KanbanClient } from "../../../components/kanban/KanbanClient";
 import { fetchKanbanBoard } from "@/services/kanban/kanban";

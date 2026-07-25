@@ -1,16 +1,21 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useState } from "react";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { CardFormData } from "@/components/kanban/popUp/CardEditDialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, moveKanbanOrder } from "@/services/kanban/kanban";
-import { OrderFormData } from "@/types/order";
+import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
+import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
-import { createClient, getPresignedUrl, uploadFileToMinIO } from "@/services/order/order";
+import { createClient, uploadOrderFile } from "@/services/order/order";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -20,7 +25,9 @@ type KanbanClientProps = {
 export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [, setIsDeleting] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -55,50 +62,81 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  const handleSaveEdit = (data: CardFormData) => {
-    if (!editingOrder) return;
-    
-    setOrders((prev) =>
-      prev.map((order) =>
-        Number(order.id) === Number(editingOrder.id) ? { ...order, ...data } : order,
-      ),
-    );
-    setEditingOrder(null);
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    const previousOrders = [...orders];
+    const idToDelete = deletingId; // Salva a referência
+
+    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(idToDelete)));
+    setDeletingId(null);
+    setIsDeleting(true);
+
+    try {
+      await deleteKanbanOrder(idToDelete);
+    } catch (error) {
+      console.error("Falha ao deletar pedido:", error);
+      alert("Ocorreu um erro ao excluir o pedido. Tente novamente.");
+      setOrders(previousOrders);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(deletingId)));
-    setDeletingId(null);
+  // Persiste a edição no backend e aplica o patch otimista à UI só no sucesso.
+  const handleSaveEdit = async (
+    orderId: number,
+    payload: UpdateOrderPayload,
+    localPatch: Partial<Order>,
+  ) => {
+    setIsSavingEdit(true);
+    try {
+      await updateKanbanOrder(orderId, payload);
+      setOrders((prev) =>
+        prev.map((order) =>
+          Number(order.id) === Number(orderId)
+            ? ({ ...order, ...localPatch } as Order)
+            : order,
+        ),
+      );
+      setEditingOrder(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   /**
-   * WORK IN PROGRESS - THIS FUNCTION WILL BE REFACTORED SINCE THE DELETE ORDER ENDPOINT IS GOING TO CHANGE
- * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
- * * This function executes a multi-step pipeline (Deferred Upload Pattern) to ensure all related 
- * entities (Clients, Orders, and MinIO Storage) are synchronized without passing heavy files 
- * through the main Node.js backend.
- * * @async
- * @param {OrderFormData} formData - The payload collected from the CreateOrderDialog form.
- * * @pipeline
- * 1. **Client Resolution:** Checks if the order belongs to an existing client. If the "New Client" 
- * tab was used, it dispatches a POST request to create a new client and retrieves the generated `clientId`.
- * 2. **Initial Order Creation:** Dispatches a POST request to create the base order in the database 
- * (without the file attached) to generate the official `orderId` (Task ID).
- * 3. **Presigned URL Generation (Optional):** If a file is attached, it requests a short-lived, 
- * presigned upload URL from the backend using the generated `orderId` and the filename.
- * 4. **Direct Storage Upload (Optional):** Uploads the physical file directly to the MinIO bucket 
- * using the presigned URL via a PUT request, bypassing the main backend API.
- * 5. **Order Patching (Optional):** Dispatches a PATCH request to update the newly created order 
- * with the final `fileUrl` (filename) to link the storage object to the database entity.
- * 6. **UI Hydration:** Updates the local React state (`setOrders`) to display the new card 
- * immediately on the Kanban board and safely closes the modal.
- * * @throws {Error} Will throw an error if client creation fails, order creation fails, 
- * or if the storage upload process is interrupted.
- */
+   * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
+   * 
+   * This function executes a sequential pipeline to ensure all related entities (Clients, 
+   * Orders, and MinIO Storage) are synchronized. It prioritizes uploading the physical file 
+   * to retrieve its unique storage key before saving the final entity in the database.
+   * 
+   * @async
+   * @param {OrderFormData} formData - The payload collected from the CreateOrderDialog form.
+   * 
+   * @pipeline
+   * 1. **Client Resolution:** Checks if the order belongs to an existing client. If the "New Client" 
+   *    tab was used, it dispatches a POST request to create a new client and retrieves the `clientId`.
+   * 2. **File Upload (Optional):** If a physical file is attached, it sends it to the backend API 
+   *    to be stored in MinIO, retrieving the unique generated `fileName`. If no file is present, 
+   *    it falls back to the external archive link (e.g., Google Drive) if provided by the user.
+   * 3. **Order Creation:** Dispatches a POST request to create the order in the database, directly 
+   *    linking the resolved `clientId` and the `archive` string (storage filename or external link).
+   * 4. **UI Hydration:** Injects the UI-friendly relationship properties (`client.name`, `tag.type`) 
+   *    into the newly created order and updates the local React state (`setOrders`) to display the 
+   *    card immediately on the Kanban board.
+   * 
+   * @throws {Error} Will throw an error if client creation fails, the file upload process 
+   * is interrupted, or the final order creation fails.
+   */
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
       let finalClientId = formData.clientId;
+      let finalClientName = ""; 
 
       if (!finalClientId && formData.newClientName) {
         const clientResponse = await createClient({ 
@@ -106,14 +144,25 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
           phone: formData.newClientPhone || "" 
         });
 
-        // Garante que a API de clientes retornou um ID válido
         if (!clientResponse || !clientResponse.id) {
             throw new Error("Falha ao criar o novo cliente. ID não retornado.");
         }
         finalClientId = clientResponse.id;
-        }
+        finalClientName = formData.newClientName; 
+      } else {
+        finalClientName = (formData as OrderFormData).newClientName || "Cliente"; 
+      }
 
       if (!finalClientId) throw new Error("Cliente é obrigatório!");
+
+      let finalArchiveName = formData.archive || ""; 
+      if (formData.file && formData.file.length > 0) {
+        const fileToUpload = formData.file[0];
+        
+        const uploadResponse = await uploadOrderFile(fileToUpload);
+        
+        finalArchiveName = uploadResponse.fileName; 
+      }
 
       const initialPayload = {
         title: formData.title,
@@ -124,52 +173,48 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
         cost: formData.cost,
         quantity: formData.quantity,
         payment_method: formData.payment_method,
-        archive: formData.archive,           
+        archive: finalArchiveName, 
       };
 
       const newOrder = await createKanbanOrder(initialPayload);
-
-      if (formData.file && formData.file.length > 0) {
-        const fileToUpload = formData.file[0];
-        
-        const { url: presignedUrl } = await getPresignedUrl(
-          String(newOrder.id), 
-          fileToUpload.name, 
-        );
-        
-        await uploadFileToMinIO(presignedUrl, fileToUpload);
-
-        // Patch to update the order with the file URL (filename) in the database
-        // await updateKanbanOrderAction(newOrder.id, { fileUrl: fileToUpload.name });
-        
-        newOrder.archive = fileToUpload.name; // Locally updates the UI
-      }
+      
+      newOrder.tag = { type: formData.tagType }; 
+      newOrder.client = { name: finalClientName };
       
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
     } catch (error) {
       console.error(error);
+      alert("Erro ao criar o pedido. Verifique os dados e tente novamente.");
     } finally {
       setIsCreating(false);
     }
   };
 
 return (
-  <div className="flex h-svh w-full select-none flex-col overflow-hidden overscroll-none">
-    <header className="flex shrink-0 justify-end px-5 py-4">
+  <div className="flex h-full w-full select-none flex-col overflow-hidden overscroll-none">
+    <div className="flex shrink-0 items-center justify-between gap-4 pb-3 md:pb-4">
+      <div className="flex items-center gap-2">
+        <MobileMenuButton />
+        <h1 className="text-2xl font-semibold">Kanban</h1>
+      </div>
       {isManager && (
-        <Button variant="default" className="transition-colors hover:cursor-pointer hover:bg-primary/90" onClick={() => setCreateModalOpen(true)}>
+        <Button
+          variant="default"
+          className="transition-colors hover:cursor-pointer hover:bg-primary/90"
+          onClick={() => setCreateModalOpen(true)}
+        >
           + Novo pedido
         </Button>
       )}
-    </header>
+    </div>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
         <KanbanBoard
           orders={orders}
           onMoveOrder={handleMoveOrder}
-          onEditOrder={handleEditOrder} 
+          onEditOrder={handleEditOrder}
           onDeleteOrder={handleDeleteOrder}
           isManager={isManager}
         />
@@ -185,11 +230,9 @@ return (
       <CardEditDialog
         open={editingOrder !== null}
         onClose={() => setEditingOrder(null)}
-        initialValues={{
-          title: editingOrder?.title ?? "",
-          description: "", 
-        }}
+        order={editingOrder}
         onSave={handleSaveEdit}
+        isSaving={isSavingEdit}
       />
 
       <ConfirmDialog

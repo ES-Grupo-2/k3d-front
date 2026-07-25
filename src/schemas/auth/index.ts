@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { z } from "zod";
 
 export const userRoleSchema = z.enum(["GERENTE", "OPERACIONAL"]);

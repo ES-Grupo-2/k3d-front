@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function KanbanLoading() {

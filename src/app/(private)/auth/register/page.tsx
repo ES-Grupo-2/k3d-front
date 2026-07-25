@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { RegisterPageClient } from "@/components/auth/RegisterPageClient";
 import { requireRole } from "@/services/auth/session";
 import Image from "next/image";

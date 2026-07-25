@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -17,7 +21,7 @@ export const enumPayingMethodMap: Record<string, string> = {
   DEBIT_CARD: "Cartão de Débito",
   PIX: "Pix",
   CASH: "Dinheiro",
-  "None": "Nenhum",
+  "None": "Nenhum", // Fallback that should never be used!
 };
 
 const enumSectionMap: Record<string, string> = {
