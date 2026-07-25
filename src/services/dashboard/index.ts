@@ -24,9 +24,9 @@ const periodToPeriodo: Record<Period, string> = {
   SEMIANNUAL: "SEMESTRAL",
 };
 
-// Path do endpoint da série diária. CONFIRMAR com o backend — o colega ainda
-// vai criar a rota; ajustar aqui quando o path definitivo for conhecido.
-const DAILY_REVENUE_PATH = "/dashboard/receita-diaria";
+// Endpoint da série diária (branch 47 do backend). É GERENTE-only — no dashboard
+// operacional, usuários OPERACIONAL recebem 403 e o gráfico degrada para vazio.
+const DAILY_REVENUE_PATH = "/dashboard/financeiro/receita-diaria";
 
 // Busca a agregação operacional (pedidos por categoria) do período informado.
 export async function getOperationalDashboard(
