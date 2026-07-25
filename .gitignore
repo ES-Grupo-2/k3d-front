@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# open-next (build do adaptador Cloudflare)
+/.open-next/
+
 # production
 /build
 
@@ -32,9 +35,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# URL pública da API — não é segredo, versionada para o build de produção ser reproduzível.
+!.env.production
 
 # vercel
 .vercel
+
+# cloudflare / wrangler
+/.wrangler/
+.dev.vars
 
 # typescript
 *.tsbuildinfo

@@ -28,7 +28,7 @@ export function HomeView({ user }: HomeViewProps) {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {shortcuts.map((item) => {
           const Icon = item.icon;
 
@@ -36,7 +36,7 @@ export function HomeView({ user }: HomeViewProps) {
             <Link
               key={item.href}
               href={item.href}
-              className="group border-border from-primary/25 via-card to-card hover:border-primary relative flex flex-col overflow-hidden rounded-2xl border bg-gradient-to-br p-6 transition-colors"
+              className="group border-border from-primary/25 via-card to-card hover:border-primary relative flex flex-col overflow-hidden rounded-2xl border bg-gradient-to-br p-4 transition-colors sm:p-6"
             >
               {/* Camada de preenchimento: surge no hover/toque cobrindo o card */}
               <div

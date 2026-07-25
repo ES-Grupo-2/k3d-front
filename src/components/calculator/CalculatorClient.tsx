@@ -455,7 +455,7 @@ export function CalculatorClient() {
                   value={result.breakdown.energyCost}
                 />
                 <ResultRow
-                  label="Depreciacao"
+                  label="Depreciação"
                   value={result.breakdown.depreciationCost}
                 />
                 <ResultRow
@@ -464,7 +464,7 @@ export function CalculatorClient() {
                   value={result.custoTotal}
                 />
                 <ResultRow
-                  label="Preco sugerido"
+                  label="Preço sugerido"
                   strong
                   value={result.precoSugerido}
                 />

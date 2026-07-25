@@ -4,15 +4,15 @@ const requiredNumber = (message: string) =>
   z.number({ error: message }).finite(message);
 
 export const calculatorParametersSchema = z.object({
-  filament_price: requiredNumber("Informe o preco do filamento.").positive(
-    "O preco do filamento deve ser maior que zero.",
+  filament_price: requiredNumber("Informe o preço do filamento.").positive(
+    "O preço do filamento deve ser maior que zero.",
   ),
   kw_cost: requiredNumber("Informe o custo do kWh.").positive(
     "O custo do kWh deve ser maior que zero.",
   ),
-  depreciation: requiredNumber("Informe a depreciacao.").min(
+  depreciation: requiredNumber("Informe a depreciação.").min(
     0,
-    "A depreciacao deve ser maior ou igual a zero.",
+    "A depreciação deve ser maior ou igual a zero.",
   ),
   profit_margin: requiredNumber("Informe a margem de lucro.").min(
     0,

@@ -1,7 +1,56 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
 
+/* Habilita a variante `dark:` do Tailwind por classe no <html> (padrão da v4 é
+   seguir o prefers-color-scheme, que não permite override manual pelo usuário). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tema claro (default do CSS). O tema efetivo é escolhido pelo ThemeProvider,
+   que aplica a classe `.dark` no <html> — ver src/components/theme/. */
 :root {
+  /* Base — creme/greige claro derivado do bege do ícone. */
+  --background: #ede8d0;
+  --foreground: #1a1c1c;
+
+  /* Components — superfícies brancas que "sobem" sobre o creme (borda + sombra). */
+  --card: #ffffff;
+  --card-foreground: #1a1c1c;
+
+  --popover: #ffffff;
+  --popover-foreground: #1a1c1c;
+
+  /* Primary */
+  --primary: #ffc94d;
+  --primary-foreground: #1a1c1c;
+
+  /* Secondary — tan quente, distinto do fundo e dos cards brancos. */
+  --secondary: #efe4c2;
+  --secondary-foreground: #1a1c1c;
+
+  /* Muted — greige mais fundo; usado nas colunas do Kanban (trilha recuada). */
+  --muted: #e4dcbf;
+  --muted-foreground: #5c5f5f;
+
+  /* Accent */
+  --accent: #efe4c2;
+  --accent-foreground: #1a1c1c;
+
+  /* States */
+  --destructive: #dc2626;
+
+  /* Borders/Input — tan visível para separar bem os componentes do fundo. */
+  --border: #e3d5b2;
+  --input: #e3d5b2;
+
+  /* Focus */
+  --ring: #ffc94d;
+
+  /* Radius */
+  --radius: 1rem;
+}
+
+/* Tema escuro — paleta original do app, preservada sem alteração. */
+.dark {
   /* Base */
   --background: #1a1c1c;
   --foreground: #ffffff;
@@ -38,9 +87,6 @@
 
   /* Focus */
   --ring: #ffc94d;
-
-  /* Radius */
-  --radius: 1rem;
 }
 
 @theme inline {
@@ -112,6 +158,240 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Theme switch — recriação do "CopyCase Dark Mode Switch", portado do
+   EyePleasure. Markup em src/components/theme/ThemeToggle.tsx.
+
+   As cores do controle são intrínsecas ao design (não são tokens do tema): o
+   track troca de branco pra quase-preto e o thumb é azul fixo nos dois estados.
+
+   O truque das animações: cada estado aplica um keyframe de nome diferente
+   (…On / …Off) mesmo quando a definição é idêntica — é a troca de nome que faz
+   o navegador reiniciar a animação quando a classe `.dark` muda. Não unifique.
+   Tudo é gated por [data-interacted="true"] pra animar só no clique do usuário,
+   nunca na carga da página.
+   ────────────────────────────────────────────────────────────────────────── */
+.k3d-theme-switch {
+  position: relative;
+  width: 64px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 17px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.4s ease;
+}
+
+.k3d-theme-switch:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.k3d-theme-switch .k3d-ts-thumb {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  left: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  background: #0451fb;
+}
+
+.k3d-theme-switch .k3d-ts-icon {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  display: block;
+  width: 17px;
+  height: 17px;
+  color: rgba(204, 215, 234, 0.8);
+}
+
+.k3d-theme-switch .k3d-ts-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.k3d-theme-switch .k3d-ts-sun {
+  left: 10px;
+}
+
+.k3d-theme-switch .k3d-ts-moon {
+  right: 10px;
+}
+
+/* ── Estado escuro ── */
+.dark .k3d-theme-switch {
+  background: #16171a;
+}
+
+.dark .k3d-theme-switch .k3d-ts-thumb {
+  right: 6px;
+  left: auto;
+}
+
+.dark .k3d-theme-switch[data-interacted="true"] {
+  animation: k3dTsClickOff 0.5s;
+}
+
+.dark .k3d-theme-switch[data-interacted="true"] .k3d-ts-thumb {
+  animation: k3dTsSlideOff 0.7s;
+}
+
+.dark .k3d-theme-switch[data-interacted="true"] .k3d-ts-moon {
+  animation: k3dTsRotateOff 0.7s;
+}
+
+.dark .k3d-theme-switch[data-interacted="true"] .k3d-ts-sun {
+  animation: k3dTsShakeOff 0.7s;
+}
+
+/* ── Estado claro ── */
+:root:not(.dark) .k3d-theme-switch[data-interacted="true"] {
+  animation: k3dTsClickOn 0.5s;
+}
+
+:root:not(.dark) .k3d-theme-switch[data-interacted="true"] .k3d-ts-thumb {
+  animation: k3dTsSlideOn 0.7s;
+}
+
+:root:not(.dark) .k3d-theme-switch[data-interacted="true"] .k3d-ts-moon {
+  animation: k3dTsRotateOn 0.7s;
+}
+
+:root:not(.dark) .k3d-theme-switch[data-interacted="true"] .k3d-ts-sun {
+  animation: k3dTsShakeOn 0.7s;
+}
+
+/* bounce do track ao clicar (as duas definições são iguais de propósito) */
+@keyframes k3dTsClickOn {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes k3dTsClickOff {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* squash/stretch líquido: o thumb estica a largura no meio da transição */
+@keyframes k3dTsSlideOn {
+  0% {
+    right: auto;
+    left: 6px;
+  }
+  50% {
+    width: 56px;
+  }
+  100% {
+    right: auto;
+    left: 6px;
+  }
+}
+
+@keyframes k3dTsSlideOff {
+  0% {
+    right: auto;
+    left: 6px;
+  }
+  50% {
+    width: 56px;
+  }
+  100% {
+    right: 6px;
+    left: auto;
+  }
+}
+
+/* rotação da lua 180° nos dois sentidos */
+@keyframes k3dTsRotateOn {
+  50% {
+    transform: rotate(-180deg);
+  }
+}
+
+@keyframes k3dTsRotateOff {
+  50% {
+    transform: rotate(180deg);
+  }
+}
+
+/* wobble do sol (shakeOff = eixos X/Y invertidos do shakeOn) */
+@keyframes k3dTsShakeOn {
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  40% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  50% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+  65% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  75% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes k3dTsShakeOff {
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  40% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  50% {
+    transform: scale3d(0.85, 1.15, 1);
+  }
+  65% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  75% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k3d-theme-switch,
+  .k3d-theme-switch * {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

@@ -36,8 +36,9 @@ function normalizeParameters(payload: unknown): CalculatorParameters {
 
 function normalizeResult(payload: unknown): CalculatorResult {
   const root = asObject(payload);
-  const inputs = asObject(root.inputs);
-  const breakdown = asObject(root.breakdown);
+  const data = asObject(root.data || root);
+  const inputs = asObject(data.inputs);
+  const breakdown = asObject(data.breakdown);
 
   return {
     inputs: {
@@ -49,8 +50,9 @@ function normalizeResult(payload: unknown): CalculatorResult {
       energyCost: readNumber(breakdown.energyCost),
       depreciationCost: readNumber(breakdown.depreciationCost),
     },
-    custoTotal: readNumber(root.custoTotal),
-    precoSugerido: readNumber(root.precoSugerido),
+    custoTotal: readNumber(data.custoTotal) || readNumber(data.totalCost),
+    precoSugerido:
+      readNumber(data.precoSugerido) || readNumber(data.suggestedPrice),
   };
 }
 
@@ -96,4 +98,3 @@ export async function calculatePrintRequest(
 
   return normalizeResult(payload);
 }
-

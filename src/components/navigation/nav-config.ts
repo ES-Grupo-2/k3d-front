@@ -31,7 +31,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: "Opera\u00e7\u00e3o",
     items: [
-      { label: "In\u00edcio", href: "/inicio", icon: Home },
+      { label: "Início", href: "/home", icon: Home },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Kanban", href: "/kanban", icon: SquareKanban },
       { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
@@ -63,7 +63,7 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 const TAB_ITEMS: NavItem[] = [
-  { label: "In\u00edcio", href: "/inicio", icon: Home },
+  { label: "Início", href: "/home", icon: Home },
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
   { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
