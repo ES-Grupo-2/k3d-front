@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth";
@@ -20,22 +19,23 @@ interface LogoutButtonProps {
 }
 
 export function LogoutButton({ className, onLoggedOut }: LogoutButtonProps) {
-  const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Executa o logout de fato — só é chamado após a confirmação no popover.
-  // Limpa os cookies HttpOnly e o estado do cliente, então redireciona ao login.
+  // Limpa os cookies HttpOnly e o estado do cliente e sai por navegação dura: o
+  // recarregamento descarta o que restou em memória e evita a corrida com a
+  // hidratação da sessão, que respondia depois do logout e ressuscitava o status
+  // "autenticado" no store.
   async function performLogout() {
     setPending(true);
     try {
       await logoutAction();
       logout();
       onLoggedOut?.();
-      router.replace("/auth/login");
-      router.refresh();
+      window.location.replace("/auth/login");
     } finally {
       setPending(false);
     }

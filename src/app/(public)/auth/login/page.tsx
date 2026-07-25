@@ -6,24 +6,15 @@
  */
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { LoginForm } from "@/components/auth";
-import { useAuthStore } from "@/store/auth/index";
 import Image from "next/image";
 
+// Não redirecionar daqui com base no store: quem decide é o middleware, que lê o
+// cookie de sessão. O store vive no localStorage e sobrevive ao fim do cookie, e
+// um "autenticado" obsoleto empurrava para "/", que devolvia para cá por falta de
+// cookie — a tela piscava nesse ciclo.
 export default function LoginPage() {
   const router = useRouter();
-  const { hasHydrated, isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    if (isAuthenticated()) {
-      router.push("/");
-    }
-  }, [hasHydrated, isAuthenticated, router]);
 
   const handleLoginSuccess = () => {
     router.push("/");
