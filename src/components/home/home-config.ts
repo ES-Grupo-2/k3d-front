@@ -44,7 +44,7 @@ const HOME_SHORTCUTS: HomeShortcut[] = [
     icon: ClipboardList,
   },
   {
-    label: "Relatórios",
+    label: "Tarcisio",
     description: "Indicadores e relatórios gerenciais.",
     href: "/relatorios",
     icon: FileBarChart,

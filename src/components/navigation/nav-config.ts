@@ -57,7 +57,7 @@ const NAV_SECTIONS: NavSection[] = [
         roles: ["GERENTE"],
       },
       {
-        label: "Relat\u00f3rios",
+        label: "Tarcisio",
         href: "/relatorios",
         icon: FileBarChart,
         roles: ["GERENTE"],
@@ -78,7 +78,7 @@ const TAB_ITEMS: NavItem[] = [
     roles: ["GERENTE"],
   },
   {
-    label: "Relat\u00f3rios",
+    label: "Tarcisio",
     href: "/relatorios",
     icon: FileBarChart,
     roles: ["GERENTE"],
