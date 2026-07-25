@@ -136,3 +136,24 @@ export async function getClients(): Promise<ClientApi> {
   const jsonResponse = await response.json();
   return jsonResponse;
 }
+
+export async function downloadOrderFile(fileName: string): Promise<Blob> {
+  const session = await requireAuth();
+  const token = session?.token;
+  
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/files/${fileName}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || "Falha ao baixar o arquivo.");
+  }
+
+  return response.blob();
+}

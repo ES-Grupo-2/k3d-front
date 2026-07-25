@@ -15,6 +15,7 @@ import {
   Package,
   User,
 } from "lucide-react";
+import { downloadOrderFile } from "@/services/order/order";
 
 interface KanbanCardProps {
   order: Order;
@@ -32,6 +33,29 @@ const getPayStatusBadgeColor = (amountPaid: number, fullPrice: number): string =
     return "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-700";
   } else {
     return "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-700";
+  }
+};
+
+const handleDownload = async (e: React.MouseEvent, fileName: string) => {
+  e.stopPropagation(); // Mantém o card expandido aberto
+
+  try {
+    const blob = await downloadOrderFile(fileName);
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = fileName;
+    
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error: any) {
+    console.error("Falha no download:", error);
+    alert(error.message || "Não foi possível baixar o arquivo.");
   }
 };
 
@@ -226,7 +250,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
 
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground">Arquivo</span>
-                  {file ? (
+                 {file ? (
                     isFileLink ? (
                       <a
                         href={file}
@@ -239,10 +263,15 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
                         Abrir
                       </a>
                     ) : (
-                      <span className="text-foreground/90 inline-flex max-w-[60%] items-center gap-1 truncate">
+                      <button
+                        type="button"
+                        onClick={(e) => handleDownload(e, file)}
+                        className="text-foreground hover:text-foreground/80 inline-flex max-w-[60%] cursor-pointer items-center gap-1 truncate transition-colors"
+                        title={`Baixar ${file}`}
+                      >
                         <Paperclip size={12} className="shrink-0" />
                         {file}
-                      </span>
+                      </button>
                     )
                   ) : (
                     <span className="text-muted-foreground">—</span>
