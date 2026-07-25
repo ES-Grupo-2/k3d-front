@@ -3,6 +3,7 @@
  * @author jvs-neves
  */
 import {
+  Calculator,
   ClipboardList,
   FileBarChart,
   LayoutDashboard,
@@ -56,6 +57,13 @@ const HOME_SHORTCUTS: HomeShortcut[] = [
     icon: UserPlus,
     roles: ["GERENTE"],
   },
+  {
+    label: "Calculadora",
+    description: "Ferramenta de cálculo auxiliar.",
+    href: "/calculadora",
+    icon: Calculator,
+    roles: ["GERENTE"],
+  }
 ];
 
 /** Atalhos da tela inicial visíveis para o perfil informado. */
