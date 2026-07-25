@@ -39,6 +39,7 @@ export interface UpdateOrderPayload {
   payment_method?: string;
   section?: "PENDENTE" | "FAZENDO" | "FINALIZADO";
   archive?: string;
+  file: File | undefined;
 }
 
 export interface Client {

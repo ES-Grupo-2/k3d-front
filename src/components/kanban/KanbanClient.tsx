@@ -86,12 +86,25 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   // Persiste a edição no backend e aplica o patch otimista à UI só no sucesso.
   const handleSaveEdit = async (
     orderId: number,
-    payload: UpdateOrderPayload,
+    payload: UpdateOrderPayload & { file?: File }, // Adicionamos a tipagem do arquivo aqui
     localPatch: Partial<Order>,
   ) => {
     setIsSavingEdit(true);
     try {
+      if (payload.file) {
+        const uploadResponse = await uploadOrderFile(payload.file) as any;
+        const newArchiveName = uploadResponse.fileName || uploadResponse.data?.fileName;
+        
+        if (newArchiveName) {
+          payload.archive = newArchiveName; 
+          localPatch.archive = newArchiveName;
+        }
+      }
+
+      delete payload.file;
+
       await updateKanbanOrder(orderId, payload);
+      
       setOrders((prev) =>
         prev.map((order) =>
           Number(order.id) === Number(orderId)
@@ -99,9 +112,11 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
             : order,
         ),
       );
+      
       setEditingOrder(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      alert(error.message || "Ocorreu um erro ao salvar o pedido.");
     } finally {
       setIsSavingEdit(false);
     }
