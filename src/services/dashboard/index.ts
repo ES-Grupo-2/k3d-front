@@ -3,6 +3,7 @@
 // É o único ponto que fala com os endpoints /dashboard/* da API.
 // Author: lukasnascimento1
 import type {
+  DailyPoint,
   DailyRevenueData,
   FinancialDashboardData,
   OperationalDashboardData,
@@ -27,6 +28,38 @@ const periodToPeriodo: Record<Period, string> = {
 // Endpoint da série diária (branch 47 do backend). É GERENTE-only — no dashboard
 // operacional, usuários OPERACIONAL recebem 403 e o gráfico degrada para vazio.
 const DAILY_REVENUE_PATH = "/dashboard/financeiro/receita-diaria";
+
+// Soma 1 dia a uma data "YYYY-MM-DD" em UTC (evita deslocamento por timezone).
+function addOneDay(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
+// O backend só retorna dias que têm pedidos. Preenche os dias faltantes do range
+// [dataInicio, dataFim] com zero, para a série de linha ficar contínua.
+function fillDailyGaps(
+  startIso: string,
+  endIso: string,
+  points: DailyPoint[],
+): DailyPoint[] {
+  const start = startIso?.slice(0, 10);
+  const end = endIso?.slice(0, 10);
+
+  // Sem range válido: devolve os pontos como vieram, ordenados por data.
+  if (!start || !end || start.length !== 10 || end.length !== 10 || start > end) {
+    return [...points].sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  const byDate = new Map(points.map((p) => [p.date, p]));
+  const result: DailyPoint[] = [];
+  let cursor = start;
+  // Trava de segurança (semestral ~180 dias) contra loop por data inválida.
+  for (let i = 0; i < 400 && cursor <= end; i++) {
+    result.push(byDate.get(cursor) ?? { date: cursor, revenue: 0, orders: 0 });
+    cursor = addOneDay(cursor);
+  }
+  return result;
+}
 
 // Busca a agregação operacional (pedidos por categoria) do período informado.
 export async function getOperationalDashboard(
@@ -116,13 +149,14 @@ export async function getDailyRevenue(
       `${DAILY_REVENUE_PATH}?periodo=${periodToPeriodo[period]}`,
       { token },
     );
+    const points = (backendData.dias ?? []).map((d) => ({
+      date: d.data,
+      revenue: d.receitaTotal,
+      orders: d.totalPedidos,
+    }));
     return {
       period,
-      days: (backendData.dias ?? []).map((d) => ({
-        date: d.data,
-        revenue: d.receitaTotal,
-        orders: d.totalPedidos,
-      })),
+      days: fillDailyGaps(backendData.dataInicio, backendData.dataFim, points),
     };
   } catch (error) {
     console.warn("[Dashboard] Endpoint de receita diária indisponível", error);
