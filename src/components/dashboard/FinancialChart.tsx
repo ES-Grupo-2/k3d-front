@@ -13,8 +13,9 @@ import {
   YAxis,
 } from "recharts";
 
-import { currency } from "@/lib/utils";
+import { compactCurrency, currency } from "@/lib/utils";
 import type { FinancialDashboardData } from "@/schemas/dashboard/dashboard";
+import { buildValueScale } from "./chart-scale";
 import { useChartTheme } from "./chart-theme";
 
 interface FinancialChartProps {
@@ -32,6 +33,8 @@ export function FinancialChart({ data }: FinancialChartProps) {
     { name: "Lucro", value: data.profit, fill: "#22c55e" },
   ];
 
+  const scale = buildValueScale(chartData.map((entry) => entry.value));
+
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -41,7 +44,9 @@ export function FinancialChart({ data }: FinancialChartProps) {
           <YAxis
             stroke={theme.axis}
             width={72}
-            tickFormatter={(value: number) => currency(value)}
+            domain={scale.domain}
+            ticks={scale.ticks}
+            tickFormatter={(value: number) => compactCurrency(value)}
           />
           <Tooltip
             cursor={{ fill: theme.grid, opacity: 0.3 }}

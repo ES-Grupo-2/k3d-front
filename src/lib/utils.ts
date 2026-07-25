@@ -16,6 +16,17 @@ export function currency(value: number): string {
   }).format(value);
 }
 
+// Versão abreviada de `currency` para os eixos dos gráficos, onde o valor por
+// extenso não cabe: 12500 -> "R$ 12,5 mil", 1250000 -> "R$ 1,3 mi".
+export function compactCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 export const enumPayingMethodMap: Record<string, string> = {
   CREDIT_CARD: "Cartão de Crédito",
   DEBIT_CARD: "Cartão de Débito",

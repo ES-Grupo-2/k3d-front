@@ -14,8 +14,9 @@ import {
   YAxis,
 } from "recharts";
 
-import { currency } from "@/lib/utils";
+import { compactCurrency, currency } from "@/lib/utils";
 import type { DailyPoint } from "@/schemas/dashboard/dashboard";
+import { buildValueScale } from "./chart-scale";
 import { useChartTheme } from "./chart-theme";
 
 interface DailyLineChartProps {
@@ -41,6 +42,13 @@ export function DailyLineChart({
   const format = (value: number) =>
     kind === "currency" ? currency(value) : String(value);
 
+  // Escala fixa só no modo moeda; a série de pedidos continua com as marcas
+  // automáticas (inteiras) do Recharts.
+  const scale =
+    kind === "currency"
+      ? buildValueScale(data.map((point) => point[dataKey]))
+      : null;
+
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -57,7 +65,11 @@ export function DailyLineChart({
             stroke={theme.axis}
             width={kind === "currency" ? 72 : 40}
             allowDecimals={false}
-            tickFormatter={(value: number) => format(value)}
+            domain={scale?.domain}
+            ticks={scale?.ticks}
+            tickFormatter={(value: number) =>
+              kind === "currency" ? compactCurrency(value) : format(value)
+            }
           />
           <Tooltip
             cursor={{ stroke: theme.grid }}
