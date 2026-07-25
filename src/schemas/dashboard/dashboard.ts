@@ -64,3 +64,17 @@ export interface ProductsBreakdownData {
   products: ProductBreakdown[];
 }
 
+// Um ponto da série temporal diária (data + receita + pedidos do dia).
+export interface DailyPoint {
+  date: string; // YYYY-MM-DD
+  revenue: number;
+  orders: number;
+}
+
+// Série diária do período — alimenta os gráficos de linha (volume de pedidos
+// no operacional; receita no financeiro).
+export interface DailyRevenueData {
+  period: Period;
+  days: DailyPoint[];
+}
+

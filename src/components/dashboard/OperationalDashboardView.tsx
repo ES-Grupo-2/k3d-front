@@ -15,11 +15,13 @@ import {
   CardTitle,
 } from "@/components/ui";
 import type {
+  DailyRevenueData,
   OperationalDashboardData,
   Period,
 } from "@/schemas/dashboard/dashboard";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryTable } from "./CategoryTable";
+import { DailyLineChart } from "./DailyLineChart";
 import { MetricCard } from "./MetricCard";
 import { OperationalChart } from "./OperationalChart";
 import { PeriodFilter } from "./PeriodFilter";
@@ -27,12 +29,14 @@ import { PeriodFilter } from "./PeriodFilter";
 interface OperationalDashboardViewProps {
   period: Period;
   data: OperationalDashboardData | null;
+  daily: DailyRevenueData | null;
   error: string | null;
 }
 
 export function OperationalDashboardView({
   period,
   data,
+  daily,
   error,
 }: OperationalDashboardViewProps) {
   const categoriesCount = data?.byCategory.length ?? 0;
@@ -70,7 +74,26 @@ export function OperationalDashboardView({
         <MetricCard title="Média por categoria" value={averagePerCategory} />
       </div>
 
-      {/* Como sobrou apenas um gráfico, ele assume a largura total para melhor visualização */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Pedidos por dia</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {daily && daily.days.length > 0 ? (
+            <DailyLineChart
+              data={daily.days}
+              dataKey="orders"
+              kind="count"
+              label="Pedidos"
+            />
+          ) : (
+            <p className="text-muted-foreground py-12 text-center text-sm">
+              Sem dados diários no período selecionado.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Pedidos por categoria</CardTitle>

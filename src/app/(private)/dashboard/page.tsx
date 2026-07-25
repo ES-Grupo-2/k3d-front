@@ -7,11 +7,12 @@
 // Acessível a Gerente e Operacional.
 import { OperationalDashboardView } from "@/components/dashboard";
 import {
+  type DailyRevenueData,
   type OperationalDashboardData,
   parsePeriod,
 } from "@/schemas/dashboard/dashboard";
 import { requireAuth } from "@/services/auth/session";
-import { getOperationalDashboard } from "@/services/dashboard";
+import { getDailyRevenue, getOperationalDashboard } from "@/services/dashboard";
 
 interface DashboardPageProps {
   searchParams: Promise<{ period?: string }>;
@@ -24,10 +25,14 @@ export default async function DashboardPage({
   const period = parsePeriod((await searchParams).period);
 
   let data: OperationalDashboardData | null = null;
+  let daily: DailyRevenueData | null = null;
   let error: string | null = null;
 
   try {
-    data = await getOperationalDashboard(period, token);
+    [data, daily] = await Promise.all([
+      getOperationalDashboard(period, token),
+      getDailyRevenue(period, token),
+    ]);
   } catch (requestError) {
     error =
       requestError instanceof Error
@@ -35,12 +40,11 @@ export default async function DashboardPage({
         : "Erro ao carregar o dashboard.";
   }
 
-  // Feature de Produtos removida devido à ausência de endpoint no backend.
-
   return (
     <OperationalDashboardView
       period={period}
       data={data}
+      daily={daily}
       error={error}
     />
   );

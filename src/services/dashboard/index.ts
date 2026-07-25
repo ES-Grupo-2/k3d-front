@@ -3,24 +3,30 @@
 // É o único ponto que fala com os endpoints /dashboard/* da API.
 // Author: lukasnascimento1
 import type {
+  DailyRevenueData,
   FinancialDashboardData,
   OperationalDashboardData,
   Period,
   ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { authHttp } from "@/services/auth/http";
-import type { 
+import type {
+  DailyRevenueApiData,
   OperationalDashboardApiData,
   OperationalTagsApiData,
-  FinancialDashboardApiData, 
-  ProductsBreakdownApiData, 
-  ProductBreakdownApi } from "@/types/dashboard"; 
+  FinancialDashboardApiData,
+  ProductsBreakdownApiData,
+  ProductBreakdownApi } from "@/types/dashboard";
 
 const periodToPeriodo: Record<Period, string> = {
   WEEKLY: "SEMANAL",
   MONTHLY: "MENSAL",
   SEMIANNUAL: "SEMESTRAL",
 };
+
+// Path do endpoint da série diária. CONFIRMAR com o backend — o colega ainda
+// vai criar a rota; ajustar aqui quando o path definitivo for conhecido.
+const DAILY_REVENUE_PATH = "/dashboard/receita-diaria";
 
 // Busca a agregação operacional (pedidos por categoria) do período informado.
 export async function getOperationalDashboard(
@@ -95,5 +101,31 @@ export async function getProductsBreakdown(
       period: period,
       products: []
     };
+  }
+}
+
+// Busca a série diária (receita e nº de pedidos por dia) do período. Um único
+// endpoint alimenta os dois gráficos: o operacional usa `orders`, o financeiro
+// usa `revenue`. Degrada para vazio se o endpoint ainda não existir ou 403.
+export async function getDailyRevenue(
+  period: Period,
+  token: string,
+): Promise<DailyRevenueData> {
+  try {
+    const backendData = await authHttp<DailyRevenueApiData>(
+      `${DAILY_REVENUE_PATH}?periodo=${periodToPeriodo[period]}`,
+      { token },
+    );
+    return {
+      period,
+      days: (backendData.dias ?? []).map((d) => ({
+        date: d.data,
+        revenue: d.receitaTotal,
+        orders: d.totalPedidos,
+      })),
+    };
+  } catch (error) {
+    console.warn("[Dashboard] Endpoint de receita diária indisponível", error);
+    return { period, days: [] };
   }
 }

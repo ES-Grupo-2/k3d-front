@@ -13,12 +13,14 @@ import {
 } from "@/components/ui";
 import { currency } from "@/lib/utils";
 import type {
+  DailyRevenueData,
   FinancialDashboardData,
   Period,
   ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryRevenueChart } from "./CategoryRevenueChart";
+import { DailyLineChart } from "./DailyLineChart";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
 import { PeriodFilter } from "./PeriodFilter";
@@ -28,6 +30,7 @@ interface FinancialDashboardViewProps {
   period: Period;
   data: FinancialDashboardData | null;
   products: ProductsBreakdownData | null;
+  daily: DailyRevenueData | null;
   error: string | null;
 }
 
@@ -35,6 +38,7 @@ export function FinancialDashboardView({
   period,
   data,
   products,
+  daily,
   error,
 }: FinancialDashboardViewProps) {
   const margin =
@@ -74,6 +78,26 @@ export function FinancialDashboardView({
         <MetricCard title="Margem de lucro" value={`${margin.toFixed(1)}%`} />
         <MetricCard title="Pedidos" value={data?.totalOrders ?? 0} />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Receita por dia</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {daily && daily.days.length > 0 ? (
+            <DailyLineChart
+              data={daily.days}
+              dataKey="revenue"
+              kind="currency"
+              label="Receita"
+            />
+          ) : (
+            <p className="text-muted-foreground py-12 text-center text-sm">
+              Sem dados diários no período selecionado.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
