@@ -26,7 +26,7 @@ export interface HomeShortcut {
 // Atalhos exibidos na tela inicial. A própria "Início" não entra aqui.
 const HOME_SHORTCUTS: HomeShortcut[] = [
   {
-    label: "Dashboard",
+    label: "Operacional",
     description: "Visão geral e indicadores da operação.",
     href: "/dashboard",
     icon: LayoutDashboard,
@@ -44,7 +44,7 @@ const HOME_SHORTCUTS: HomeShortcut[] = [
     icon: ClipboardList,
   },
   {
-    label: "Tarcisio",
+    label: "Financeiro",
     description: "Indicadores e relatórios gerenciais.",
     href: "/relatorios",
     icon: FileBarChart,

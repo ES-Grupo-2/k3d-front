@@ -36,7 +36,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Opera\u00e7\u00e3o",
     items: [
       { label: "Início", href: "/home", icon: Home },
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Operacional", href: "/dashboard", icon: LayoutDashboard },
       { label: "Kanban", href: "/kanban", icon: SquareKanban },
       { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
     ],
@@ -57,7 +57,7 @@ const NAV_SECTIONS: NavSection[] = [
         roles: ["GERENTE"],
       },
       {
-        label: "Tarcisio",
+        label: "Financeiro",
         href: "/relatorios",
         icon: FileBarChart,
         roles: ["GERENTE"],
@@ -68,7 +68,7 @@ const NAV_SECTIONS: NavSection[] = [
 
 const TAB_ITEMS: NavItem[] = [
   { label: "Início", href: "/home", icon: Home },
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Operacional", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
   { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
   {
@@ -78,7 +78,7 @@ const TAB_ITEMS: NavItem[] = [
     roles: ["GERENTE"],
   },
   {
-    label: "Tarcisio",
+    label: "Financeiro",
     href: "/relatorios",
     icon: FileBarChart,
     roles: ["GERENTE"],
