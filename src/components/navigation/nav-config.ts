@@ -3,6 +3,7 @@
  * @author jvs-neves
  */
 import {
+  Calculator,
   ClipboardList,
   FileBarChart,
   Home,
@@ -32,7 +33,7 @@ export interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: "Operação",
+    title: "Opera\u00e7\u00e3o",
     items: [
       { label: "Início", href: "/home", icon: Home },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -41,16 +42,22 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "Gestão",
+    title: "Gest\u00e3o",
     items: [
       {
-        label: "Registrar usuário",
+        label: "Calculadora",
+        href: "/calculadora",
+        icon: Calculator,
+        roles: ["GERENTE"],
+      },
+      {
+        label: "Registrar usu\u00e1rio",
         href: "/auth/register",
         icon: UserPlus,
         roles: ["GERENTE"],
       },
       {
-        label: "Relatórios",
+        label: "Relat\u00f3rios",
         href: "/relatorios",
         icon: FileBarChart,
         roles: ["GERENTE"],
@@ -64,7 +71,18 @@ const TAB_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Kanban", href: "/kanban", icon: SquareKanban },
   { label: "Pedidos", href: "/pedidos", icon: ClipboardList },
-  { label: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["GERENTE"] },
+  {
+    label: "Calculadora",
+    href: "/calculadora",
+    icon: Calculator,
+    roles: ["GERENTE"],
+  },
+  {
+    label: "Relat\u00f3rios",
+    href: "/relatorios",
+    icon: FileBarChart,
+    roles: ["GERENTE"],
+  },
 ];
 
 export function getVisibleTabItems(role: UserRole | undefined): NavItem[] {
@@ -103,3 +121,4 @@ export function getInitials(name?: string, email?: string): string {
 
   return source.slice(0, 2).toUpperCase();
 }
+
