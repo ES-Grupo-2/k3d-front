@@ -1,6 +1,6 @@
 // Gráfico de receita empilhada por categoria (Chaveiros, Brindes, etc.), na
-// horizontal. Agrega a receita por tag a partir do detalhamento por produto —
-// o backend não expõe esse recorte pronto, então a soma é feita no cliente.
+// horizontal: uma única barra em que cada segmento é uma categoria, o que deixa
+// visível tanto o peso relativo de cada uma quanto a receita total do período.
 // Author: lukasnascimento1
 "use client";
 
@@ -16,7 +16,7 @@ import {
 } from "recharts";
 
 import { currency } from "@/lib/utils";
-import type { ProductBreakdown } from "@/schemas/dashboard/dashboard";
+import type { CategoryRevenue } from "@/schemas/dashboard/dashboard";
 import { useChartTheme } from "./chart-theme";
 
 // Paleta categórica (o backend ainda não fornece cor por tag).
@@ -32,24 +32,18 @@ const CATEGORY_COLORS = [
 ];
 
 interface CategoryRevenueChartProps {
-  products: ProductBreakdown[];
+  categories: CategoryRevenue[];
 }
 
-export function CategoryRevenueChart({ products }: CategoryRevenueChartProps) {
+export function CategoryRevenueChart({
+  categories,
+}: CategoryRevenueChartProps) {
   const theme = useChartTheme();
-
-  // Soma a receita por categoria (tag).
-  const totals = new Map<string, number>();
-  for (const product of products) {
-    const key = product.tagName || "Sem categoria";
-    totals.set(key, (totals.get(key) ?? 0) + product.revenue);
-  }
-  const categories = Array.from(totals.keys());
 
   // Uma única linha ("Receita") com um segmento empilhado por categoria.
   const row: Record<string, number | string> = { name: "Receita" };
   categories.forEach((category) => {
-    row[category] = totals.get(category) ?? 0;
+    row[category.name] = category.revenue;
   });
   const data = [row];
 
@@ -84,10 +78,10 @@ export function CategoryRevenueChart({ products }: CategoryRevenueChartProps) {
           <Legend />
           {categories.map((category, index) => (
             <Bar
-              key={category}
-              dataKey={category}
+              key={category.name}
+              dataKey={category.name}
               stackId="revenue"
-              name={category}
+              name={category.name}
               fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
               barSize={56}
               radius={

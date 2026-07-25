@@ -3,21 +3,19 @@
 // É o único ponto que fala com os endpoints /dashboard/* da API.
 // Author: lukasnascimento1
 import type {
+  CategoryRevenueData,
   DailyPoint,
   DailyRevenueData,
   FinancialDashboardData,
   OperationalDashboardData,
   Period,
-  ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { authHttp } from "@/services/auth/http";
 import type {
   DailyRevenueApiData,
   OperationalDashboardApiData,
   OperationalTagsApiData,
-  FinancialDashboardApiData,
-  ProductsBreakdownApiData,
-  ProductBreakdownApi } from "@/types/dashboard";
+  FinancialDashboardApiData } from "@/types/dashboard";
 
 const periodToPeriodo: Record<Period, string> = {
   WEEKLY: "SEMANAL",
@@ -102,38 +100,46 @@ export async function getFinancialDashboard(
   };
 }
 
-// Busca o detalhamento por produto (receita, custo, lucro, margem, quantidade).
-// Requer perfil Gerente no backend.
-export async function getProductsBreakdown(
+// Monta a receita por categoria do período. O backend não expõe esse recorte
+// pronto, mas os endpoints aceitam ?tagType: o operacional diz quais categorias
+// tiveram pedidos e o financeiro devolve a receita de cada uma (1 + N chamadas,
+// as N em paralelo). Requer perfil Gerente por causa do endpoint financeiro.
+export async function getCategoryRevenue(
   period: Period,
   token: string,
-): Promise<ProductsBreakdownData> {
+): Promise<CategoryRevenueData> {
+  const periodo = periodToPeriodo[period];
+
   try {
-    const backendData = await authHttp<ProductsBreakdownApiData>(
-      `/dashboard/financeiro/produtos?periodo=${periodToPeriodo[period]}`,
+    const operational = await authHttp<OperationalDashboardApiData>(
+      `/dashboard/operacional?periodo=${periodo}`,
       { token },
     );
 
+    const tagTypes = (operational.tags ?? [])
+      .map((tag) => tag.tagType)
+      .filter(Boolean);
+
+    const categories = await Promise.all(
+      tagTypes.map(async (tagType) => {
+        const financial = await authHttp<FinancialDashboardApiData>(
+          `/dashboard/financeiro?periodo=${periodo}&tagType=${encodeURIComponent(tagType)}`,
+          { token },
+        );
+        return { name: tagType, revenue: financial.receitaTotal ?? 0 };
+      }),
+    );
+
     return {
-      period: period,
-      products: backendData.produtos?.map((prod: ProductBreakdownApi) => ({
-        name: prod.nome,
-        tagName: prod.tagType,
-        revenue: prod.receita,
-        cost: prod.custo,
-        profit: prod.lucro,
-        quantity: prod.quantidade,
-        orders: prod.pedidos,
-        profitMarginPercent: prod.margemLucro,
-        tagColor: "#ffc94d"
-      })) || []
+      period,
+      // Categorias sem receita só ocupariam a legenda: a barra teria largura zero.
+      categories: categories
+        .filter((category) => category.revenue > 0)
+        .sort((a, b) => b.revenue - a.revenue),
     };
   } catch (error) {
-    console.warn("[Dashboard] Endpoint de produtos não encontrado", error);
-    return {
-      period: period,
-      products: []
-    };
+    console.warn("[Dashboard] Falha ao montar a receita por categoria", error);
+    return { period, categories: [] };
   }
 }
 

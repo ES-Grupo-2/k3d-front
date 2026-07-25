@@ -26,23 +26,6 @@ export type FinancialDashboardApiData = {
   totalPedidos: number;
 }
 
-export type ProductBreakdownApi = {
-  nome: string;
-  tagType: string;
-  tagColor: string;
-  receita: number;
-  custo: number;
-  lucro: number;
-  quantidade: number;
-  pedidos: number;
-  margemLucro: number;
-}
-
-export type ProductsBreakdownApiData = {
-  period: Period;
-  produtos: ProductBreakdownApi[];
-}
-
 // Série diária (formato exato enviado pelo backend). Cada dia traz a receita e
 // o nº de pedidos daquele dia.
 export type DailyRevenuePointApi = {

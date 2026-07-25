@@ -7,4 +7,3 @@ export { FinancialDashboardView } from "./FinancialDashboardView";
 export { MetricCard } from "./MetricCard";
 export { OperationalDashboardView } from "./OperationalDashboardView";
 export { PeriodFilter } from "./PeriodFilter";
-export { ProductsTable } from "./ProductsTable";

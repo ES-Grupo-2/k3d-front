@@ -1,19 +1,19 @@
 // Página do Dashboard Financeiro (rota /relatorios). Restrita ao perfil Gerente:
-// busca no servidor os indicadores financeiros e o detalhamento por produto e
-// entrega à view.
+// busca no servidor os indicadores financeiros, a série diária de receita e a
+// receita por categoria, e entrega à view.
 // Author: lukasnascimento1
 import { FinancialDashboardView } from "@/components/dashboard";
 import {
+  type CategoryRevenueData,
   type DailyRevenueData,
   type FinancialDashboardData,
   parsePeriod,
-  type ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { requireRole } from "@/services/auth/session";
 import {
+  getCategoryRevenue,
   getDailyRevenue,
   getFinancialDashboard,
-  getProductsBreakdown,
 } from "@/services/dashboard";
 
 interface RelatoriosPageProps {
@@ -28,14 +28,14 @@ export default async function RelatoriosPage({
   const period = parsePeriod((await searchParams).period);
 
   let data: FinancialDashboardData | null = null;
-  let products: ProductsBreakdownData | null = null;
+  let categories: CategoryRevenueData | null = null;
   let daily: DailyRevenueData | null = null;
   let error: string | null = null;
 
   try {
-    [data, products, daily] = await Promise.all([
+    [data, categories, daily] = await Promise.all([
       getFinancialDashboard(period, token),
-      getProductsBreakdown(period, token),
+      getCategoryRevenue(period, token),
       getDailyRevenue(period, token),
     ]);
   } catch (requestError) {
@@ -49,7 +49,7 @@ export default async function RelatoriosPage({
     <FinancialDashboardView
       period={period}
       data={data}
-      products={products}
+      categories={categories}
       daily={daily}
       error={error}
     />

@@ -45,23 +45,18 @@ export interface FinancialDashboardData {
   totalOrders: number;
 }
 
-// Um produto agregado no breakdown por produto.
-export interface ProductBreakdown {
+// Receita acumulada de uma categoria (tag) no período.
+export interface CategoryRevenue {
   name: string;
-  tagName: string;
-  tagColor: string;
   revenue: number;
-  cost: number;
-  profit: number;
-  quantity: number;
-  orders: number;
-  profitMarginPercent: number;
 }
 
-// Resposta de GET /dashboard/financial/products — indicadores por produto.
-export interface ProductsBreakdownData {
+// Receita por categoria do período. Não existe endpoint dedicado no backend:
+// o serviço monta esse recorte combinando /dashboard/operacional (categorias do
+// período) com /dashboard/financeiro?tagType= (receita de cada uma).
+export interface CategoryRevenueData {
   period: Period;
-  products: ProductBreakdown[];
+  categories: CategoryRevenue[];
 }
 
 // Um ponto da série temporal diária (data + receita + pedidos do dia).

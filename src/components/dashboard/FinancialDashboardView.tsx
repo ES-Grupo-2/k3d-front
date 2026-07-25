@@ -1,6 +1,6 @@
 // Tela do Dashboard Financeiro: receita, custo, lucro, ticket e margem do
-// período, com comparativo geral, receita por produto e detalhamento completo
-// por produto. Restrito ao perfil Gerente.
+// período, com a série diária de receita, o comparativo geral e a receita por
+// categoria. Restrito ao perfil Gerente.
 // Author: lukasnascimento1
 import {
   Alert,
@@ -13,10 +13,10 @@ import {
 } from "@/components/ui";
 import { currency } from "@/lib/utils";
 import type {
+  CategoryRevenueData,
   DailyRevenueData,
   FinancialDashboardData,
   Period,
-  ProductsBreakdownData,
 } from "@/schemas/dashboard/dashboard";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CategoryRevenueChart } from "./CategoryRevenueChart";
@@ -24,12 +24,11 @@ import { DailyLineChart } from "./DailyLineChart";
 import { FinancialChart } from "./FinancialChart";
 import { MetricCard } from "./MetricCard";
 import { PeriodFilter } from "./PeriodFilter";
-import { ProductsTable } from "./ProductsTable";
 
 interface FinancialDashboardViewProps {
   period: Period;
   data: FinancialDashboardData | null;
-  products: ProductsBreakdownData | null;
+  categories: CategoryRevenueData | null;
   daily: DailyRevenueData | null;
   error: string | null;
 }
@@ -37,13 +36,13 @@ interface FinancialDashboardViewProps {
 export function FinancialDashboardView({
   period,
   data,
-  products,
+  categories,
   daily,
   error,
 }: FinancialDashboardViewProps) {
   const margin =
     data && data.revenue > 0 ? (data.profit / data.revenue) * 100 : 0;
-  const productList = products?.products ?? [];
+  const categoryList = categories?.categories ?? [];
 
   return (
     <div className="space-y-6 pb-24 md:pb-0">
@@ -120,31 +119,16 @@ export function FinancialDashboardView({
             <CardTitle>Receita por categoria</CardTitle>
           </CardHeader>
           <CardContent>
-            {productList.length > 0 ? (
-              <CategoryRevenueChart products={productList} />
+            {categoryList.length > 0 ? (
+              <CategoryRevenueChart categories={categoryList} />
             ) : (
               <p className="text-muted-foreground py-12 text-center text-sm">
-                Sem produtos no período selecionado.
+                Sem receita por categoria no período selecionado.
               </p>
             )}
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Detalhamento completo por produto</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {productList.length > 0 ? (
-            <ProductsTable products={productList} variant="financial" />
-          ) : (
-            <p className="text-muted-foreground py-8 text-center text-sm">
-              Sem produtos no período.
-            </p>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
