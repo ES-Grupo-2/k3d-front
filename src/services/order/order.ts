@@ -6,8 +6,9 @@
  */
 
 import { API_URL } from "../auth/config";
-import { ClientApi, CreateClientDTO } from "@/types/order";
+import { ClientApi, CreateClientDTO, OrderFormData } from "@/types/order";
 import { requireAuth } from "../auth/session";
+import { createKanbanOrder } from "../kanban/kanban";
 
 export async function createClient(data: CreateClientDTO) {
     const sessionToken = (await requireAuth().then(session => session.token));
@@ -135,4 +136,50 @@ export async function getClients(): Promise<ClientApi> {
   
   const jsonResponse = await response.json();
   return jsonResponse;
+}
+
+export async function orchestrateOrderCreation(formData: OrderFormData) {
+  let finalClientId = formData.clientId;
+  let finalClientName = ""; 
+
+  if (!finalClientId && formData.newClientName) {
+    const clientResponse = await createClient({ 
+      name: formData.newClientName, 
+      phone: formData.newClientPhone || "" 
+    });
+    if (!clientResponse || !clientResponse.id) throw new Error("Falha ao criar cliente.");
+    finalClientId = clientResponse.id;
+    finalClientName = formData.newClientName; 
+  } else {
+    finalClientName = (formData as any).clientNameForUI || "Cliente"; 
+  }
+
+  let finalArchiveName = formData.archive || ""; 
+  if (formData.file && formData.file.length > 0) {
+    const fileToUpload = formData.file[0];
+    const uploadResponse = await uploadOrderFile(fileToUpload) as any;
+    const extractedFileName = uploadResponse.fileName || uploadResponse.data?.fileName;
+    if (!extractedFileName) throw new Error("Upload concluído, mas o backend não devolveu o fileName!");
+    finalArchiveName = extractedFileName; 
+  }
+
+  const initialPayload = {
+    title: formData.title,
+    client_id: Number(finalClientId), 
+    tagType: formData.tagType,          
+    price: formData.price,
+    amount_paid: formData.amount_paid,
+    cost: formData.cost,
+    quantity: formData.quantity,
+    payment_method: formData.payment_method,
+    archive: finalArchiveName, 
+  };
+
+  const newOrder = await createKanbanOrder(initialPayload);
+  
+  // 4. HIDRATAÇÃO DO RETORNO PARA O FRONTEND
+  newOrder.tag = { type: formData.tagType }; 
+  newOrder.client = { name: finalClientName };
+
+  return newOrder;
 }
