@@ -53,7 +53,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     const draggableId = isDestinationPlaceHolder
       ? `ghost-${order.id}`
       : order.id;
-    const { attributes, listeners, setNodeRef, transform, isDragging } =
+    const { attributes, listeners, setNodeRef, isDragging } =
       useDraggable({
         id: draggableId,
         data: { originColumn: order.section, order: order },
@@ -61,18 +61,21 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
 
     const { over } = useDndContext();
 
-    const style =
-      transform && isOverlay
-        ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-        : undefined;
+    // const style = {
+    //   transform: transform && !isOverlay ? CSS.Translate.toString(transform) : undefined,
+    //   width: isOverlay ? "100%" : undefined, 
+    // };
+// Substitua o style por este (ajuste o "300px" para a largura exata da sua coluna no Tailwind)
+    const style = isOverlay ? { width: "300px" } : undefined;
 
     const isOriginalCard = isDragging && !isOverlay;
     const isCardOverOtherColumn = over && over.id !== order.section;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
 
+    // className="hidden"
     if (isOriginalCard && isCardOverOtherColumn) {
-      return <div ref={setNodeRef} className="hidden" />;
+      return <div ref={setNodeRef}  />;
     }
 
     const formattedTitle = order.title[0].toUpperCase() + order.title.slice(1);

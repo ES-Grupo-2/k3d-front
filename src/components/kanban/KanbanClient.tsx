@@ -199,7 +199,6 @@ return (
         <MobileMenuButton />
         <h1 className="text-2xl font-semibold">Kanban</h1>
       </div>
-      {isManager && (
         <Button
           variant="default"
           className="transition-colors hover:cursor-pointer hover:bg-primary/90"
@@ -207,7 +206,6 @@ return (
         >
           + Novo pedido
         </Button>
-      )}
     </div>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
