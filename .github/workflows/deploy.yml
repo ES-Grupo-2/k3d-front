@@ -1,9 +1,16 @@
 name: Deploy
 
-# Faz deploy do frontend (OpenNext -> Cloudflare Workers) a cada push na stage.
+# Deploy automático do frontend no Cloudflare Workers a cada push na stage
+# (branch de produção). O build do OpenNext converte o Next em um Worker.
 on:
   push:
     branches: [ stage ]
+  workflow_dispatch:
+
+# Impede que dois deploys rodem ao mesmo tempo e se sobrescrevam.
+concurrency:
+  group: deploy-stage
+  cancel-in-progress: false
 
 jobs:
   deploy:
