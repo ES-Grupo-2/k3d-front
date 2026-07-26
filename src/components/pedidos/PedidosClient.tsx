@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 import { CreateOrderDialog } from "@/components/kanban/popUp/CreateOrderDialog";
-import { orchestrateOrderCreation } from "@/services/order/order";
+import { orchestrateOrderCreation, uploadOrderFile } from "@/services/order/order";
 import { ApiOrder, OrderFormData } from "@/types/order";
 import { Tag } from "@/types/tags";
 
@@ -35,8 +35,20 @@ export default function PedidosPage({
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
-      const newOrder = await orchestrateOrderCreation(formData);
+      if (formData.file && formData.file.length > 0) {
+        const data = new FormData();
+        data.append("file", formData.file[0]);
+        
+        const uploadResponse = await uploadOrderFile(data);
+        
+        if (uploadResponse?.fileName) {
+          formData.archive = uploadResponse.fileName;
+        }
+      }
       
+      delete formData.file;
+
+      const newOrder = await orchestrateOrderCreation(formData);
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       

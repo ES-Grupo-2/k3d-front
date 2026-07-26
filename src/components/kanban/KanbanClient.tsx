@@ -14,7 +14,7 @@ import type { Order, KanbanTaskStatus } from "@/types/kanban";
 import { deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
 import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
-import { orchestrateOrderCreation } from "@/services/order/order";
+import { orchestrateOrderCreation, uploadOrderFile } from "@/services/order/order";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 type KanbanClientProps = {
@@ -140,14 +140,25 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
-      const newOrder = await orchestrateOrderCreation(formData);
+      if (formData.file && formData.file.length > 0) {
+        const data = new FormData();
+        data.append("file", formData.file[0]);
+        
+        const uploadResponse = await uploadOrderFile(data);
+        
+        if (uploadResponse?.fileName) {
+          formData.archive = uploadResponse.fileName;
+        }
+      }
       
+      delete formData.file;
+
+      const newOrder = await orchestrateOrderCreation(formData);
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
     } catch (error: unknown) { 
       console.error("Erro ao criar pedido:", error);
-      
       if (error instanceof Error) {
         alert(`Erro: ${error.message}`);
       } else {
