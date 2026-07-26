@@ -1,3 +1,5 @@
+# @author lukasnascimento1
+# @author jvs-neves
 name: Deploy
 
 # Deploy automático do frontend no Cloudflare Workers a cada push na stage

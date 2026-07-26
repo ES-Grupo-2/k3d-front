@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -59,7 +64,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   }
 
   return (
-    <Card className="flex w-full max-w-lg flex-col justify-between gap-28 border-transparent bg-transparent">
+    <Card className="w-full max-w-md gap-6 py-8 shadow-lg">
       <CardHeader className="flex flex-col items-center text-center">
         <CardTitle className="text-3xl">Bem vindo ao K3D</CardTitle>
         <CardDescription className="text-muted-foreground">
@@ -83,6 +88,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   <FormControl>
                     <Input
                       autoComplete="username"
+                      className="bg-background"
                       placeholder="E-mail"
                       type="email"
                       {...field}
@@ -101,6 +107,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   <FormControl>
                     <PasswordInput
                       autoComplete="new-password"
+                      className="bg-background"
                       placeholder="Senha"
                       {...field}
                     />

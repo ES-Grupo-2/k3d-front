@@ -1,24 +1,16 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { PackageSearch } from "lucide-react";
-
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
-import { queryOrders } from "@/data/orders";
-import { requireAuth } from "@/services/auth/session";
-import type { KanbanColumnNames, PaymentMethod } from "@/types/kanban";
+import { queryOrders } from "@/services/orders";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
-// Orders history/listing screen.
-// Server Component: reads the filters straight from `searchParams`, fetches the
-// already-filtered list on the server and hands it off for rendering. All the
-// interactivity is isolated in `PedidosFilters`, which only rewrites the URL.
+const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
 
-const COLUMNS: KanbanColumnNames[] = ["TODO", "DOING", "DONE"];
-const PAYMENT_METHODS: PaymentMethod[] = [
-  "CREDIT_CARD",
-  "DEBIT_CARD",
-  "CASH",
-  "PIX",
-];
+const PAYMENT_METHODS = ["CARTAO_CREDITO", "CARTAO_DEBITO", "DINHEIRO", "PIX"];
 
-// Ensures only valid enum values reach the filter (ignores junk in the URL).
 function parseEnumParam<T extends string>(
   value: string | undefined,
   allowed: T[],
@@ -31,29 +23,41 @@ export default async function PedidosPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireAuth();
-
   const params = await searchParams;
-  const orderQuery = typeof params.q === "string" ? params.q : "";
-  const column = parseEnumParam(
-    typeof params.status === "string" ? params.status : undefined,
-    COLUMNS,
+  
+  // A MÁGICA AQUI: Lemos "params.search" (ou "params.q" dependendo do que o PedidosFilters coloca na URL)
+  // E salvamos na variável orderQuery
+  const orderQuery = typeof params.search === "string" ? params.search : "";
+  
+  const section = parseEnumParam(
+    typeof params.section === "string" ? params.section : undefined,
+    SECTIONS,
   );
+  
   const paymentMethod = parseEnumParam(
     typeof params.payment === "string" ? params.payment : undefined,
     PAYMENT_METHODS,
   );
+  
+  const page = typeof params.page === "string" ? params.page : "1";
 
-  const orders = await queryOrders({
-    q: orderQuery,
-    column: column || undefined,
-    paymentMethod: paymentMethod || undefined,
+  const response = await queryOrders({
+    queryInput: orderQuery, // Agora sim, passamos a string lida da URL para a chave que a função exige!
+    section: section || undefined,
+    payment: paymentMethod || undefined,
+    page: page,
   });
 
+  const orders = response.data;
+  const totalItems = response.meta.totalItems;
+  
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Pedidos</h1>
+    <div className="flex flex-col gap-6 pb-24 md:pb-0">
+      <header className="space-y-1">
+        <div className="flex items-center gap-2">
+          <MobileMenuButton />
+          <h1 className="text-2xl font-semibold">Pedidos</h1>
+        </div>
         <p className="text-muted-foreground text-sm">
           Histórico completo de pedidos — busque, filtre e audite a operação.
         </p>
@@ -61,13 +65,13 @@ export default async function PedidosPage({
 
       <PedidosFilters
         initialQuery={orderQuery}
-        initialColumn={column}
+        initialSection={section}
         initialPayment={paymentMethod}
       />
 
       <p className="text-muted-foreground text-sm">
-        {orders.length}{" "}
-        {orders.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
+        {totalItems}{" "}
+        {totalItems === 1 ? "pedido encontrado" : "pedidos encontrados"}
       </p>
 
       {orders.length > 0 ? (

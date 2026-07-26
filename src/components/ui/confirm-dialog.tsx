@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import * as React from "react";
 import { AlertTriangle } from "lucide-react";
 
@@ -93,6 +98,7 @@ export function ConfirmDialog({
             variant="outline"
             disabled={pending}
             onClick={() => onOpenChange(false)}
+            className="hover:cursor-pointer"
           >
             {cancelLabel}
           </Button>
@@ -100,6 +106,7 @@ export function ConfirmDialog({
             variant={config.confirm}
             disabled={pending}
             onClick={handleConfirm}
+            className="hover:cursor-pointer"
           >
             {pending ? "Processando..." : confirmLabel}
           </Button>

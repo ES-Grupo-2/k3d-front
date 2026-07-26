@@ -1,5 +1,10 @@
 "use server";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { cookies } from "next/headers";
 
 import {

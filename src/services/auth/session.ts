@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -68,7 +72,7 @@ export async function requireRole(role: UserRole) {
   const session = await requireAuth();
 
   if (session.user.role !== role) {
-    redirect("/inicio");
+    redirect("/home");
   }
 
   return session;

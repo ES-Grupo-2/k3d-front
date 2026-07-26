@@ -1,4 +1,9 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import {
+  Calculator,
   ClipboardList,
   FileBarChart,
   LayoutDashboard,
@@ -21,7 +26,7 @@ export interface HomeShortcut {
 // Atalhos exibidos na tela inicial. A própria "Início" não entra aqui.
 const HOME_SHORTCUTS: HomeShortcut[] = [
   {
-    label: "Dashboard",
+    label: "Operacional",
     description: "Visão geral e indicadores da operação.",
     href: "/dashboard",
     icon: LayoutDashboard,
@@ -39,7 +44,7 @@ const HOME_SHORTCUTS: HomeShortcut[] = [
     icon: ClipboardList,
   },
   {
-    label: "Relatórios",
+    label: "Financeiro",
     description: "Indicadores e relatórios gerenciais.",
     href: "/relatorios",
     icon: FileBarChart,
@@ -52,6 +57,13 @@ const HOME_SHORTCUTS: HomeShortcut[] = [
     icon: UserPlus,
     roles: ["GERENTE"],
   },
+  {
+    label: "Calculadora",
+    description: "Ferramenta de cálculo auxiliar.",
+    href: "/calculadora",
+    icon: Calculator,
+    roles: ["GERENTE"],
+  }
 ];
 
 /** Atalhos da tela inicial visíveis para o perfil informado. */

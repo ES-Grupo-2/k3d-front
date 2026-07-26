@@ -1,98 +1,53 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import { useState } from "react";
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
-import { CardEditDialog } from "@/components/kanban/CardEditDialog";
+import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { CardFormData } from "@/components/kanban/CardEditDialog";
-import type { Order, KanbanColumnNames } from "@/types/kanban";
+import type { Order, KanbanTaskStatus } from "@/types/kanban";
+import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
+import { OrderFormData, UpdateOrderPayload } from "@/types/order";
+import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
+import { createClient, uploadOrderFile } from "@/services/order/order";
+import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
-const MOCK_ORDERS: Order[] = [
-  {
-    id: "1",
-    column: "TODO",
-    title: "Manutenção Preventiva Servidor",
-    quantity: 1,
-    price: 1500.0,
-    status: "UNPAID",
-    paymentMethod: "PIX",
-    client: { id: "c1", name: "Empresa Alpha Ltda" },
-    tag: { name: "Infra", color: "#3b82f6" },
-  },
-  {
-    id: "2",
-    column: "DOING",
-    title: "Licenças Office 365",
-    quantity: 10,
-    price: 3500.0,
-    status: "HALFPAID",
-    paymentMethod: "PIX",
-    client: { id: "c2", name: "Escola Beta" },
-    tag: { name: "Software", color: "#10b981" },
-  },
-  {
-    id: "3",
-    column: "DONE",
-    title: "Roteadores Wi-Fi 6",
-    quantity: 3,
-    price: 1200.0,
-    status: "HALFPAID",
-    paymentMethod: "CREDIT_CARD",
-    client: { id: "c3", name: "Cafeteria Delta" },
-    tag: { name: "Hardware", color: "#f59e0b" },
-  },
-  {
-    id: "4",
-    column: "DONE",
-    title: "Roteadores Wi-Fi 6",
-    quantity: 3,
-    price: 1500.0,
-    status: "HALFPAID",
-    paymentMethod: "CREDIT_CARD",
-    client: {
-      id: "c3",
-      name: `${"(Exemplo de Cliente com nome grande\n)".repeat(10)}`,
-    },
-    tag: { name: "Hardware", color: "#f59e0b" },
-  },
-  {
-    id: "5",
-    column: "DONE",
-    title: "Roteadores Wi-Fi 6",
-    quantity: 3,
-    price: 1200.0,
-    status: "HALFPAID",
-    paymentMethod: "CREDIT_CARD",
-    client: { id: "c3", name: "Cafeteria Delta" },
-    tag: { name: "Hardware", color: "#f59e0b" },
-  },
-  {
-    id: "6",
-    column: "DONE",
-    title: "Roteadores Wi-Fi 6",
-    quantity: 3,
-    price: 1200.0,
-    status: "HALFPAID",
-    paymentMethod: "CREDIT_CARD",
-    client: { id: "c3", name: "Cafeteria Delta" },
-    tag: { name: "Hardware", color: "#f59e0b" },
-  },
-];
+type KanbanClientProps = {
+  isManager: boolean;
+  ordersRequest: Record<string, Order[]>;
+}
 
-export function KanbanClient({ isManager }: { isManager: boolean }) {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
+  const [orders, setOrders] = useState<Order[]>(ordersRequest.PENDENTE.concat(ordersRequest.FAZENDO, ordersRequest.FINALIZADO));
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [, setIsDeleting] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
-  const deletingOrder = orders.find((order) => order.id === deletingId) ?? null;
+  const deletingOrder = orders.find((order) => Number(order.id) === Number(deletingId)) ?? null;
 
-  const handleMoveOrder = (orderId: string, targetColumn: KanbanColumnNames) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, column: targetColumn } : order,
+  const handleMoveOrder = async (orderId: number, targetColumn: KanbanTaskStatus) => {
+    const previousOrders = [...orders];
+
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId ? { ...order, section: targetColumn } : order,
       ),
     );
+
+    try {
+      await moveKanbanOrder(orderId, targetColumn);
+    } catch (error) {
+      console.error(error);
+      setOrders(previousOrders);
+    }
   };
 
   const handleEditOrder = (order: Order) => {
@@ -101,55 +56,183 @@ export function KanbanClient({ isManager }: { isManager: boolean }) {
     }
   };
 
-  const handleDeleteOrder = (orderId: string) => {
+  const handleDeleteOrder = (orderId: number) => {
     if (isManager) {
       setDeletingId(orderId);
     }
   };
 
-  const handleSaveEdit = (data: CardFormData) => {
-    if (!editingOrder) return;
-    
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === editingOrder.id ? { ...order, ...data } : order,
-      ),
-    );
-    setEditingOrder(null);
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    const previousOrders = [...orders];
+    const idToDelete = deletingId; // Salva a referência
+
+    setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(idToDelete)));
+    setDeletingId(null);
+    setIsDeleting(true);
+
+    try {
+      await deleteKanbanOrder(idToDelete);
+    } catch (error) {
+      console.error("Falha ao deletar pedido:", error);
+      alert("Ocorreu um erro ao excluir o pedido. Tente novamente.");
+      setOrders(previousOrders);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    setOrders((prev) => prev.filter((order) => order.id !== deletingId));
-    setDeletingId(null);
+  // Persiste a edição no backend e aplica o patch otimista à UI só no sucesso.
+  const handleSaveEdit = async (
+    orderId: number,
+    payload: UpdateOrderPayload,
+    localPatch: Partial<Order>,
+  ) => {
+    setIsSavingEdit(true);
+    try {
+      await updateKanbanOrder(orderId, payload);
+      setOrders((prev) =>
+        prev.map((order) =>
+          Number(order.id) === Number(orderId)
+            ? ({ ...order, ...localPatch } as Order)
+            : order,
+        ),
+      );
+      setEditingOrder(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
+
+  /**
+   * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
+   * 
+   * This function executes a sequential pipeline to ensure all related entities (Clients, 
+   * Orders, and MinIO Storage) are synchronized. It prioritizes uploading the physical file 
+   * to retrieve its unique storage key before saving the final entity in the database.
+   * 
+   * @async
+   * @param {OrderFormData} formData - The payload collected from the CreateOrderDialog form.
+   * 
+   * @pipeline
+   * 1. **Client Resolution:** Checks if the order belongs to an existing client. If the "New Client" 
+   *    tab was used, it dispatches a POST request to create a new client and retrieves the `clientId`.
+   * 2. **File Upload (Optional):** If a physical file is attached, it sends it to the backend API 
+   *    to be stored in MinIO, retrieving the unique generated `fileName`. If no file is present, 
+   *    it falls back to the external archive link (e.g., Google Drive) if provided by the user.
+   * 3. **Order Creation:** Dispatches a POST request to create the order in the database, directly 
+   *    linking the resolved `clientId` and the `archive` string (storage filename or external link).
+   * 4. **UI Hydration:** Injects the UI-friendly relationship properties (`client.name`, `tag.type`) 
+   *    into the newly created order and updates the local React state (`setOrders`) to display the 
+   *    card immediately on the Kanban board.
+   * 
+   * @throws {Error} Will throw an error if client creation fails, the file upload process 
+   * is interrupted, or the final order creation fails.
+   */
+  const handleCreateOrder = async (formData: OrderFormData) => {
+    setIsCreating(true);
+    try {
+      let finalClientId = formData.clientId;
+      let finalClientName = ""; 
+
+      if (!finalClientId && formData.newClientName) {
+        const clientResponse = await createClient({ 
+          name: formData.newClientName, 
+          phone: formData.newClientPhone || "" 
+        });
+
+        if (!clientResponse || !clientResponse.id) {
+            throw new Error("Falha ao criar o novo cliente. ID não retornado.");
+        }
+        finalClientId = clientResponse.id;
+        finalClientName = formData.newClientName; 
+      } else {
+        finalClientName = (formData as OrderFormData).newClientName || "Cliente"; 
+      }
+
+      if (!finalClientId) throw new Error("Cliente é obrigatório!");
+
+      let finalArchiveName = formData.archive || ""; 
+      if (formData.file && formData.file.length > 0) {
+        const fileToUpload = formData.file[0];
+        
+        const uploadResponse = await uploadOrderFile(fileToUpload);
+        
+        finalArchiveName = uploadResponse.fileName; 
+      }
+
+      const initialPayload = {
+        title: formData.title,
+        client_id: Number(finalClientId), 
+        tagType: formData.tagType,          
+        price: formData.price,
+        amount_paid: formData.amount_paid,
+        cost: formData.cost,
+        quantity: formData.quantity,
+        payment_method: formData.payment_method,
+        archive: finalArchiveName, 
+      };
+
+      const newOrder = await createKanbanOrder(initialPayload);
+      
+      newOrder.tag = { type: formData.tagType }; 
+      newOrder.client = { name: finalClientName };
+      
+      setOrders((prev) => [newOrder, ...prev]);
+      setCreateModalOpen(false);
+      
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao criar o pedido. Verifique os dados e tente novamente.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
 return (
-  <div className="flex h-svh w-full select-none flex-col overflow-hidden overscroll-none">
-    <header className="flex shrink-0 justify-end px-5 py-4">
+  <div className="flex h-full w-full select-none flex-col overflow-hidden overscroll-none">
+    <div className="flex shrink-0 items-center justify-between gap-4 pb-3 md:pb-4">
+      <div className="flex items-center gap-2">
+        <MobileMenuButton />
+        <h1 className="text-2xl font-semibold">Kanban</h1>
+      </div>
       {isManager && (
-        <Button variant="default" className="transition-colors hover:cursor-pointer hover:bg-primary/90">
+        <Button
+          variant="default"
+          className="transition-colors hover:cursor-pointer hover:bg-primary/90"
+          onClick={() => setCreateModalOpen(true)}
+        >
           + Novo pedido
         </Button>
       )}
-    </header>
-
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <KanbanBoard
-        orders={orders}
-        onMoveOrder={handleMoveOrder}
-        onEditOrder={handleEditOrder}
-        onDeleteOrder={handleDeleteOrder}
-        isManager={isManager}
-      />
     </div>
+
+      <div className="min-h-0 flex-1 flex-col overflow-hidden">
+        <KanbanBoard
+          orders={orders}
+          onMoveOrder={handleMoveOrder}
+          onEditOrder={handleEditOrder}
+          onDeleteOrder={handleDeleteOrder}
+          isManager={isManager}
+        />
+      </div>
+
+      <CreateOrderDialog
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSave={handleCreateOrder}
+        isLoading={isCreating}
+      />
 
       <CardEditDialog
         open={editingOrder !== null}
         onClose={() => setEditingOrder(null)}
-        initialValues={{
-          title: editingOrder?.title ?? "",
-          description: "", 
-        }}
+        order={editingOrder}
         onSave={handleSaveEdit}
+        isSaving={isSavingEdit}
       />
 
       <ConfirmDialog

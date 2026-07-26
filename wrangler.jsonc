@@ -1,3 +1,7 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "k3d-front",
@@ -7,5 +11,14 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "env": {
+    "preview": {
+      "name": "k3d-front-preview",
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS"
+      }
+    }
   }
 }

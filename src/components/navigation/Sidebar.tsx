@@ -1,10 +1,17 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { AuthUser } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme";
 
 import { LogoutButton } from "./LogoutButton";
 import {
@@ -17,25 +24,79 @@ import {
 interface SidebarContentProps {
   user: AuthUser;
   onNavigate?: () => void;
+  // Modo compacto (só ícones) — usado apenas na sidebar fixa do desktop.
+  // Toggle: chevron "<" ao lado da logo (expandido) e ">" (compacto); o avatar
+  // de perfil também expande. Tudo via onToggleCollapse.
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
+export function SidebarContent({
+  user,
+  onNavigate,
+  collapsed = false,
+  onToggleCollapse,
+}: SidebarContentProps) {
   const pathname = usePathname();
   const sections = getVisibleSections(user.role);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-border flex h-16 shrink-0 items-center gap-2 border-b px-6">
-        <span className="text-primary text-xl font-bold tracking-tight">K3D</span>
-        <span className="text-muted-foreground text-xs">Gestão</span>
+      {/* Marca */}
+      <div
+        className={cn(
+          "flex h-16 shrink-0 items-center",
+          collapsed ? "justify-center px-0.5" : "gap-2 px-6",
+        )}
+      >
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title="Expandir menu"
+            aria-label="Expandir menu"
+            className="text-muted-foreground hover:text-foreground flex items-center gap-0.5 rounded-md transition-colors hover:cursor-pointer"
+          >
+            <span className="text-foreground text-lg font-bold tracking-tight dark:text-primary">
+              K3D
+            </span>
+            <ChevronRight className="size-5 shrink-0" strokeWidth={1.5} />
+          </button>
+        ) : (
+          <>
+            <span className="text-foreground text-xl font-bold tracking-tight dark:text-primary">
+              K3D
+            </span>
+            <span className="text-muted-foreground text-xs">Gestão</span>
+            {onToggleCollapse && (
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                title="Recolher menu"
+                aria-label="Recolher menu"
+                className="text-muted-foreground hover:text-foreground ml-auto inline-flex size-8 items-center justify-center rounded-md transition-colors hover:cursor-pointer"
+              >
+                <ChevronLeft className="size-6" strokeWidth={1.5} />
+              </button>
+            )}
+          </>
+        )}
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+      {/* Navegação */}
+      <nav
+        className={cn(
+          "flex-1 space-y-6 overflow-y-auto py-4",
+          collapsed ? "px-2" : "px-3",
+        )}
+      >
         {sections.map((section) => (
           <div key={section.title} className="space-y-1">
-            <p className="text-muted-foreground px-3 pb-1 text-xs font-semibold tracking-wider uppercase">
-              {section.title}
-            </p>
+            {!collapsed && (
+              <p className="text-muted-foreground px-3 pb-1 text-xs font-semibold tracking-wider uppercase">
+                {section.title}
+              </p>
+            )}
             {section.items.map((item) => {
               const active = isItemActive(pathname, item.href);
               const Icon = item.icon;
@@ -46,15 +107,17 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
                   href={item.href}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center rounded-lg text-sm font-medium transition-colors",
+                    collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2",
                     active
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground/80 hover:bg-primary/10 hover:text-foreground",
                   )}
                 >
-                  <Icon className="size-5 shrink-0" />
-                  {item.label}
+                  <Icon className="size-[26px] shrink-0" />
+                  {!collapsed && item.label}
                 </Link>
               );
             })}
@@ -62,21 +125,50 @@ export function SidebarContent({ user, onNavigate }: SidebarContentProps) {
         ))}
       </nav>
 
-      <div className="border-border shrink-0 border-t p-4">
-        <div className="mb-3 flex items-center gap-3">
-          <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
-            {getInitials(user.name, user.email)}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">
-              {user.name || user.email}
-            </p>
-            <p className="text-muted-foreground truncate text-xs">
-              {ROLE_LABELS[user.role]}
-            </p>
-          </div>
-        </div>
-        <LogoutButton variant="full" className="w-full" onLoggedOut={onNavigate} />
+      {/* Rodapé */}
+      <div
+        className={cn(
+          "shrink-0",
+          collapsed ? "flex flex-col items-center gap-2 p-2" : "p-4",
+        )}
+      >
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title="Perfil — expandir menu"
+            aria-label="Expandir menu"
+            className="hover:cursor-pointer"
+          >
+            <span className="bg-primary text-primary-foreground ring-foreground/15 flex size-9 items-center justify-center rounded-full text-sm font-semibold ring-1">
+              {getInitials(user.name, user.email)}
+            </span>
+          </button>
+        ) : (
+          <>
+            {/* Trocar tema: rótulo discreto à esquerda + toggle à direita. */}
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="text-muted-foreground text-xs">Mudar tema</span>
+              <ThemeToggle className="shrink-0" />
+            </div>
+
+            {/* Perfil, com o botão Sair à direita. */}
+            <div className="flex items-center gap-3">
+              <span className="bg-primary text-primary-foreground ring-foreground/15 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ring-1">
+                {getInitials(user.name, user.email)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">
+                  {user.name || user.email}
+                </p>
+                <p className="text-muted-foreground truncate text-xs">
+                  {ROLE_LABELS[user.role]}
+                </p>
+              </div>
+              <LogoutButton onLoggedOut={onNavigate} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

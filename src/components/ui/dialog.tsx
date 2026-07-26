@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
+
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X } from "lucide-react";
@@ -29,10 +34,12 @@ function DialogOverlay({
 }
 
 const DIALOG_SIZES = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-2xl",
+  sm: "max-w-sm",    // 384px
+  md: "max-w-md",    // 448px
+  lg: "max-w-lg",    // 512px
+  xl: "max-w-2xl",   // 672px
+  "2xl": "max-w-3xl", // 768px 
+  "3xl": "max-w-4xl", // 896px
 } as const;
 
 function DialogContent({

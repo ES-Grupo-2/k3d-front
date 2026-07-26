@@ -1,7 +1,20 @@
+/**
+ * @author lukasnascimento1
+ * @author jvs-neves
+ */
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { Order } from "@/types/kanban";
-import { currency, humanizeEnum } from "@/lib/utils";
-import { forwardRef } from "react";
+import { currency, humanizePayMethod, humanizePayStatus } from "@/lib/utils";
+import { forwardRef, useState } from "react";
+import {
+  ChevronDown,
+  CreditCard,
+  Edit2,
+  Paperclip,
+  Trash,
+  Package,
+  User,
+} from "lucide-react";
 
 interface KanbanCardProps {
   order: Order;
@@ -11,6 +24,16 @@ interface KanbanCardProps {
   isOverlay?: boolean;
   isDestinationPlaceHolder?: boolean;
 }
+
+const getPayStatusBadgeColor = (amountPaid: number, fullPrice: number): string => {
+  if (amountPaid === 0) {
+    return "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-700";
+  } else if (amountPaid === fullPrice) {
+    return "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-700";
+  } else {
+    return "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-700";
+  }
+};
 
 export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
   function KanbanCard(
@@ -24,13 +47,16 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     }: KanbanCardProps,
     ref,
   ) {
+    // Ao clicar/tocar, um segundo card (mais escuro) surge por baixo do principal.
+    const [expanded, setExpanded] = useState(false);
+
     const draggableId = isDestinationPlaceHolder
       ? `ghost-${order.id}`
       : order.id;
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useDraggable({
         id: draggableId,
-        data: { originColumn: order.column, order: order },
+        data: { originColumn: order.section, order: order },
       });
 
     const { over } = useDndContext();
@@ -41,7 +67,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         : undefined;
 
     const isOriginalCard = isDragging && !isOverlay;
-    const isCardOverOtherColumn = over && over.id !== order.column;
+    const isCardOverOtherColumn = over && over.id !== order.section;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
 
@@ -49,72 +75,183 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
       return <div ref={setNodeRef} className="hidden" />;
     }
 
+    const formattedTitle = order.title[0].toUpperCase() + order.title.slice(1);
+
+    const file = order.archive?.trim();
+    const isFileLink = !!file && /^https?:\/\//i.test(file);
+
     return (
       <div
         ref={isOverlay ? ref : setNodeRef}
         style={style}
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
+        onClick={
+          isOverlay || isPlaceholder
+            ? undefined
+            : () => setExpanded((prev) => !prev)
+        }
         suppressHydrationWarning={true}
-        className={`overflow-hidden rounded-md text-sm ${
+        className={`k3d-kanban-card text-sm ${
           isDragging ? "touch-none opacity-50" : "touch-pan-y"
         } ${
-          isOverlay
-            ? "bg-background border-border ring-primary scale-105 rotate-3 cursor-grabbing border opacity-90 shadow-2xl ring-2"
-            : isPlaceholder
-              ? "bg-border/40 border-border border-2 border-dashed opacity-50"
-              : "bg-background border-border cursor-grab border shadow-sm active:cursor-grabbing"
+          isOverlay || isPlaceholder
+            ? "cursor-grabbing"
+            : "cursor-grab active:cursor-grabbing"
         }`}
       >
-        <div className={isPlaceholder ? "invisible" : "visible"}>
-          
+        {/* Card principal — estático (não cresce ao expandir). Fica na frente
+            (z-10) para cobrir o topo do card de detalhes que surge por trás. */}
+        <div
+          className={`relative z-10 overflow-hidden rounded-md transition-colors ${
+            isOverlay
+              ? "bg-card border border-border ring-primary scale-105 rotate-3 opacity-90 shadow-2xl ring-2"
+              : isPlaceholder
+                ? "bg-card/20 border-border border-2 border-dashed opacity-50"
+                : "bg-card border border-border hover:border-primary/50 shadow-sm"
+          }`}
+        >
           <div
-            className="border-border relative flex items-center justify-between border-b px-3 py-2"
-            style={{ borderLeft: `3px solid ${order.tag.color}` }}
-          >
-            <span className="text-muted text-[10px] font-medium tracking-wider uppercase pr-30 truncate">
-              {order.tag.name}
-            </span>
-            
-            {isManager && (
+            className="absolute left-0 top-0 h-full w-1"
+            style={{ backgroundColor: order.tag?.color || '#777' }}
+          />
+
+          <div className={`flex flex-col gap-3 p-4 pl-5 ${isPlaceholder ? "invisible" : "visible"}`}>
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-semibold tracking-wider text-foreground/80 uppercase">
+                {order.tag?.type}
+              </span>
+
               <div className="flex items-center gap-1">
-                <button
-                  className="text-subtle hover:bg-foreground/15 cursor-pointer rounded-full px-1 text-xs transition-all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                >
-                  ✎
-                </button>
-                <button
-                  className="text-subtle cursor-pointer px-1 text-xs hover:text-red-400"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                >
-                  ✕
-                </button>
+                {isManager && (
+                  <div className="flex items-center gap-1 opacity-60 transition-opacity hover:opacity-100">
+                    <button
+                      className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-foreground/10 hover:text-foreground transition-all"
+                      onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      className="rounded p-1 text-muted-foreground hover:cursor-pointer hover:bg-red-500/10 hover:text-red-400 transition-all"
+                      onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    >
+                      <Trash size={16} />
+                    </button>
+                  </div>
+                )}
+                <ChevronDown
+                  size={16}
+                  className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                    expanded ? "rotate-180" : ""
+                  }`}
+                />
               </div>
-            )}
-          </div>
-
-          <div className="cursor-grab px-3 py-2">
-            <div className="text-foreground leading-tight font-medium">
-              {order.title}
             </div>
-            <div className="text-muted mt-1 text-xs">{order.client.name}</div>
-            <div className="text-subtle mt-1 text-[11px]">
-              Qtde: {order.quantity} · {currency(order.price)}
-            </div>
-          </div>
 
-          <div className="border-border text-subtle flex justify-between border-t px-3 py-1.5 text-[10px]">
-            <span>{humanizeEnum(order.status)}</span>
-            <span>{humanizeEnum(order.paymentMethod)}</span>
+            <div className="flex flex-col gap-1.5">
+              <h3 className="text-sm font-medium leading-tight text-foreground">
+                {formattedTitle}
+              </h3>
+
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <User size={14} className="shrink-0" />
+                <span className="truncate">{order.client?.name}</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                <div className="flex items-center gap-1">
+                  <Package size={14} />
+                  <span>{order.quantity || 1} un</span>
+                </div>
+                <div className="font-medium text-foreground/90">
+                  {currency(order.price)}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-1 flex items-center justify-between border-t border-border/50 pt-3 text-xs font-medium">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CreditCard size={14} />
+                <span>{humanizePayMethod(order.payment_method || "None")}</span>
+              </div>
+
+              <span className={`rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wide ${getPayStatusBadgeColor(order.amount_paid || 0, order.price)}`}>
+                {humanizePayStatus(order.amount_paid || 0, order.price)}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Card de detalhes — "novo card" que surge por trás do principal, mais
+            escuro. A margem negativa (aplicada só quando expandido, para não
+            afetar o espaçamento entre cards) esconde o topo atrás do card
+            principal, sem gap. Só em cards reais. */}
+        {!isOverlay && !isPlaceholder && (
+          <div
+            className={`grid transition-[grid-template-rows,margin-top] duration-300 ease-out ${
+              expanded ? "-mt-8 grid-rows-[1fr]" : "grid-rows-[0fr]"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="k3d-kanban-card-details space-y-2 rounded-b-md border border-t-0 border-border px-3 pb-3 pt-10 text-xs">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Telefone</span>
+                  <span className="text-foreground/90 truncate">
+                    {order.client?.phone || "—"}
+                  </span>
+                </div>
+
+                {order.client?.email ? (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">E-mail</span>
+                    <span className="text-foreground/90 truncate">
+                      {order.client.email}
+                    </span>
+                  </div>
+                ) : null}
+
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Custo</span>
+                  <span className="text-foreground/90">
+                    {order.cost != null ? currency(order.cost) : "—"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground">Valor pago</span>
+                  <span className="text-foreground/90">
+                    {currency(order.amount_paid)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Arquivo</span>
+                  {file ? (
+                    isFileLink ? (
+                      <a
+                        href={file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-primary inline-flex items-center gap-1 truncate underline underline-offset-2"
+                      >
+                        <Paperclip size={12} className="shrink-0" />
+                        Abrir
+                      </a>
+                    ) : (
+                      <span className="text-foreground/90 inline-flex max-w-[60%] items-center gap-1 truncate">
+                        <Paperclip size={12} className="shrink-0" />
+                        {file}
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   },
