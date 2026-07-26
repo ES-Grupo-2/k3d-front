@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import { Plus } from "lucide-react"; // Importamos o ícone para o botão
 import { Button } from "../ui";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
@@ -14,8 +15,12 @@ import type { Order, KanbanTaskStatus } from "@/types/kanban";
 import { deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
 import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
-import { orchestrateOrderCreation, uploadOrderFile } from "@/services/order/order";
+import { orchestrateOrderCreation, UploadFileApiResponse, uploadOrderFile } from "@/services/order/order";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
+
+// Importações do novo componente de Tag
+import { CreateTagDialog } from "./popUp/createTagDialog"; // Ajuste o caminho se necessário
+import { Tag } from "@/types/tags";
 
 type KanbanClientProps = {
   isManager: boolean;
@@ -30,6 +35,9 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const [, setIsDeleting] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Estado para controlar o modal de Tags
+  const [tagModalOpen, setTagModalOpen] = useState(false);
 
   const deletingOrder = orders.find((order) => Number(order.id) === Number(deletingId)) ?? null;
 
@@ -66,7 +74,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     if (!deletingId) return;
 
     const previousOrders = [...orders];
-    const idToDelete = deletingId; // Salva a referência
+    const idToDelete = deletingId; 
 
     setOrders((prev) => prev.filter((order) => Number(order.id) !== Number(idToDelete)));
     setDeletingId(null);
@@ -83,15 +91,30 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  // Persiste a edição no backend e aplica o patch otimista à UI só no sucesso.
   const handleSaveEdit = async (
     orderId: number,
-    payload: UpdateOrderPayload,
+    payload: UpdateOrderPayload & { file?: File }, 
     localPatch: Partial<Order>,
   ) => {
     setIsSavingEdit(true);
     try {
+      if (payload.file) {
+        const formData = new FormData();
+        formData.append("file", payload.file);
+
+        const uploadResponse = await uploadOrderFile(formData) as UploadFileApiResponse;
+        const newArchiveName = uploadResponse.fileName || uploadResponse.data?.fileName;
+        
+        if (newArchiveName) {
+          payload.archive = newArchiveName; 
+          localPatch.archive = newArchiveName;
+        }
+      }
+
+      delete payload.file;
+
       await updateKanbanOrder(orderId, payload);
+      
       setOrders((prev) =>
         prev.map((order) =>
           Number(order.id) === Number(orderId)
@@ -99,6 +122,7 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
             : order,
         ),
       );
+      
       setEditingOrder(null);
     } catch (error: unknown) { 
       console.error("Erro ao criar pedido:", error);
@@ -112,31 +136,6 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
-  /**
-   * Orchestrates the creation of a new Kanban order, including client resolution and file uploads.
-   * 
-   * This function executes a sequential pipeline to ensure all related entities (Clients, 
-   * Orders, and MinIO Storage) are synchronized. It prioritizes uploading the physical file 
-   * to retrieve its unique storage key before saving the final entity in the database.
-   * 
-   * @async
-   * @param {OrderFormData} formData - The payload collected from the CreateOrderDialog form.
-   * 
-   * @pipeline
-   * 1. **Client Resolution:** Checks if the order belongs to an existing client. If the "New Client" 
-   *    tab was used, it dispatches a POST request to create a new client and retrieves the `clientId`.
-   * 2. **File Upload (Optional):** If a physical file is attached, it sends it to the backend API 
-   *    to be stored in MinIO, retrieving the unique generated `fileName`. If no file is present, 
-   *    it falls back to the external archive link (e.g., Google Drive) if provided by the user.
-   * 3. **Order Creation:** Dispatches a POST request to create the order in the database, directly 
-   *    linking the resolved `clientId` and the `archive` string (storage filename or external link).
-   * 4. **UI Hydration:** Injects the UI-friendly relationship properties (`client.name`, `tag.type`) 
-   *    into the newly created order and updates the local React state (`setOrders`) to display the 
-   *    card immediately on the Kanban board.
-   * 
-   * @throws {Error} Will throw an error if client creation fails, the file upload process 
-   * is interrupted, or the final order creation fails.
-   */
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
@@ -168,6 +167,12 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     }
   };
 
+  // Função callback para quando a tag for criada
+  const handleTagCreated = (newTag: Tag) => {
+    // Caso use bibliotecas como sonner ou react-hot-toast, você pode disparar um aviso aqui.
+    console.log("Tag cadastrada e pronta para uso:", newTag);
+  };
+
 return (
   <div className="flex h-full w-full select-none flex-col overflow-hidden overscroll-none">
     <div className="flex shrink-0 items-center justify-between gap-4 pb-3 md:pb-4">
@@ -175,13 +180,24 @@ return (
         <MobileMenuButton />
         <h1 className="text-2xl font-semibold">Kanban</h1>
       </div>
-        <Button
-          variant="default"
-          className="transition-colors hover:cursor-pointer hover:bg-primary/90"
-          onClick={() => setCreateModalOpen(true)}
-        >
-          + Novo pedido
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 transition-colors hover:cursor-pointer"
+            onClick={() => setTagModalOpen(true)}
+          >
+            <Plus size={16} />
+            Nova Tag
+          </Button>
+
+          <Button
+            variant="default"
+            className="transition-colors hover:cursor-pointer hover:bg-primary/90"
+            onClick={() => setCreateModalOpen(true)}
+          >
+            + Novo pedido
+          </Button>
+        </div>
     </div>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">
@@ -193,6 +209,13 @@ return (
           isManager={isManager}
         />
       </div>
+
+      {/* Renderização do popup de Tags */}
+      <CreateTagDialog
+        open={tagModalOpen}
+        onClose={() => setTagModalOpen(false)}
+        onTagCreated={handleTagCreated}
+      />
 
       <CreateOrderDialog
         open={createModalOpen}
