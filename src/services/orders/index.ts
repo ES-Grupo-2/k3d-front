@@ -6,6 +6,9 @@ import { API_URL } from "@/services/auth/config";
 import { GetOrdersFilters, PaginatedOrders } from "@/types/order";
 import { requireAuth } from "../auth/session";
 
+export const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
+export const PAYMENT_METHODS = ["CARTAO_CREDITO", "CARTAO_DEBITO", "DINHEIRO", "PIX"];
+
 const PAYMENT_DICTIONARY: Record<string, string> = {
   "CARTAO_CREDITO": "CREDIT_CARD",
   "CARTAO_DEBITO": "DEBIT_CARD",

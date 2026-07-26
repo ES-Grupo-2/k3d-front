@@ -23,7 +23,7 @@ interface RelatoriosPageProps {
 export default async function RelatoriosPage({
   searchParams,
 }: RelatoriosPageProps) {
-  // Rota exclusiva do perfil Gerente (redireciona os demais para /inicio).
+  // Rota exclusiva do perfil Gerente (redireciona os demais para /home).
   const { token } = await requireRole("GERENTE");
   const period = parsePeriod((await searchParams).period);
 

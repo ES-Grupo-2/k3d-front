@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Kria 3D",
     short_name: "Kria 3D",
     description: "Gestão de pedidos e produção da Kria 3D.",
-    start_url: "/inicio",
+    start_url: "/home",
     scope: "/",
     display: "standalone",
     orientation: "portrait",

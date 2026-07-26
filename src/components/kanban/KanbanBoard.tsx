@@ -5,6 +5,7 @@
 import { useMemo, useState, useRef } from "react";
 import {
   DndContext,
+  pointerWithin,
   DragOverlay,
   MouseSensor,
   TouchSensor,
@@ -17,6 +18,8 @@ import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
 import { COLUMN_ICONS } from "./kanban-columns";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
+
 
 const COLUMN_LABELS: Record<ColumnType, string> = {
   PENDENTE: "A Fazer",
@@ -134,6 +137,7 @@ export function KanbanBoard({
 return (
   <DndContext 
   sensors={sensors} 
+  collisionDetection={pointerWithin}
   onDragStart={handleDragStart} 
   onDragEnd={handleDragEnd}
   autoScroll={{ threshold: {x: 0.12, y: 0}, acceleration: 10, interval: 10 }}
@@ -189,7 +193,7 @@ return (
             </div>
           ))}
 
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
             {orderBeingMoved ? (
               <KanbanCard
                 order={orderBeingMoved}
