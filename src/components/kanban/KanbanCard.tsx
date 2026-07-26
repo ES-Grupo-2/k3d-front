@@ -61,21 +61,13 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
 
     const { over } = useDndContext();
 
-    // const style = {
-    //   transform: transform && !isOverlay ? CSS.Translate.toString(transform) : undefined,
-    //   width: isOverlay ? "100%" : undefined, 
-    // };
-// Substitua o style por este (ajuste o "300px" para a largura exata da sua coluna no Tailwind)
-    const style = isOverlay ? { width: "300px" } : undefined;
-
     const isOriginalCard = isDragging && !isOverlay;
     const isCardOverOtherColumn = over && over.id !== order.section;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
 
-    // className="hidden"
     if (isOriginalCard && isCardOverOtherColumn) {
-      return <div ref={setNodeRef}  />;
+      return <div ref={setNodeRef} className="hidden"/>;
     }
 
     const formattedTitle = order.title[0].toUpperCase() + order.title.slice(1);
@@ -86,7 +78,6 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     return (
       <div
         ref={isOverlay ? ref : setNodeRef}
-        style={style}
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
         onClick={
@@ -101,7 +92,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
           isOverlay || isPlaceholder
             ? "cursor-grabbing"
             : "cursor-grab active:cursor-grabbing"
-        }`}
+        } ${isOverlay ? "w-80" : ""}`}
       >
         {/* Card principal — estático (não cresce ao expandir). Fica na frente
             (z-10) para cobrir o topo do card de detalhes que surge por trás. */}
