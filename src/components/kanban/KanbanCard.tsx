@@ -39,26 +39,40 @@ const getPayStatusBadgeColor = (amountPaid: number, fullPrice: number): string =
 const handleDownload = async (e: React.MouseEvent, fileName: string) => {
   e.stopPropagation(); // Mantém o card expandido aberto
 
-  try {
-    const blob = await downloadOrderFile(fileName);
+  const looksLikeLink = fileName.includes(".com") || fileName.includes("drive.") || fileName.includes(".net") || fileName.startsWith("http");
 
-    const downloadUrl = window.URL.createObjectURL(blob);
+  if (looksLikeLink) {
+    const fallbackUrl = fileName.startsWith("http") ? fileName : `https://${fileName}`;
+    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  try {
+    const result = await downloadOrderFile(fileName);
+
+    let downloadUrl = "";
+
+    if (typeof result === "string") {
+      downloadUrl = result;
+    } else {
+      downloadUrl = window.URL.createObjectURL(result);
+    }
     
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = fileName;
+    link.download = fileName; // O nome que aparecerá no download do navegador
     
     document.body.appendChild(link);
     link.click();
     link.remove();
     
-    window.URL.revokeObjectURL(downloadUrl);
-  } catch (error: unknown) { 
-      if (error instanceof Error) {
-        alert(`Erro: ${error.message}`);
-      } else {
-        alert("Ocorreu um erro desconhecido ao tentar baixar o arquivo.");
-      }
+    if (typeof result !== "string") {
+      window.URL.revokeObjectURL(downloadUrl);
+    }
+
+  } catch (error: any) { 
+    console.error("Erro ao baixar do MinIO:", error);
+    alert(`O arquivo "${fileName}" não foi encontrado no servidor. Ele pode ter sido corrompido ou não foi enviado corretamente.`);
   }
 };
 
