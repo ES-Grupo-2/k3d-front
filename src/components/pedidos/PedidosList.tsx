@@ -5,7 +5,6 @@
 import type { KanbanTaskStatus, PaymentStatus } from "@/types/kanban";
 import { currency, humanizePayMethod, humanizePayStatus, humanizeSection } from "@/lib/utils";
 import type { ApiOrder } from "@/types/order";
-import { getTags } from "@/services/tags";
 import { Tag } from "@/types/tags";
 // Orders listing for the history screen.
 // Purely visual component (server-rendered): receives the already-filtered list
@@ -64,9 +63,7 @@ function TagPill({ name, color }: { name: string; color: string }) {
   );
 }
 
-export async function PedidosList({ orders }: { orders: ApiOrder[] }) {
-  const tags = await getTags();
-
+export function PedidosList({ orders, tags }: { orders: ApiOrder[]; tags: Tag[] }) {
   return (
     <>
       {/* Desktop: table */}

@@ -6,8 +6,9 @@
  */
 
 import { API_URL } from "../auth/config";
-import { ClientApi, CreateClientDTO } from "@/types/order";
+import { ClientApi, CreateClientDTO, OrderFormData } from "@/types/order";
 import { requireAuth } from "../auth/session";
+import { createKanbanOrder } from "../kanban/kanban";
 
 export async function createClient(data: CreateClientDTO) {
     const sessionToken = (await requireAuth().then(session => session.token));
@@ -46,6 +47,28 @@ export async function getClientById(id: string) {
   }
 
   return response.json();
+}
+
+export async function getClients(): Promise<ClientApi> {
+  const session = await requireAuth();
+  const token = session?.token;
+  
+  if (!token) throw new Error("Acesso não autorizado");
+
+  const response = await fetch(`${API_URL}/clients`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao buscar a lista de clientes.");
+  }
+  
+  const jsonResponse = await response.json();
+  return jsonResponse;
 }
 
 /**
@@ -93,46 +116,71 @@ export async function getClientById(id: string) {
 //   return true;
 // }
 
-export async function uploadOrderFile(file: File) {
+export async function uploadOrderFile(payload: FormData) {
   const session = await requireAuth();
   if (!session?.token) throw new Error("Acesso não autorizado");
 
-  const formData = new FormData();
-  formData.append("file", file);
+  const file = payload.get("file");
+  if (!file) throw new Error("Arquivo não encontrado.");
+
+  const externalFormData = new FormData();
+  externalFormData.append("file", file);
 
   const response = await fetch(`${API_URL}/files`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${session.token}`,
     },
-    body: formData,
+    body: externalFormData,
   });
 
   if (!response.ok) {
+    const errText = await response.text(); 
+    console.error("Erro do backend de arquivos:", errText);
     throw new Error("Falha ao fazer o upload do arquivo.");
   }
 
-  return response.json() as Promise<{ url: string; fileName: string; mimeType: string }>;
+  return response.json() as Promise<UploadResponse>;
 }
 
-export async function getClients(): Promise<ClientApi> {
-  const session = await requireAuth();
-  const token = session?.token;
-  
-  if (!token) throw new Error("Acesso não autorizado");
+export async function orchestrateOrderCreation(formData: OrderFormData) {
+  let finalClientId = formData.clientId;
+  let finalClientName = ""; 
 
-  const response = await fetch(`${API_URL}/clients`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Falha ao buscar a lista de clientes.");
+  if (!finalClientId && formData.newClientName) {
+    const clientResponse = await createClient({ 
+      name: formData.newClientName, 
+      phone: formData.newClientPhone || "" 
+    });
+    if (!clientResponse || !clientResponse.id) throw new Error("Falha ao criar cliente.");
+    finalClientId = clientResponse.id;
+    finalClientName = formData.newClientName; 
+  } else {
+    finalClientName = formData.newClientName || "Cliente"; 
   }
+
+  const initialPayload = {
+    title: formData.title,
+    client_id: Number(finalClientId), 
+    tagType: formData.tagType,          
+    price: formData.price,
+    amount_paid: formData.amount_paid,
+    cost: formData.cost,
+    quantity: formData.quantity,
+    payment_method: formData.payment_method,
+    archive: formData.archive || "", 
+  };
+
+  const newOrder = await createKanbanOrder(initialPayload);
   
-  const jsonResponse = await response.json();
-  return jsonResponse;
+  newOrder.tag = { type: formData.tagType }; 
+  newOrder.client = { name: finalClientName };
+
+  return newOrder;
 }
+
+type UploadResponse = {
+    url: string,
+    fileName: string,
+    mimeType?: string,
+  };
