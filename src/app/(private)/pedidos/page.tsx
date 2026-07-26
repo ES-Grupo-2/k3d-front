@@ -2,14 +2,12 @@
  * @author lukasnascimento1
  * @author jvs-neves
  */
-import { PackageSearch } from "lucide-react";
-import { PedidosFilters, PedidosList } from "@/components/pedidos";
+import { SECTIONS, PAYMENT_METHODS } from "@/services/orders";
 import { queryOrders } from "@/services/orders";
-import { MobileMenuButton } from "@/components/navigation/mobile-nav";
+import { getTags } from "@/services/tags";
+import PedidosClient from "@/components/pedidos/PedidosClient";
 
-const SECTIONS = ["PENDENTE", "FAZENDO", "FINALIZADO"];
-
-const PAYMENT_METHODS = ["CARTAO_CREDITO", "CARTAO_DEBITO", "DINHEIRO", "PIX"];
+export const dynamic = 'force-dynamic';
 
 function parseEnumParam<T extends string>(
   value: string | undefined,
@@ -18,17 +16,15 @@ function parseEnumParam<T extends string>(
   return value && (allowed as string[]).includes(value) ? (value as T) : "";
 }
 
-export default async function PedidosPage({
-  searchParams,
-}: {
+export default async function PedidosPage(
+  {searchParams}: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+  }) {
+  const tags = await getTags();
   const params = await searchParams;
-  
-  // A MÁGICA AQUI: Lemos "params.search" (ou "params.q" dependendo do que o PedidosFilters coloca na URL)
-  // E salvamos na variável orderQuery
+
   const orderQuery = typeof params.search === "string" ? params.search : "";
-  
+
   const section = parseEnumParam(
     typeof params.section === "string" ? params.section : undefined,
     SECTIONS,
@@ -41,54 +37,24 @@ export default async function PedidosPage({
   
   const page = typeof params.page === "string" ? params.page : "1";
 
-  const response = await queryOrders({
-    queryInput: orderQuery, // Agora sim, passamos a string lida da URL para a chave que a função exige!
+  const initialOrders = await queryOrders({
+    queryInput: orderQuery, 
     section: section || undefined,
     payment: paymentMethod || undefined,
     page: page,
   });
 
-  const orders = response.data;
-  const totalItems = response.meta.totalItems;
-  
   return (
-    <div className="flex flex-col gap-6 pb-24 md:pb-0">
-      <header className="space-y-1">
-        <div className="flex items-center gap-2">
-          <MobileMenuButton />
-          <h1 className="text-2xl font-semibold">Pedidos</h1>
-        </div>
-        <p className="text-muted-foreground text-sm">
-          Histórico completo de pedidos — busque, filtre e audite a operação.
-        </p>
-      </header>
-
-      <PedidosFilters
-        initialQuery={orderQuery}
-        initialSection={section}
-        initialPayment={paymentMethod}
+    <main>
+      <PedidosClient 
+        key={`${orderQuery}-${section}-${paymentMethod}-${page}`}
+        initialOrders={initialOrders.data}
+        metaItemsQuantity={initialOrders.meta.totalItems}
+        tags={tags} 
+        queryInputParam={orderQuery} 
+        sectionParam={section} 
+        paymentMethodParam={paymentMethod}
       />
-
-      <p className="text-muted-foreground text-sm">
-        {totalItems}{" "}
-        {totalItems === 1 ? "pedido encontrado" : "pedidos encontrados"}
-      </p>
-
-      {orders.length > 0 ? (
-        <PedidosList orders={orders} />
-      ) : (
-        <div className="border-border text-muted-foreground flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center">
-          <PackageSearch className="size-8 opacity-60" />
-          <div>
-            <p className="text-foreground font-medium">
-              Nenhum pedido encontrado
-            </p>
-            <p className="text-sm">
-              Ajuste a busca ou os filtros para ver outros resultados.
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
+    </main>
   );
 }

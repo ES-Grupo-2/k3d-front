@@ -12,10 +12,10 @@ import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
+import { deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
 import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
-import { createClient, uploadOrderFile } from "@/services/order/order";
+import { orchestrateOrderCreation, UploadFileApiResponse, uploadOrderFile } from "@/services/order/order";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 // Importações do novo componente de Tag
@@ -99,7 +99,10 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
     setIsSavingEdit(true);
     try {
       if (payload.file) {
-        const uploadResponse = await uploadOrderFile(payload.file) as any;
+        const formData = new FormData();
+        formData.append("file", payload.file);
+
+        const uploadResponse = await uploadOrderFile(formData) as UploadFileApiResponse;
         const newArchiveName = uploadResponse.fileName || uploadResponse.data?.fileName;
         
         if (newArchiveName) {
@@ -121,10 +124,14 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       );
       
       setEditingOrder(null);
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message || "Ocorreu um erro ao salvar o pedido.");
-    } finally {
+    } catch (error: unknown) { 
+      console.error("Erro ao criar pedido:", error);
+      
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar criar o pedido.");
+      }
       setIsSavingEdit(false);
     }
   };
@@ -132,59 +139,30 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
   const handleCreateOrder = async (formData: OrderFormData) => {
     setIsCreating(true);
     try {
-      let finalClientId = formData.clientId;
-      let finalClientName = ""; 
-
-      if (!finalClientId && formData.newClientName) {
-        const clientResponse = await createClient({ 
-          name: formData.newClientName, 
-          phone: formData.newClientPhone || "" 
-        });
-
-        if (!clientResponse || !clientResponse.id) {
-            throw new Error("Falha ao criar o novo cliente. ID não retornado.");
-        }
-        finalClientId = clientResponse.id;
-        finalClientName = formData.newClientName; 
-      } else {
-        finalClientName = (formData as OrderFormData).newClientName || "Cliente"; 
-      }
-
-      if (!finalClientId) throw new Error("Cliente é obrigatório!");
-
-      let finalArchiveName = formData.archive || ""; 
       if (formData.file && formData.file.length > 0) {
-        const fileToUpload = formData.file[0];
+        const data = new FormData();
+        data.append("file", formData.file[0]);
         
-        const uploadResponse = await uploadOrderFile(fileToUpload);
+        const uploadResponse = await uploadOrderFile(data);
         
-        finalArchiveName = uploadResponse.fileName; 
+        if (uploadResponse?.fileName) {
+          formData.archive = uploadResponse.fileName;
+        }
       }
-
-      const initialPayload = {
-        title: formData.title,
-        client_id: Number(finalClientId), 
-        tagType: formData.tagType,          
-        price: formData.price,
-        amount_paid: formData.amount_paid,
-        cost: formData.cost,
-        quantity: formData.quantity,
-        payment_method: formData.payment_method,
-        archive: finalArchiveName, 
-      };
-
-      const newOrder = await createKanbanOrder(initialPayload);
       
-      newOrder.tag = { type: formData.tagType }; 
-      newOrder.client = { name: finalClientName };
-      
+      delete formData.file;
+
+      const newOrder = await orchestrateOrderCreation(formData);
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao criar o pedido. Verifique os dados e tente novamente.");
-    } finally {
+    } catch (error: unknown) { 
+      console.error("Erro ao criar pedido:", error);
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar criar o pedido.");
+      }
       setIsCreating(false);
     }
   };
@@ -202,9 +180,6 @@ return (
         <MobileMenuButton />
         <h1 className="text-2xl font-semibold">Kanban</h1>
       </div>
-      
-      {/* Agrupamos os botões em uma div flex caso o usuário seja gerente */}
-      {isManager && (
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -223,7 +198,6 @@ return (
             + Novo pedido
           </Button>
         </div>
-      )}
     </div>
 
       <div className="min-h-0 flex-1 flex-col overflow-hidden">

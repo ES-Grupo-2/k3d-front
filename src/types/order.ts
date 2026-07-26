@@ -24,7 +24,7 @@ export interface OrderFormData extends Omit<CreateOrderDTO, 'clientId'> {
   clientId?: string; 
   newClientName?: string;
   newClientPhone?: string;
-  file: FileList | null;
+  file?: FileList | null;
 }
 
 // Campos aceitos pelo PUT /orders/:id. Todos opcionais (update parcial);

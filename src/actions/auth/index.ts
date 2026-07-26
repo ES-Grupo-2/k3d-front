@@ -14,11 +14,7 @@ import {
   type AuthSession,
   type AuthUser,
 } from "@/schemas/auth";
-import {
-  loginRequest,
-  refreshTokenRequest,
-  registerRequest,
-} from "@/services/auth";
+import { loginRequest, registerRequest } from "@/services/auth";
 import {
   AUTH_COOKIE_NAME,
   AUTH_USER_COOKIE_NAME,
@@ -111,52 +107,6 @@ export async function registerAction(
       success: true,
       data: result,
       message: result.message,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: getActionError(error),
-    };
-  }
-}
-
-export async function refreshTokenAction(): Promise<
-  ActionResult<{ accessToken: string; refreshToken?: string }>
-> {
-  try {
-    const cookieStore = await cookies();
-    const refreshToken = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
-
-    if (!refreshToken) {
-      return {
-        success: false,
-        error: "Refresh token indisponivel.",
-      };
-    }
-
-    const tokens = await refreshTokenRequest(refreshToken);
-
-    cookieStore.set(AUTH_COOKIE_NAME, tokens.accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    });
-
-    if (tokens.refreshToken) {
-      cookieStore.set(REFRESH_COOKIE_NAME, tokens.refreshToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-        maxAge: REFRESH_TOKEN_MAX_AGE,
-      });
-    }
-
-    return {
-      success: true,
-      data: tokens,
     };
   } catch (error) {
     return {

@@ -53,9 +53,12 @@ const handleDownload = async (e: React.MouseEvent, fileName: string) => {
     link.remove();
     
     window.URL.revokeObjectURL(downloadUrl);
-  } catch (error: any) {
-    console.error("Falha no download:", error);
-    alert(error.message || "Não foi possível baixar o arquivo.");
+  } catch (error: unknown) { 
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar baixar o arquivo.");
+      }
   }
 };
 
@@ -77,7 +80,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     const draggableId = isDestinationPlaceHolder
       ? `ghost-${order.id}`
       : order.id;
-    const { attributes, listeners, setNodeRef, transform, isDragging } =
+    const { attributes, listeners, setNodeRef, isDragging } =
       useDraggable({
         id: draggableId,
         data: { originColumn: order.section, order: order },
@@ -85,18 +88,13 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
 
     const { over } = useDndContext();
 
-    const style =
-      transform && isOverlay
-        ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-        : undefined;
-
     const isOriginalCard = isDragging && !isOverlay;
     const isCardOverOtherColumn = over && over.id !== order.section;
 
     const isPlaceholder = isOriginalCard || isDestinationPlaceHolder;
 
     if (isOriginalCard && isCardOverOtherColumn) {
-      return <div ref={setNodeRef} className="hidden" />;
+      return <div ref={setNodeRef} className="hidden"/>;
     }
 
     const formattedTitle = order.title[0].toUpperCase() + order.title.slice(1);
@@ -107,7 +105,6 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
     return (
       <div
         ref={isOverlay ? ref : setNodeRef}
-        style={style}
         {...(isOverlay || isPlaceholder ? {} : listeners)}
         {...(isOverlay || isPlaceholder ? {} : attributes)}
         onClick={
@@ -122,7 +119,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
           isOverlay || isPlaceholder
             ? "cursor-grabbing"
             : "cursor-grab active:cursor-grabbing"
-        }`}
+        } ${isOverlay ? "w-80" : ""}`}
       >
         {/* Card principal — estático (não cresce ao expandir). Fica na frente
             (z-10) para cobrir o topo do card de detalhes que surge por trás. */}

@@ -5,6 +5,7 @@
 import { useMemo, useState, useRef } from "react";
 import {
   DndContext,
+  pointerWithin,
   DragOverlay,
   MouseSensor,
   TouchSensor,
@@ -17,6 +18,8 @@ import { KanbanColumn } from ".";
 import { KanbanCard } from ".";
 import type { KanbanTaskStatus as ColumnType, Order } from "@/types/kanban";
 import { COLUMN_ICONS } from "./kanban-columns";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
+
 
 const COLUMN_LABELS: Record<ColumnType, string> = {
   PENDENTE: "A Fazer",
@@ -134,6 +137,7 @@ export function KanbanBoard({
 return (
   <DndContext 
   sensors={sensors} 
+  collisionDetection={pointerWithin}
   onDragStart={handleDragStart} 
   onDragEnd={handleDragEnd}
   autoScroll={{ threshold: {x: 0.12, y: 0}, acceleration: 10, interval: 10 }}
@@ -141,7 +145,7 @@ return (
 
     <div className="flex flex-1 flex-col gap-2 overflow-hidden h-full w-full">
         {/* Fixed because we're considering that will only be three main columns */}
-        <div className={`flex md:hidden shrink-0 justify-center overflow-x-hidden border-b border-border px-4 bg-background`}>
+        <div className={`flex md:hidden shrink-0 border-b border-border px-2 bg-background`}>
           {COLUMNS.map((column, index) => {
             const Icon = COLUMN_ICONS[column.id];
             return (
@@ -149,15 +153,16 @@ return (
                 key={column.id}
                 type="button"
                 onClick={() => scrollToColumn(column.id, index)}
-                className={`flex shrink-0 items-center border-b-2 gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex min-w-0 flex-1 items-center justify-center border-b-2 gap-1.5 px-2 py-2.5 text-xs sm:text-sm font-medium transition-colors ${
                   activeTab === column.id
                     ? "border-primary bg-muted text-foreground"
                     : "border-transparent bg-background text-muted-foreground"
                 }`}
               >
-                <Icon className="size-4 shrink-0" />
-                {column.title}
-                <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">
+                {/* O ícone só entra quando há folga; abaixo de 640px o rótulo tem prioridade. */}
+                <Icon className="hidden sm:block size-4 shrink-0" />
+                <span className="truncate">{column.title}</span>
+                <span className="shrink-0 rounded-full bg-foreground/10 px-1.5 py-0.5 text-[11px]">
                   {byColumn[column.id].length}
                 </span>
               </button>
@@ -189,7 +194,7 @@ return (
             </div>
           ))}
 
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
             {orderBeingMoved ? (
               <KanbanCard
                 order={orderBeingMoved}
