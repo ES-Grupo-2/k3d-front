@@ -151,14 +151,14 @@ export async function orchestrateOrderCreation(formData: OrderFormData) {
     finalClientId = clientResponse.id;
     finalClientName = formData.newClientName; 
   } else {
-    finalClientName = (formData as any).clientNameForUI || "Cliente"; 
+    finalClientName = (formData as OrderFormData).newClientName || "Cliente"; 
   }
 
   let finalArchiveName = formData.archive || ""; 
   if (formData.file && formData.file.length > 0) {
     const fileToUpload = formData.file[0];
-    const uploadResponse = await uploadOrderFile(fileToUpload) as any;
-    const extractedFileName = uploadResponse.fileName || uploadResponse.data?.fileName;
+    const uploadResponse = await uploadOrderFile(fileToUpload) as UploadResponse;
+    const extractedFileName = uploadResponse.fileName;
     if (!extractedFileName) throw new Error("Upload concluído, mas o backend não devolveu o fileName!");
     finalArchiveName = extractedFileName; 
   }
@@ -183,3 +183,9 @@ export async function orchestrateOrderCreation(formData: OrderFormData) {
 
   return newOrder;
 }
+
+type UploadResponse = {
+    url: string,
+    fileName: string,
+    mimeType?: string,
+  };

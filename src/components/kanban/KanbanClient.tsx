@@ -11,10 +11,10 @@ import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { CardEditDialog } from "@/components/kanban/popUp/CardEditDialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Order, KanbanTaskStatus } from "@/types/kanban";
-import { createKanbanOrder, deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
+import { deleteKanbanOrder, moveKanbanOrder, updateKanbanOrder } from "@/services/kanban/kanban";
 import { OrderFormData, UpdateOrderPayload } from "@/types/order";
 import { CreateOrderDialog } from "./popUp/CreateOrderDialog";
-import { createClient, orchestrateOrderCreation, uploadOrderFile } from "@/services/order/order";
+import { orchestrateOrderCreation } from "@/services/order/order";
 import { MobileMenuButton } from "@/components/navigation/mobile-nav";
 
 type KanbanClientProps = {
@@ -100,9 +100,14 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
         ),
       );
       setEditingOrder(null);
-    } catch (error) {
-      console.error(error);
-    } finally {
+    } catch (error: unknown) { 
+      console.error("Erro ao criar pedido:", error);
+      
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar criar o pedido.");
+      }
       setIsSavingEdit(false);
     }
   };
@@ -140,10 +145,14 @@ export function KanbanClient({ isManager, ordersRequest }: KanbanClientProps) {
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
-    } catch (error: any) {
+    } catch (error: unknown) { 
       console.error("Erro ao criar pedido:", error);
-      alert(`Erro: ${error.message}`);
-    } finally {
+      
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar criar o pedido.");
+      }
       setIsCreating(false);
     }
   };

@@ -3,7 +3,7 @@
  * @author jvs-neves
  */
 'use client'
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PedidosFilters, PedidosList } from "@/components/pedidos";
@@ -15,12 +15,14 @@ import { Tag } from "@/types/tags";
 
 export default function PedidosPage({
   initialOrders,
+  metaItemsQuantity,
   tags,
   queryInputParam,
   sectionParam,
   paymentMethodParam,
 }: {
   initialOrders: ApiOrder[];
+  metaItemsQuantity: number;
   tags: Tag[];
   queryInputParam: string;
   sectionParam: string;
@@ -38,19 +40,21 @@ export default function PedidosPage({
       setOrders((prev) => [newOrder, ...prev]);
       setCreateModalOpen(false);
       
-    } catch (error: any) {
+    } catch (error: unknown) { 
       console.error("Erro ao criar pedido:", error);
-      alert(`Erro: ${error.message}`);
+      
+      if (error instanceof Error) {
+        alert(`Erro: ${error.message}`);
+      } else {
+        alert("Ocorreu um erro desconhecido ao tentar criar o pedido.");
+      }
+      
     } finally {
       setIsCreating(false);
     }
   };
 
-  useEffect(() => {
-    setOrders(initialOrders);
-  }, [initialOrders]);
-
-  const totalItems = orders.length;
+  const totalItems = metaItemsQuantity;
   
   return (
     <div className="flex flex-col gap-6 pb-24 md:pb-0">

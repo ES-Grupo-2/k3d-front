@@ -114,7 +114,7 @@ export function PedidosFilters({
       isFirstRender.current = false;
       return;
     }
-    const timeout = setTimeout(() => updateParam("search", query.trim()), 350);
+    const timeout = setTimeout(() => updateParam("search", query.trim()), 700);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);

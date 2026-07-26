@@ -43,17 +43,13 @@ export default async function PedidosPage(
     payment: paymentMethod || undefined,
     page: page,
   });
-//   const response = await queryOrders({
-//     queryInput: orderQuery, // Agora sim, passamos a string lida da URL para a chave que a função exige!
-//     section: section || undefined,
-//     payment: paymentMethod || undefined,
-//     page: page,
-//   });
 
   return (
     <main>
       <PedidosClient 
-        initialOrders={initialOrders.data} 
+        key={`${orderQuery}-${section}-${paymentMethod}-${page}`}
+        initialOrders={initialOrders.data}
+        metaItemsQuantity={initialOrders.meta.totalItems}
         tags={tags} 
         queryInputParam={orderQuery} 
         sectionParam={section} 
