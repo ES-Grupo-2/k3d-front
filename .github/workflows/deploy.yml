@@ -22,15 +22,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with OpenNext
+      # Gera o bundle do Worker (.open-next/worker.js) a partir do build do Next.
+      - name: Build (OpenNext)
         run: npx opennextjs-cloudflare build
 
+      # Publica no Worker definido em wrangler.jsonc; wrangler lê o token e a conta das env.
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy
         env:
