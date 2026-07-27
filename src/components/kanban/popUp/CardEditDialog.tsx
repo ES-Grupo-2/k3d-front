@@ -52,6 +52,7 @@ interface EditFormValues {
   payment_method: string;
   section: KanbanTaskStatus;
   archive: string;
+  file?: FileList | null;
 }
 
 interface CardEditDialogProps {
@@ -78,6 +79,7 @@ function toFormValues(order: Order | null): EditFormValues {
     payment_method: (order?.payment_method as string) ?? "",
     section: order?.section ?? "PENDENTE",
     archive: order?.archive ?? "",
+    file: null,
   };
 }
 
@@ -114,6 +116,7 @@ export function CardEditDialog({
   async function handleSave(values: EditFormValues) {
     if (!order) return;
 
+    const fileToUpload = values.file && values.file.length > 0 ? values.file[0] : undefined;
     const payload: UpdateOrderPayload = {
       title: values.title,
       tagType: values.tagType,
@@ -124,6 +127,7 @@ export function CardEditDialog({
       payment_method: values.payment_method,
       section: values.section,
       archive: values.archive || undefined,
+      file: fileToUpload,
     };
 
     // Resolve a tag para o patch otimista: mantém a cor atual se a categoria
@@ -138,7 +142,7 @@ export function CardEditDialog({
       amount_paid: payload.amount_paid,
       payment_method: values.payment_method,
       section: values.section,
-      archive: values.archive || undefined,
+      archive: fileToUpload ? fileToUpload.name : (values.archive || undefined),
       tag: tagChanged
         ? {
             id: matchedTag?.id ?? order.tag?.id,
@@ -155,7 +159,7 @@ export function CardEditDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={guard.handleOpenChange}>
-        <DialogContent size="xl">
+        <DialogContent size="2xl">
           <DialogHeader>
             <DialogTitle>Editar pedido</DialogTitle>
             <DialogDescription>
@@ -326,11 +330,29 @@ export function CardEditDialog({
                     </div>
                   </div>
                 </div>
-
+                
                 <div className="border-border space-y-4 rounded-xl border border-dashed p-4">
+                  <h3 className="text-foreground text-sm font-semibold">
+                    Anexos
+                  </h3>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-file">Enviar novo arquivo</Label>
+                    <Input
+                      id="edit-file"
+                      type="file"
+                      className="cursor-pointer file:text-primary file:bg-primary/10 file:border-0 file:rounded-sm file:mr-4 file:px-4 file:py-1 hover:file:bg-primary/20"
+                      {...form.register("file")}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-center text-xs text-muted-foreground font-medium uppercase tracking-widest">
+                    ou
+                  </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="edit-archive">
-                      Link Externo / Arquivo
+                      Link Externo
                     </Label>
                     <Input
                       id="edit-archive"

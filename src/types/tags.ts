@@ -4,3 +4,9 @@ export type Tag = {
     color: string;
 }
 
+export type TagRequest = {
+    type: string;
+    color: string;
+}
+
+

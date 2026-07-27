@@ -189,7 +189,7 @@ export function CreateOrderDialog({ open, onClose, onSave, isLoading }: CreateOr
                         <SelectValue placeholder={isLoadingData ? "Carregando..." : "Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {tags.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={t.type}>{t.type}</SelectItem>)}
+                        {tags.map(t => <SelectItem className="hover:cursor-pointer" key={t.id} value={t.type}>{t.type.toUpperCase()}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
